@@ -3,4 +3,6 @@
 struct Wall{
 	Vector2 startPos;
 	Vector2 endPos;
+	int floor;
+	Texture2D* texture;
 };

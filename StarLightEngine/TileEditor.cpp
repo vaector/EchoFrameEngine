@@ -1,5 +1,6 @@
 #include "TileEditor.h"
 #include "raymath.h"
+#include "Shared.h"
 
 TileEditor::TileEditor()
 {
@@ -71,6 +72,8 @@ void TileEditor::UpdateWall()
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 
 		pendingWall.endPos = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
+		pendingWall.floor = 0;
+		pendingWall.texture = &Shared::textures["tile1"];
 		Shared::walls.push_back(pendingWall);
 	}
 

@@ -5,10 +5,8 @@
 RealEditor::RealEditor()
 {
 	InitCam();
+	wallTexture = Shared::textures["tile1"];
 
-	wallTexture = LoadTexture("images/tile1.png");
-	rlTextureParameters(wallTexture.id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_REPEAT);
-	rlTextureParameters(wallTexture.id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_REPEAT);
 }
 
 void RealEditor::InitCam()
@@ -22,7 +20,6 @@ void RealEditor::InitCam()
 	forward = Vector3Normalize(Vector3Subtract(cam.target, cam.position));
 	yaw = atan2f(forward.z, forward.x);
 	pitch = asinf(forward.y);
-
 }
 
 void RealEditor::Update()
@@ -93,7 +90,7 @@ void RealEditor::DrawWall()
 		Vector3 topRight = { wall.endPos.x,   Shared::wallHeight, wall.endPos.y };
 		Vector3 bottomRight = { wall.endPos.x,   0.0f,       wall.endPos.y };
 
-		rlSetTexture(wallTexture.id);
+		rlSetTexture(wall.texture->id);
 		rlBegin(RL_QUADS);
 
 		rlColor4ub(255,255,255,255);

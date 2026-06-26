@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include <iostream>
 #include "rlgl.h"
+#include "Importer.h"
 
 int main() {
 
@@ -13,6 +14,9 @@ int main() {
     SetTargetFPS(60);
 
     rlDisableBackfaceCulling();
+
+    //Init Textures(Images)
+    Importer::InitTextures();
 
     Engine engine;
 
