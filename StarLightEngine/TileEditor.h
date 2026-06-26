@@ -2,7 +2,7 @@
 #include <vector>
 #include "raylib.h"
 #include "Wall.h"
-
+#include "Shared.h"
 
 
 class TileEditor
@@ -20,7 +20,6 @@ private:
 	Wall placeHolder;
 
 public:
-	std::vector<Wall> walls;
 
 	const int tileSize = 16;
 
@@ -38,6 +37,4 @@ public:
 	void Draw();
 };
 
-
-
-//-------TILES VECTOR------> 0->Empty | 1->Full
+//-------WALLS VECTOR------> A vector of walls(wall-> {start position, end position}) -> SHARED.H (Shared::walls)

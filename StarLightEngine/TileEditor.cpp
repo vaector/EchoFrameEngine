@@ -12,8 +12,9 @@ TileEditor::TileEditor()
 
 void TileEditor::InitCamera()
 {
-	cam.offset = { 0 };
+	cam.rotation = 0.0f;
 	cam.target = { 0 };
+	cam.offset = { 0, 0};
 	cam.zoom = 1;
 }
 
@@ -70,13 +71,13 @@ void TileEditor::UpdateWall()
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 
 		pendingWall.endPos = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
-		walls.push_back(pendingWall);
+		Shared::walls.push_back(pendingWall);
 	}
 
 	//Removing Walls
-	for (int i = 0; i < walls.size(); i++) {
-		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && CheckCollisionPointLine(mouse, walls[i].startPos, walls[i].endPos, 4))
-			walls.erase(walls.begin() + i);
+	for (int i = 0; i < Shared::walls.size(); i++) {
+		if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT) && CheckCollisionPointLine(mouse, Shared::walls[i].startPos, Shared::walls[i].endPos, 4))
+			Shared::walls.erase(Shared::walls.begin() + i);
 	}
 
 	//Update Place Holder Wall
@@ -90,7 +91,7 @@ void TileEditor::UpdateWall()
 
 void TileEditor::DrawWall()
 {
-	for (Wall& wall: walls) {
+	for (Wall& wall: Shared::walls) {
 		DrawLine(wall.startPos.x, wall.startPos.y, wall.endPos.x, wall.endPos.y, PURPLE);
 	}
 	DrawLine(placeHolder.startPos.x, placeHolder.startPos.y, placeHolder.endPos.x, placeHolder.endPos.y, PURPLE);

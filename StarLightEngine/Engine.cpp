@@ -19,6 +19,16 @@ void Engine::UpdateGui()
 	tileEditor.Update();
 }
 
+void Engine::UpdateReal()
+{
+	realEditor.Update();
+}
+
+void Engine::DrawReal()
+{
+	realEditor.Draw();
+}
+
 void Engine::DrawGui()
 {
 	//Draw Engine Entities

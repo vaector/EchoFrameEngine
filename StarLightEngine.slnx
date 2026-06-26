@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="StarLightEngine/StarLightEngine.vcxproj" />
+  <Project Path="StarLightEngine/StarLightEngine.vcxproj" Id="18148501-42a5-4df4-b0a5-1e6f7a9eca5b" />
 </Solution>
