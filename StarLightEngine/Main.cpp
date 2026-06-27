@@ -3,22 +3,27 @@
 #include <iostream>
 #include "rlgl.h"
 #include "Importer.h"
+#include "imgui/rlImGui.h"
+#include "ImguiWindow.h"
 
 int main() {
 
-    const int screenWidth = 800;
-    const int screenHeight = 600;
+    const int screenWidth = 1024;
+    const int screenHeight = 1024;
 
     // Create the window and set FPS
     InitWindow(screenWidth, screenHeight, "StarLight Engine");
     SetTargetFPS(60);
 
-    rlDisableBackfaceCulling();
+    //ImGui Context
+    rlImGuiSetup(true);
 
     //Init Textures(Images)
     Importer::InitTextures();
 
     Engine engine;
+
+    ImguiWindow imgui;
 
     bool editorMode = true;
 
@@ -62,11 +67,14 @@ int main() {
 
             EndMode3D();
         }
-       
+
+        //Imgui
+        imgui.UpdateImguiTileEditor();
 
         EndDrawing();
     }
 
+    rlImGuiShutdown();
     CloseWindow(); 
 
     return 0;

@@ -44,7 +44,7 @@ void RealEditor::UpdateCam()
 	yaw += -mouseDt.x * (mouseSens * DEG2RAD);
 	pitch += -mouseDt.y * (mouseSens * DEG2RAD);
 
-	pitch = Clamp(pitch, -89.0f , 89.0f );
+	pitch = Clamp(pitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
 
 	forward.x = cosf(pitch) * sinf(yaw);
 	forward.y = sinf(pitch);
@@ -83,6 +83,9 @@ void RealEditor::UpdateWall()
 }
 void RealEditor::DrawWall()
 {
+	//Disable back face culling
+	rlDisableBackfaceCulling();
+
 	for (Wall& wall : Shared::walls) {
 
 		Vector3 topLeft = { wall.startPos.x, Shared::wallHeight, wall.startPos.y };
@@ -90,16 +93,19 @@ void RealEditor::DrawWall()
 		Vector3 topRight = { wall.endPos.x,   Shared::wallHeight, wall.endPos.y };
 		Vector3 bottomRight = { wall.endPos.x,   0.0f,       wall.endPos.y };
 
+		float wallLength = Vector2Distance(wall.startPos, wall.endPos);
+		float tileX = wallLength / 32.0f; 
+		float tileY = Shared::wallHeight / 32.0f;
+
 		rlSetTexture(wall.texture->id);
 		rlBegin(RL_QUADS);
 
-		rlColor4ub(255,255,255,255);
+		rlColor4ub(255, 255, 255, 255);
 
-		//topLeft → bottomLeft → bottomRight → topRight
-		rlTexCoord2f(0.0f, 0.0f); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
-		rlTexCoord2f(0.0f, 1.0f); rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
-		rlTexCoord2f(1.0f, 1.0f); rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
-		rlTexCoord2f(1.0f, 0.0f); rlVertex3f(topRight.x, topRight.y, topRight.z);
+		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+		rlTexCoord2f(0.0f, tileY); rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+		rlTexCoord2f(tileX, tileY); rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(topRight.x, topRight.y, topRight.z);
 
 		rlEnd();
 		rlSetTexture(0);

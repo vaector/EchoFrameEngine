@@ -33,8 +33,8 @@ public:
 	void Update();
 	void UpdateCam();
 	void UpdateWall();
+	
+
 	void DrawWall();
 	void Draw();
 };
-
-//-------WALLS VECTOR------> A vector of walls(wall-> {start position, end position}) -> SHARED.H (Shared::walls)

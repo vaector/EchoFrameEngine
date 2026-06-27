@@ -73,7 +73,7 @@ void TileEditor::UpdateWall()
 
 		pendingWall.endPos = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
 		pendingWall.floor = 0;
-		pendingWall.texture = &Shared::textures["tile1"];
+		pendingWall.texture = Shared::selectedTexture;
 		Shared::walls.push_back(pendingWall);
 	}
 
@@ -99,6 +99,7 @@ void TileEditor::DrawWall()
 	}
 	DrawLine(placeHolder.startPos.x, placeHolder.startPos.y, placeHolder.endPos.x, placeHolder.endPos.y, PURPLE);
 }
+
 
 void TileEditor::Draw()
 {
