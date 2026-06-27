@@ -13,6 +13,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 	ImGui::SetWindowSize({ 200,600 });
 	ImGui::SetWindowPos({ 0,0 });
 
+	//Drop Down box for choosing textures
 	static std::string selectedT = "tile1";
 	if (ImGui::BeginCombo("Textures", selectedT.c_str())) {
 
@@ -32,7 +33,8 @@ void ImguiWindow::UpdateImguiTileEditor()
 		ImGui::EndCombo();
 	}
 
-	
+	//Checkbox for sectorMode
+	ImGui::Checkbox("Sector Mode", &Shared::sectorMode);
 
 	ImGui::End();
 	rlImGuiEnd();

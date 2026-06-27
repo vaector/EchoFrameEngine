@@ -33,8 +33,12 @@ public:
 	void Update();
 	void UpdateCam();
 	void UpdateWall();
+	void UpdateSector();
 	
 
 	void DrawWall();
+	void DrawSector();
 	void Draw();
 };
+
+//-------UpdateSector----- Press "C" to build the sector

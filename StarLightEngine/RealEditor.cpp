@@ -5,7 +5,6 @@
 RealEditor::RealEditor()
 {
 	InitCam();
-	wallTexture = Shared::textures["tile1"];
 
 }
 
@@ -27,9 +26,6 @@ void RealEditor::Update()
 	
 	//Update Camera
 	UpdateCam();
-
-	//Update walls
-	UpdateWall();
 }
 
 void RealEditor::UpdateCam()
@@ -76,11 +72,6 @@ void RealEditor::UpdateCam()
 	
 
 }
-
-void RealEditor::UpdateWall()
-{
-	
-}
 void RealEditor::DrawWall()
 {
 	//Disable back face culling
@@ -88,10 +79,10 @@ void RealEditor::DrawWall()
 
 	for (Wall& wall : Shared::walls) {
 
-		Vector3 topLeft = { wall.startPos.x, Shared::wallHeight, wall.startPos.y };
-		Vector3 bottomLeft = { wall.startPos.x, 0.0f,       wall.startPos.y };
-		Vector3 topRight = { wall.endPos.x,   Shared::wallHeight, wall.endPos.y };
-		Vector3 bottomRight = { wall.endPos.x,   0.0f,       wall.endPos.y };
+		Vector3 topLeft = { wall.startPos.x, Shared::wallHeight*wall.floor, wall.startPos.y };
+		Vector3 bottomLeft = { wall.startPos.x, wall.floor,       wall.startPos.y };
+		Vector3 topRight = { wall.endPos.x,   Shared::wallHeight*wall.floor, wall.endPos.y };
+		Vector3 bottomRight = { wall.endPos.x,   wall.floor,       wall.endPos.y };
 
 		float wallLength = Vector2Distance(wall.startPos, wall.endPos);
 		float tileX = wallLength / 32.0f; 
@@ -112,8 +103,36 @@ void RealEditor::DrawWall()
 	}
 }
 
+void RealEditor::DrawSector()
+{
+	for (auto& sector : Shared::sectors)
+	{
+		if (sector.points.size() < 3) continue;
+
+		rlBegin(RL_TRIANGLES);
+		rlSetTexture(sector.texture->id);
+		rlColor4ub(255, 255, 255, 255);
+		for (int i = 1; i < sector.points.size() - 1; i++)
+		{
+			rlTexCoord2f(sector.points[0].x / 64.0f, sector.points[0].y / 64.0f);
+			rlVertex3f(sector.points[0].x, sector.floor, sector.points[0].y);
+
+			rlTexCoord2f(sector.points[i].x / 64.0f, sector.points[i].y / 64.0f);
+			rlVertex3f(sector.points[i].x, sector.floor, sector.points[i].y);
+
+			rlTexCoord2f(sector.points[i + 1].x / 64.0f, sector.points[i + 1].y / 64.0f);
+			rlVertex3f(sector.points[i + 1].x, sector.floor, sector.points[i + 1].y);
+		}
+		rlEnd();
+		rlSetTexture(0);
+	}
+}
+
 void RealEditor::Draw()
 {
 	//Draw Walls
 	DrawWall();
+
+	//Draw Sector
+	DrawSector();
 }

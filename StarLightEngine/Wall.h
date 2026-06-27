@@ -5,4 +5,11 @@ struct Wall{
 	Vector2 endPos;
 	int floor;
 	Texture2D* texture;
+	bool inSector = false;
+};
+
+struct Sector{
+	std::vector<Vector2> points;
+	int floor;
+	Texture2D* texture;
 };

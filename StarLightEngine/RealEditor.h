@@ -11,7 +11,6 @@ private:
 	float pitch = 0.0f;
 	Vector3 forward;
 
-	Texture2D wallTexture;
 
 public:
 	//3d Camera
@@ -22,9 +21,9 @@ public:
 
 	void Update();
 	void UpdateCam();
-	void UpdateWall();
 
 	void DrawWall();
+	void DrawSector();
 	void Draw();
 
 };

@@ -29,6 +29,9 @@ void TileEditor::Update()
 
 	//Update Walls
 	UpdateWall();
+
+	if(IsKeyPressed(KEY_C))
+		UpdateSector();
 	
 }
 
@@ -70,10 +73,12 @@ void TileEditor::UpdateWall()
 
 	}
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-
-		pendingWall.endPos = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
-		pendingWall.floor = 0;
+		Vector2 currentTile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };;
+		pendingWall.endPos = currentTile;
+		pendingWall.floor = 1;
 		pendingWall.texture = Shared::selectedTexture;
+		pendingWall.inSector = !Shared::sectorMode;
+		//if sectorMode == true then inSector is false(false because the wall is not in a sector and should be added to one).
 		Shared::walls.push_back(pendingWall);
 	}
 
@@ -92,6 +97,28 @@ void TileEditor::UpdateWall()
 		placeHolder = { 0,0 };
 }
 
+void TileEditor::UpdateSector()
+{
+	if (Shared::walls.size() <= 2)
+		return;
+	else {
+		std::vector<Vector2> currentSector;
+		bool first = false;
+		for (auto& wall : Shared::walls) {
+			if (!wall.inSector) {
+				if (first == false) {
+					currentSector.push_back(wall.startPos);
+					first = true;
+				}
+				currentSector.push_back(wall.endPos);
+				wall.inSector = true;
+			}
+		}
+
+		Shared::sectors.push_back({ currentSector, 1, Shared::selectedTexture});
+	}
+}
+
 void TileEditor::DrawWall()
 {
 	for (Wall& wall: Shared::walls) {
@@ -100,6 +127,12 @@ void TileEditor::DrawWall()
 	DrawLine(placeHolder.startPos.x, placeHolder.startPos.y, placeHolder.endPos.x, placeHolder.endPos.y, PURPLE);
 }
 
+void TileEditor::DrawSector()
+{
+	for (auto& sector : Shared::sectors) {
+		DrawTriangleFan(sector.points.data(), sector.points.size(), RED);
+	}
+}
 
 void TileEditor::Draw()
 {
@@ -131,5 +164,7 @@ void TileEditor::Draw()
 
 	//Draw Walls
 	DrawWall();
+
+	DrawSector();
 
 }
