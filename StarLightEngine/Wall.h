@@ -3,6 +3,7 @@
 struct Wall{
 	Vector2 startPos;
 	Vector2 endPos;
+	int wallHeight;
 	int floor;
 	Texture2D* texture;
 	bool inSector = false;

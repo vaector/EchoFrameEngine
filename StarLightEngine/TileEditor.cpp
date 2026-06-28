@@ -75,7 +75,8 @@ void TileEditor::UpdateWall()
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		Vector2 currentTile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };;
 		pendingWall.endPos = currentTile;
-		pendingWall.floor = 1;
+		pendingWall.wallHeight = Shared::wallHeight;
+		pendingWall.floor = Shared::floor;
 		pendingWall.texture = Shared::selectedTexture;
 		pendingWall.inSector = !Shared::sectorMode;
 		//if sectorMode == true then inSector is false(false because the wall is not in a sector and should be added to one).
@@ -115,7 +116,7 @@ void TileEditor::UpdateSector()
 			}
 		}
 
-		Shared::sectors.push_back({ currentSector, 1, Shared::selectedTexture});
+		Shared::sectors.push_back({ currentSector, Shared::floor, Shared::selectedTexture});
 	}
 }
 

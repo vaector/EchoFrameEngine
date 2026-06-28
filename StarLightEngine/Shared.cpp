@@ -8,4 +8,5 @@ namespace Shared {
 	Texture2D* selectedTexture = &textures["tile1"];
 	std::vector<Sector> sectors;
 	bool sectorMode = false;
+	int floor = 0;
 }

@@ -66,6 +66,10 @@ int main() {
             engine.DrawReal();
 
             EndMode3D();
+
+            //GUI FOR 3D
+                //Crosshair
+            DrawCircle(GetScreenWidth()/2, GetScreenHeight()/2, 1, WHITE);
         }
 
         //Imgui

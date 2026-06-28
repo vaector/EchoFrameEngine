@@ -11,6 +11,7 @@ namespace Shared {
 	extern std::vector<Sector> sectors;
 	extern Texture2D* selectedTexture;
 	extern bool sectorMode;
+	extern int floor;
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)
@@ -18,3 +19,4 @@ namespace Shared {
 //-------TEXTURES MAP------> A map of textures(key-> filename, val->Texture2D) -> SHARED.H (Shared::sectors)
 //-------SELECTEDTEXTURE---> A pointer pointing at the selected texture through the tilemap editor imgui window. -> SHARED.H (Shared::sectors)
 //-------SECTORMODE--------> bool value. -> true means consider new walls for a sector | false means do not consider(no sectors)
+//-------FLOOR-------------> The floor currently on-> updated in ImguiWindow.h.

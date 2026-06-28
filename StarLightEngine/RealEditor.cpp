@@ -72,21 +72,22 @@ void RealEditor::UpdateCam()
 	
 
 }
+void RealEditor::UpdateSector()
+{
+}
 void RealEditor::DrawWall()
 {
-	//Disable back face culling
-	rlDisableBackfaceCulling();
 
 	for (Wall& wall : Shared::walls) {
 
-		Vector3 topLeft = { wall.startPos.x, Shared::wallHeight*wall.floor, wall.startPos.y };
-		Vector3 bottomLeft = { wall.startPos.x, wall.floor,       wall.startPos.y };
-		Vector3 topRight = { wall.endPos.x,   Shared::wallHeight*wall.floor, wall.endPos.y };
-		Vector3 bottomRight = { wall.endPos.x,   wall.floor,       wall.endPos.y };
+		Vector3 topLeft = { wall.startPos.x, (wall.wallHeight * wall.floor) + wall.wallHeight, wall.startPos.y };
+		Vector3 bottomLeft = { wall.startPos.x, wall.wallHeight * wall.floor,       wall.startPos.y };
+		Vector3 topRight = { wall.endPos.x,   (wall.wallHeight *wall.floor) + wall.wallHeight, wall.endPos.y };
+		Vector3 bottomRight = { wall.endPos.x,   wall.wallHeight * wall.floor,       wall.endPos.y };
 
 		float wallLength = Vector2Distance(wall.startPos, wall.endPos);
-		float tileX = wallLength / 32.0f; 
-		float tileY = Shared::wallHeight / 32.0f;
+		float tileX = wallLength / 64.0f; 
+		float tileY = wall.wallHeight / 64.0f;
 
 		rlSetTexture(wall.texture->id);
 		rlBegin(RL_QUADS);
@@ -115,13 +116,30 @@ void RealEditor::DrawSector()
 		for (int i = 1; i < sector.points.size() - 1; i++)
 		{
 			rlTexCoord2f(sector.points[0].x / 64.0f, sector.points[0].y / 64.0f);
-			rlVertex3f(sector.points[0].x, sector.floor, sector.points[0].y);
+			rlVertex3f(sector.points[0].x, sector.floor * Shared::wallHeight, sector.points[0].y);
 
 			rlTexCoord2f(sector.points[i].x / 64.0f, sector.points[i].y / 64.0f);
-			rlVertex3f(sector.points[i].x, sector.floor, sector.points[i].y);
+			rlVertex3f(sector.points[i].x, sector.floor * Shared::wallHeight, sector.points[i].y);
 
 			rlTexCoord2f(sector.points[i + 1].x / 64.0f, sector.points[i + 1].y / 64.0f);
-			rlVertex3f(sector.points[i + 1].x, sector.floor, sector.points[i + 1].y);
+			rlVertex3f(sector.points[i + 1].x, sector.floor * Shared::wallHeight, sector.points[i + 1].y);
+		}
+		rlEnd();
+		rlSetTexture(0);
+		
+		rlBegin(RL_TRIANGLES);
+		rlSetTexture(sector.texture->id);
+		rlColor4ub(255, 255, 255, 255);
+		for (int i = 1; i < sector.points.size() - 1; i++)
+		{
+			rlTexCoord2f(sector.points[0].x / 64.0f, sector.points[0].y / 64.0f);
+			rlVertex3f(sector.points[0].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.points[0].y);
+
+			rlTexCoord2f(sector.points[i].x / 64.0f, sector.points[i].y / 64.0f);
+			rlVertex3f(sector.points[i].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.points[i].y);
+
+			rlTexCoord2f(sector.points[i + 1].x / 64.0f, sector.points[i + 1].y / 64.0f);
+			rlVertex3f(sector.points[i + 1].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.points[i + 1].y);
 		}
 		rlEnd();
 		rlSetTexture(0);
@@ -130,6 +148,9 @@ void RealEditor::DrawSector()
 
 void RealEditor::Draw()
 {
+	//Disable back face culling
+	rlDisableBackfaceCulling();
+
 	//Draw Walls
 	DrawWall();
 

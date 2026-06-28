@@ -36,6 +36,9 @@ void ImguiWindow::UpdateImguiTileEditor()
 	//Checkbox for sectorMode
 	ImGui::Checkbox("Sector Mode", &Shared::sectorMode);
 
+	//Current Floor
+	ImGui::InputInt("Floor", &Shared::floor);
+
 	ImGui::End();
 	rlImGuiEnd();
 }

@@ -21,6 +21,7 @@ public:
 
 	void Update();
 	void UpdateCam();
+	void UpdateSector();
 
 	void DrawWall();
 	void DrawSector();
