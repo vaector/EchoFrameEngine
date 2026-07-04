@@ -7,10 +7,13 @@ struct Wall{
 	int floor;
 	Texture2D* texture;
 	bool inSector = false;
+
 };
 
 struct Sector{
-	std::vector<Vector2> points;
+	std::vector<Vector2> floorPoints;
+	std::vector<Vector2> ceilingPoints;
 	int floor;
-	Texture2D* texture;
+	Texture2D* floorTexture; 
+	Texture2D* ceilingTexture;
 };

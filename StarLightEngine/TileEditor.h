@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include "Wall.h"
 #include "Shared.h"
-
+#include "Ramp.h"
 
 class TileEditor
 {
@@ -17,8 +17,13 @@ private:
 
 	Vector2 mouse = GetMousePosition();
 	Wall pendingWall;
-	Wall placeHolder;
+	Wall placeHolderWall;
 
+	Ramp pendingRamp;
+	Ramp placeHolderRamp;
+
+	std::vector<Vector2*> draggingVertices;
+	std::vector<Vector2*> draggingSectorVertices;
 public:
 
 	const int tileSize = 16;
@@ -33,11 +38,14 @@ public:
 	void Update();
 	void UpdateCam();
 	void UpdateWall();
+	bool UpdateWallVertices();
 	void UpdateSector();
-	
+	void UpdateRamp();
+
 
 	void DrawWall();
 	void DrawSector();
+	void DrawRamp();
 	void Draw();
 };
 

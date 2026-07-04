@@ -37,7 +37,13 @@ void ImguiWindow::UpdateImguiTileEditor()
 	ImGui::Checkbox("Sector Mode", &Shared::sectorMode);
 
 	//Current Floor
-	ImGui::InputInt("Floor", &Shared::floor);
+	if (ImGui::InputInt("Floor", &Shared::floor)) {
+		if (Shared::floor <= 0)
+			Shared::floor = 0;
+	}
+
+	//Ramp Mode
+	ImGui::Checkbox("Ramp Mode", &Shared::rampMode);
 
 	ImGui::End();
 	rlImGuiEnd();

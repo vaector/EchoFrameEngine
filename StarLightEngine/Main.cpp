@@ -23,7 +23,12 @@ int main() {
 
     Engine engine;
 
+	//Reserve memory for sectors and walls to improve performance
+    Shared::sectors.reserve(1024);
+    Shared::walls.reserve(1024);
+
     ImguiWindow imgui;
+    
 
     bool editorMode = true;
 

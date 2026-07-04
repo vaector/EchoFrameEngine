@@ -11,6 +11,8 @@ private:
 	float pitch = 0.0f;
 	Vector3 forward;
 
+	Ramp* selectedRamp = nullptr;
+	Wall* selectedWall = nullptr;
 
 public:
 	//3d Camera
@@ -22,10 +24,17 @@ public:
 	void Update();
 	void UpdateCam();
 	void UpdateSector();
+	void UpdateWall();
+	void UpdateRamp();
+	void UpdateWallFeatures();
 
 	void DrawWall();
 	void DrawSector();
+	void DrawRamp();
 	void Draw();
+
+	//Helper
+	bool WallCloserThanSector();
 
 };
 

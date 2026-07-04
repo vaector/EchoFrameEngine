@@ -2,16 +2,19 @@
 #include "TileEditor.h"
 #include <unordered_map>
 #include <string>
-
+#include "Ramp.h"
 
 namespace Shared {
 	extern std::vector<Wall> walls;
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;
 	extern std::vector<Sector> sectors;
+	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;
 	extern bool sectorMode;
 	extern int floor;
+	extern bool onImguiWindow;
+	extern bool rampMode;
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)
@@ -20,3 +23,5 @@ namespace Shared {
 //-------SELECTEDTEXTURE---> A pointer pointing at the selected texture through the tilemap editor imgui window. -> SHARED.H (Shared::sectors)
 //-------SECTORMODE--------> bool value. -> true means consider new walls for a sector | false means do not consider(no sectors)
 //-------FLOOR-------------> The floor currently on-> updated in ImguiWindow.h.
+//-------RAMPMODE----------> bool value that tells us if we are adding ramps or not.(ImguiWindow.h)
+//-------onImguiWindow-----> bool value that tells us if the cursor is on an IMGUI window/Item(ImguiWindow.h)

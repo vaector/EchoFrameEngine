@@ -160,6 +160,7 @@
     <ClInclude Include="imgui\rlImGui.h" />
     <ClInclude Include="imgui\rlImGuiColors.h" />
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="Ramp.h" />
     <ClInclude Include="RealEditor.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="TileEditor.h" />

@@ -16,6 +16,7 @@ Engine::~Engine()
 
 void Engine::UpdateGui()
 {
+
 	//Update Engine Entities
 	tileEditor.Update();
 }
