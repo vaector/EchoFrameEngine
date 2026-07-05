@@ -9,11 +9,13 @@ namespace Shared {
 	std::vector<Sector> sectors;
 
 	bool sectorMode = false;
-	bool rampMode = false;
 	int floor = 0;
 	bool onImguiWindow = false;
 
 	std::vector<Ramp> ramps;
 	float selectedRampHeight = 0.0f;
+
+	bool doorMode = false;
 	
+	std::vector<DoorSwitch> doorSwitches;
 }

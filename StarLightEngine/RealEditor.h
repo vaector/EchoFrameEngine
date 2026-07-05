@@ -1,10 +1,11 @@
 #pragma once
 #include "Shared.h"
+#include <memory>
 
 class RealEditor
 {
 private:
-	int moveSpeed = 100;
+	int moveSpeed = 125;
 	float mouseSens = 0.1f;
 
 	float yaw = 0.0f;
@@ -27,7 +28,9 @@ public:
 	void UpdateWall();
 	void UpdateRamp();
 	void UpdateWallFeatures();
+	void UpdateDoor();
 
+	void DrawDoorSwitch();
 	void DrawWall();
 	void DrawSector();
 	void DrawRamp();

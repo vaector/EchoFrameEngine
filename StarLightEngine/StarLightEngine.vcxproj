@@ -128,9 +128,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="ImguiWindow.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -165,6 +162,9 @@
     <ClInclude Include="Shared.h" />
     <ClInclude Include="TileEditor.h" />
     <ClInclude Include="Wall.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

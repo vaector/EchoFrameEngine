@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include "raylib.h"
 #include "Wall.h"
 #include "Shared.h"
 #include "Ramp.h"
@@ -24,6 +23,8 @@ private:
 
 	std::vector<Vector2*> draggingVertices;
 	std::vector<Vector2*> draggingSectorVertices;
+
+	Wall* selectedWall = nullptr;
 public:
 
 	const int tileSize = 16;
@@ -41,8 +42,12 @@ public:
 	bool UpdateWallVertices();
 	void UpdateSector();
 	void UpdateRamp();
+	void UpdateDoor();
+	void UpdateDoorSwitch();
+	void UpdateSelectedWall();
 
 
+	void DrawDoorSwitch();
 	void DrawWall();
 	void DrawSector();
 	void DrawRamp();
@@ -50,3 +55,5 @@ public:
 };
 
 //-------UpdateSector----- Press "C" to build the sector
+//-------UpdateRamp------- Press "R" to build the ramp
+//-------DELETE----------- Right click to delete objects(walls, ramps, door switches)

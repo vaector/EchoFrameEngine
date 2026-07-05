@@ -1,6 +1,7 @@
 #include "RealEditor.h"
 #include "raymath.h"
 #include "rlgl.h"
+#include <iostream>
 
 RealEditor::RealEditor()
 {
@@ -38,6 +39,8 @@ void RealEditor::Update()
 
 	//Update Ramp
 	UpdateRamp();
+
+	UpdateDoor();
 	
 }
 
@@ -208,7 +211,6 @@ void RealEditor::UpdateRamp()
 }
 void RealEditor::UpdateWallFeatures()
 {
-
 	//Select Wall(selectedWall)
 	if (selectedWall != nullptr) {
 		if (IsKeyDown(KEY_UP))
@@ -217,6 +219,142 @@ void RealEditor::UpdateWallFeatures()
 			selectedWall->wallHeight -= 1.0f;
 
 		selectedWall->wallHeight = Clamp(selectedWall->wallHeight, 1.0f, Shared::wallHeight);
+	}
+}
+void RealEditor::UpdateDoor()
+{
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+
+	static DoorSwitch* selectedDoorSwitch = nullptr;
+	static Vector2 savedDir = { 0 };
+	static Vector3 savedPerp = { 0 };
+	static float sign = 1.0f;
+	
+	for (auto& d : Shared::doorSwitches)
+	{
+
+		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
+		static Wall* closestWall = nullptr;
+		float clostseDist = FLT_MAX;
+		for (auto& wall : Shared::walls) {
+			if (wall.floor != d.floor) continue;
+			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall.startPos.x + wall.endPos.x) / 2, (wall.startPos.y + wall.endPos.y) / 2 });
+			if (dist < clostseDist) {
+				clostseDist = dist;
+				closestWall = &wall;
+			}
+		}
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 3.0f));
+
+		Vector3 startLeft = { pos };
+		Vector3 startRight = Vector3Add(pos, Vector3Scale({ dir.x, 0, dir.y }, 25));
+		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
+		Vector3 endRight = Vector3Add(endLeft, Vector3Scale({ dir.x, 0, dir.y }, 25));
+
+		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
+
+		if (dCol.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			selectedDoorSwitch = &d;
+			savedDir = dir;
+			sign = (Vector3DotProduct(forward, perp) < 0.0f) ? 1.0f : -1.0f;
+			savedPerp = perp;
+
+			break;
+		}
+	}
+
+	if (selectedDoorSwitch != nullptr)
+	{
+		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr)
+			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
+
+		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+		{
+			Vector2 mouseDelta = GetMouseDelta();
+
+			selectedDoorSwitch->pos = Vector3Add(
+				selectedDoorSwitch->pos,
+				Vector3Scale({ savedDir.x, 0, savedDir.y }, mouseDelta.x * 0.25f * sign)
+			);
+
+			selectedDoorSwitch->pos = Vector3Add(
+				selectedDoorSwitch->pos,
+				Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -0.25f)
+			);
+
+		}
+		if (GetMouseWheelMove() != 0)
+		{
+			float wheelMove = GetMouseWheelMove();
+			selectedDoorSwitch->pos = Vector3Add({ selectedDoorSwitch->pos.x, (selectedDoorSwitch->floor * Shared::wallHeight) + selectedDoorSwitch->pos.y, selectedDoorSwitch->pos.z }, Vector3Scale(savedPerp, wheelMove * sign));
+
+		}
+
+		//Deselect Door Switch
+		if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+			selectedDoorSwitch = nullptr;
+	}
+
+	float speed = 150.0f * GetFrameTime();
+
+	for (auto& d : Shared::doorSwitches)
+	{
+		if(d.linkedWall == nullptr) continue;
+
+		if (d.linkedWall->isOpen)
+			d.linkedWall->wallHeight -= speed;
+		else
+			d.linkedWall->wallHeight += speed;
+
+		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::wallHeight);
+	}
+
+}
+void RealEditor::DrawDoorSwitch()
+{
+
+	for (auto& d : Shared::doorSwitches) {
+
+		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
+		static Wall* closestWall = nullptr;
+		float clostseDist = FLT_MAX;
+		for (auto& wall : Shared::walls) {
+			if (wall.floor != d.floor) continue;
+			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall.startPos.x + wall.endPos.x) / 2, (wall.startPos.y + wall.endPos.y) / 2 });
+			if(dist < clostseDist) {
+				clostseDist = dist;
+				closestWall = &wall;
+			}
+		}
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 1.0f));
+		
+		Vector3 startLeft = { pos };
+		Vector3 startRight = Vector3Add({ pos.x, pos.y, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
+		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
+		Vector3 endRight = Vector3Add({ pos.x, pos.y + 25, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
+
+		float tileX = 2.0f;
+		float tileY = 2.0f;
+
+		rlBegin(RL_QUADS);
+		rlSetTexture(d.texture->id);
+
+		rlColor4ub(255, 255, 255, 255);
+
+		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(startLeft.x, startLeft.y, startLeft.z);
+		rlTexCoord2f(0.0f, tileY); rlVertex3f(endLeft.x, endLeft.y, endLeft.z);
+		rlTexCoord2f(tileX, tileY); rlVertex3f(endRight.x, endRight.y, endRight.z);
+		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(startRight.x, startRight.y, startRight.z);
+
+		rlEnd();
+		rlSetTexture(0);
 	}
 }
 void RealEditor::DrawWall()
@@ -236,7 +374,11 @@ void RealEditor::DrawWall()
 		rlBegin(RL_QUADS);
 		rlSetTexture(wall.texture->id);
 
-		rlColor4ub(255, 255, 255, 255);
+		if (selectedWall == &wall)
+			rlColor4ub(255, 0, 0, 255);
+		else
+			rlColor4ub(255, 255, 255, 255);
+		
 
 		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
 		rlTexCoord2f(0.0f, tileY); rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
@@ -317,7 +459,11 @@ void RealEditor::DrawRamp()
 
 		rlBegin(RL_QUADS);
 		rlSetTexture(ramp.texture->id);
-		rlColor4ub(255, 255, 255, 255);
+
+		if (selectedRamp == &ramp)//Draw selected ramp in red
+			rlColor4ub(255, 0, 0, 255);
+		else
+			rlColor4ub(255, 255, 255, 255);
 
 		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(endLeft.x, endLeft.y, endLeft.z);
 		rlTexCoord2f(0.0f, tileY); rlVertex3f(startLeft.x, startLeft.y, startLeft.z);
@@ -343,6 +489,8 @@ void RealEditor::Draw()
 	DrawSector();
 
 	DrawRamp();
+
+	DrawDoorSwitch();
 }
 
 bool RealEditor::WallCloserThanSector()

@@ -42,8 +42,8 @@ void ImguiWindow::UpdateImguiTileEditor()
 			Shared::floor = 0;
 	}
 
-	//Ramp Mode
-	ImGui::Checkbox("Ramp Mode", &Shared::rampMode);
+	//Door Mode
+	ImGui::Checkbox("Door Mode", &Shared::doorMode);
 
 	ImGui::End();
 	rlImGuiEnd();
