@@ -100,22 +100,30 @@ void TileEditor::UpdateWall()
 		pendingWall.texture = Shared::selectedTexture;
 		pendingWall.inSector = !Shared::sectorMode;
 		//if sectorMode == true then inSector is false(false because the wall is not in a sector and should be added to one).
-		Shared::walls.push_back(pendingWall);
+		Shared::walls.push_back(new Wall(pendingWall));
 	}
 
 	
 	//Removing Walls
 	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
 		for (int i = 0; i < Shared::walls.size(); i++) {
-			if (CheckCollisionPointLine(mouse, Shared::walls[i].startPos, Shared::walls[i].endPos, 4)) {
+			if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 4)) {
 
-				//Rmove connection that the wall has with a door switch if it is linked to one.
-				for(auto& d : Shared::doorSwitches) {
-					if(d.linkedWall == &Shared::walls[i])
-						Shared::doorSwitches.erase(Shared::doorSwitches.begin() + i);
+				//Remove connection that the wall has with a door switch if it is linked to one.
+				for (int j = 0; Shared::doorSwitches.size(); j++) {
+					if(Shared::doorSwitches[j].linkedWall == Shared::walls[i])
+						Shared::doorSwitches.erase(Shared::doorSwitches.begin() + j);
 				}
 
+				//Deselecting the wall if it is selected before deleting it.
+				if(selectedWall == Shared::walls[i])
+					selectedWall = nullptr;
+				
+				delete Shared::walls[i];
+				Shared::walls[i] = nullptr;
 				Shared::walls.erase(Shared::walls.begin() + i);
+
+				break;
 			}
 		}
 	}
@@ -143,10 +151,10 @@ bool TileEditor::UpdateWallVertices()
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		draggingVertices.clear();
 		for (auto& wall : Shared::walls) {
-			if (CheckCollisionPointCircle(mouse, wall.startPos, grabRadius))
-				draggingVertices.push_back(&wall.startPos);
-			if (CheckCollisionPointCircle(mouse, wall.endPos, grabRadius))
-				draggingVertices.push_back(&wall.endPos);
+			if (CheckCollisionPointCircle(mouse, wall->startPos, grabRadius))
+				draggingVertices.push_back(&wall->startPos);
+			if (CheckCollisionPointCircle(mouse, wall->endPos, grabRadius))
+				draggingVertices.push_back(&wall->endPos);
 		}
 	}
 
@@ -190,13 +198,13 @@ void TileEditor::UpdateSector()
 		std::vector<Vector2> currentSector;
 		bool first = false;
 		for (auto& wall : Shared::walls) {
-			if (!wall.inSector) {
+			if (!wall->inSector) {
 				if (first == false) {
-					currentSector.push_back(wall.startPos);
+					currentSector.push_back(wall->startPos);
 					first = true;
 				}
-				currentSector.push_back(wall.endPos);
-				wall.inSector = true;
+				currentSector.push_back(wall->endPos);
+				wall->inSector = true;
 			}
 		}
 
@@ -288,13 +296,13 @@ void TileEditor::UpdateDoor()
 	if(!Shared::doorMode) return;
 
 	for (auto& wall: Shared::walls) {
-		if (CheckCollisionPointLine(mouse, wall.startPos, wall.endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			wall.isDoor = !wall.isDoor;
+		if (CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			wall->isDoor = !wall->isDoor;
 
 			//if wall is no longer a door , remove any door switches linked to it.
-			if (!wall.isDoor) {
+			if (!wall->isDoor) {
 				for(int i = 0; i < Shared::doorSwitches.size(); i++) {
-					if (Shared::doorSwitches[i].linkedWall == &wall) {
+					if (Shared::doorSwitches[i].linkedWall == wall) {
 						Shared::doorSwitches.erase(Shared::doorSwitches.begin() + i);
 						break;
 					}
@@ -360,9 +368,9 @@ void TileEditor::UpdateDoorSwitch()
 void TileEditor::UpdateSelectedWall()
 {
 	for (auto& wall : Shared::walls) {
-		if(wall.floor == Shared::floor)
-		if(CheckCollisionPointLine(mouse, wall.startPos, wall.endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			selectedWall = &wall;
+		if(wall->floor == Shared::floor)
+		if(CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			selectedWall = wall;
 			break;
 		}
 	}
@@ -383,16 +391,16 @@ void TileEditor::DrawDoorSwitch()
 
 void TileEditor::DrawWall()
 {
-	for (Wall& wall: Shared::walls) {
-		if (wall.floor != Shared::floor) continue;
+	for (auto& wall: Shared::walls) {
+		if (wall->floor != Shared::floor) continue;
 		//Draw Wall/Door
-		if(wall.isDoor)
-			DrawLine(wall.startPos.x, wall.startPos.y, wall.endPos.x, wall.endPos.y, ORANGE);
+		if(wall->isDoor)
+			DrawLine(wall->startPos.x, wall->startPos.y, wall->endPos.x, wall->endPos.y, ORANGE);
 		else
-			DrawLine(wall.startPos.x, wall.startPos.y, wall.endPos.x, wall.endPos.y, PURPLE);
+			DrawLine(wall->startPos.x, wall->startPos.y, wall->endPos.x, wall->endPos.y, PURPLE);
 		//Draw Verices
-		DrawCircle(wall.startPos.x, wall.startPos.y, 2, BLUE);
-		DrawCircle(wall.endPos.x, wall.endPos.y, 2, BLUE);
+		DrawCircle(wall->startPos.x, wall->startPos.y, 2, BLUE);
+		DrawCircle(wall->endPos.x, wall->endPos.y, 2, BLUE);
 	}
 	DrawLine(placeHolderWall.startPos.x, placeHolderWall.startPos.y, placeHolderWall.endPos.x, placeHolderWall.endPos.y, PURPLE);
 }

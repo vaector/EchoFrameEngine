@@ -145,21 +145,21 @@ void RealEditor::UpdateWall()
 
 	for (auto& wall : Shared::walls)
 	{
-		Vector3 topLeft = { wall.startPos.x, (wall.wallHeight * wall.floor) + wall.wallHeight, wall.startPos.y };
-		Vector3 bottomLeft = { wall.startPos.x,  wall.wallHeight * wall.floor,                    wall.startPos.y };
-		Vector3 topRight = { wall.endPos.x,   (wall.wallHeight * wall.floor) + wall.wallHeight,  wall.endPos.y };
-		Vector3 bottomRight = { wall.endPos.x,    wall.wallHeight * wall.floor,                     wall.endPos.y };
+		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
+		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
+		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
+		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                     wall->endPos.y };
 
 		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
 
 		if (wallCol.hit && wallCol.distance < closestDist)
 		{
 			closestDist = wallCol.distance;
-			closestWall = &wall;
+			closestWall = wall;
 
 			//Select Wall
 			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-				selectedWall = &wall;
+				selectedWall = wall;
 		}
 		
 	}
@@ -237,17 +237,17 @@ void RealEditor::UpdateDoor()
 		static Wall* closestWall = nullptr;
 		float clostseDist = FLT_MAX;
 		for (auto& wall : Shared::walls) {
-			if (wall.floor != d.floor) continue;
-			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall.startPos.x + wall.endPos.x) / 2, (wall.startPos.y + wall.endPos.y) / 2 });
+			if (wall->floor != d.floor) continue;
+			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
 			if (dist < clostseDist) {
 				clostseDist = dist;
-				closestWall = &wall;
+				closestWall = wall;
 			}
 		}
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 3.0f));
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
 
 		Vector3 startLeft = { pos };
 		Vector3 startRight = Vector3Add(pos, Vector3Scale({ dir.x, 0, dir.y }, 25));
@@ -256,7 +256,7 @@ void RealEditor::UpdateDoor()
 
 		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
 
-		if (dCol.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		if (dCol.hit)
 		{
 			selectedDoorSwitch = &d;
 			savedDir = dir;
@@ -303,12 +303,17 @@ void RealEditor::UpdateDoor()
 
 	for (auto& d : Shared::doorSwitches)
 	{
+
 		if(d.linkedWall == nullptr) continue;
 
-		if (d.linkedWall->isOpen)
+		if (d.linkedWall->isOpen) {
 			d.linkedWall->wallHeight -= speed;
-		else
+			std::cout << "in ";
+		}
+		else if(!d.linkedWall->isOpen){
 			d.linkedWall->wallHeight += speed;
+			std::cout << "out ";
+		}
 
 		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::wallHeight);
 	}
@@ -323,17 +328,17 @@ void RealEditor::DrawDoorSwitch()
 		static Wall* closestWall = nullptr;
 		float clostseDist = FLT_MAX;
 		for (auto& wall : Shared::walls) {
-			if (wall.floor != d.floor) continue;
-			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall.startPos.x + wall.endPos.x) / 2, (wall.startPos.y + wall.endPos.y) / 2 });
+			if (wall->floor != d.floor) continue;
+			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
 			if(dist < clostseDist) {
 				clostseDist = dist;
-				closestWall = &wall;
+				closestWall = wall;
 			}
 		}
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 1.0f));
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
 		
 		Vector3 startLeft = { pos };
 		Vector3 startRight = Vector3Add({ pos.x, pos.y, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
@@ -359,22 +364,22 @@ void RealEditor::DrawDoorSwitch()
 }
 void RealEditor::DrawWall()
 {
-	for (Wall& wall : Shared::walls) {
+	for (auto& wall : Shared::walls) {
 
-		Vector3 topLeft = { wall.startPos.x, (wall.wallHeight * wall.floor) + wall.wallHeight, wall.startPos.y };
-		Vector3 bottomLeft = { wall.startPos.x, wall.wallHeight * wall.floor,       wall.startPos.y };
-		Vector3 topRight = { wall.endPos.x,   (wall.wallHeight *wall.floor) + wall.wallHeight, wall.endPos.y };
-		Vector3 bottomRight = { wall.endPos.x,   wall.wallHeight * wall.floor,       wall.endPos.y };
+		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
+		Vector3 bottomLeft = { wall->startPos.x, wall->wallHeight * wall->floor,       wall->startPos.y };
+		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight *wall->floor) + wall->wallHeight, wall->endPos.y };
+		Vector3 bottomRight = { wall->endPos.x,   wall->wallHeight * wall->floor,       wall->endPos.y };
 
-		float wallLength = Vector2Distance(wall.startPos, wall.endPos);
+		float wallLength = Vector2Distance(wall->startPos, wall->endPos);
 		float tileX = wallLength / 32.0f;
-		float tileY = wall.wallHeight / 32.0f;
+		float tileY = wall->wallHeight / 32.0f;
 
 		
 		rlBegin(RL_QUADS);
-		rlSetTexture(wall.texture->id);
+		rlSetTexture(wall->texture->id);
 
-		if (selectedWall == &wall)
+		if (selectedWall == wall)
 			rlColor4ub(255, 0, 0, 255);
 		else
 			rlColor4ub(255, 255, 255, 255);
@@ -502,10 +507,10 @@ bool RealEditor::WallCloserThanSector()
 
 	for (auto& wall : Shared::walls)
 	{
-		Vector3 topLeft = { wall.startPos.x, (wall.wallHeight * wall.floor) + wall.wallHeight, wall.startPos.y };
-		Vector3 bottomLeft = { wall.startPos.x,  wall.wallHeight * wall.floor,                    wall.startPos.y };
-		Vector3 topRight = { wall.endPos.x,   (wall.wallHeight * wall.floor) + wall.wallHeight,  wall.endPos.y };
-		Vector3 bottomRight = { wall.endPos.x,    wall.wallHeight * wall.floor,                     wall.endPos.y };
+		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
+		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
+		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
+		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                   wall->endPos.y };
 
 		RayCollision col = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
 		if (col.hit && col.distance < wallDist)
