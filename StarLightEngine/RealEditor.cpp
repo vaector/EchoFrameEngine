@@ -11,22 +11,36 @@ RealEditor::RealEditor()
 
 void RealEditor::InitCam()
 {
-	cam.fovy = 60;
-	cam.position = { 20,0,20};
-	cam.projection = CAMERA_PERSPECTIVE;
-	cam.target = { 0 };
-	cam.up = { 0.0f, 1.0f, 0.0f };
 
-	forward = Vector3Normalize(Vector3Subtract(cam.target, cam.position));
-	yaw = atan2f(forward.z, forward.x);
-	pitch = asinf(forward.y);
+	//Free Cam
+	freeCam.fovy = 60;
+	freeCam.position = { 20,10,20};
+	freeCam.projection = CAMERA_PERSPECTIVE;
+	freeCam.target = { 0 };
+	freeCam.up = { 0.0f, 1.0f, 0.0f };
+
+	freeForward = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
+	freeYaw = atan2f(freeForward.z, freeForward.x);
+	freePitch = asinf(freeForward.y);
+
+	//Player Cam
+	playerCam.fovy = 60;
+	playerCam.position = { 20,50,20 };
+	playerCam.projection = CAMERA_PERSPECTIVE;
+	playerCam.target = { 0 };
+	playerCam.up = { 0.0f, 1.0f, 0.0f };
+
+	playerForward = Vector3Normalize(Vector3Subtract(playerCam.target, playerCam.position));
+	playerYaw = atan2f(playerForward.z, playerForward.x);
+	playerPitch = asinf(playerForward.y);
 }
 
-void RealEditor::Update()
+
+void RealEditor::Update(Camera3D* cam)
 {
 	
 	//Update Camera
-	UpdateCam();
+	UpdateCam(cam);
 
 	//Update Wall/Sector
 	if (WallCloserThanSector())
@@ -44,51 +58,106 @@ void RealEditor::Update()
 	
 }
 
-void RealEditor::UpdateCam()
+void RealEditor::UpdateCam(Camera3D* cam)
 {
 	float dt = GetFrameTime();
-
 	Vector3 move = { 0 };
-
-	//Camera
 	Vector2 mouseDt = GetMouseDelta();
-
-	yaw += -mouseDt.x * (mouseSens * DEG2RAD);
-	pitch += -mouseDt.y * (mouseSens * DEG2RAD);
-
-	pitch = Clamp(pitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
-
-	forward.x = cosf(pitch) * sinf(yaw);
-	forward.y = sinf(pitch);
-	forward.z = cosf(pitch) * cosf(yaw);
-
-	forward = Vector3Normalize(forward);
-
-	Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, {0,1,0}));
-	Vector3 up = Vector3Normalize(Vector3CrossProduct(right, forward));
-
-	//Movement
-	if (IsKeyDown(KEY_W))
-		move = Vector3Add(move,Vector3Scale(forward, moveSpeed*dt));
-	if(IsKeyDown(KEY_S))
-		move = Vector3Add(move, Vector3Scale(forward, -moveSpeed * dt));
-	if (IsKeyDown(KEY_D))
-		move = Vector3Add(move, Vector3Scale(right, moveSpeed * dt));
-	if (IsKeyDown(KEY_A))
-		move = Vector3Add(move, Vector3Scale(right, -moveSpeed * dt));
-	if (IsKeyDown(KEY_E))
-		move = Vector3Add(move, Vector3Scale(up, moveSpeed * dt));
-	if (IsKeyDown(KEY_Q))
-		move = Vector3Add(move, Vector3Scale(up, -moveSpeed * dt));
+	
+	if (cam == &freeCam) {
+		//Camera
 
 
-	cam.position = Vector3Add(cam.position, move);
-	cam.target = Vector3Add(cam.position, forward);
+		freeYaw += -mouseDt.x * (mouseSens * DEG2RAD);
+		freePitch += -mouseDt.y * (mouseSens * DEG2RAD);
+
+		freePitch = Clamp(freePitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
+
+		freeForward.x = cosf(freePitch) * sinf(freeYaw);
+		freeForward.y = sinf(freePitch);
+		freeForward.z = cosf(freePitch) * cosf(freeYaw);
+
+		freeForward = Vector3Normalize(freeForward);
+
+		Vector3 right = Vector3Normalize(Vector3CrossProduct(freeForward, { 0,1,0 }));
+		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, freeForward));
+
+		//Movement
+		if (IsKeyDown(KEY_W))
+			move = Vector3Add(move, Vector3Scale(freeForward, freeMoveSpeed * dt));
+		if (IsKeyDown(KEY_S))
+			move = Vector3Add(move, Vector3Scale(freeForward, -freeMoveSpeed * dt));
+		if (IsKeyDown(KEY_D))
+			move = Vector3Add(move, Vector3Scale(right, freeMoveSpeed * dt));
+		if (IsKeyDown(KEY_A))
+			move = Vector3Add(move, Vector3Scale(right, -freeMoveSpeed * dt));
+		if (IsKeyDown(KEY_E))
+			move = Vector3Add(move, Vector3Scale(up, freeMoveSpeed * dt));
+		if (IsKeyDown(KEY_Q))
+			move = Vector3Add(move, Vector3Scale(up, -freeMoveSpeed * dt));
+
+
+		freeCam.position = Vector3Add(freeCam.position, move);
+		freeCam.target = Vector3Add(freeCam.position, freeForward);
+	}
+	else if (cam == &playerCam) {
+		//Camera
+		playerYaw += -mouseDt.x * (mouseSens * DEG2RAD);
+		playerPitch += -mouseDt.y * (mouseSens * DEG2RAD);
+
+		playerPitch = Clamp(playerPitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
+
+		playerForward.x = cosf(playerPitch) * sinf(playerYaw);
+		playerForward.y = sinf(playerPitch);
+		playerForward.z = cosf(playerPitch) * cosf(playerYaw);
+
+		playerForward = Vector3Normalize(playerForward);
+
+		Vector3 right = Vector3Normalize(Vector3CrossProduct(playerForward, { 0,1,0 }));
+		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, playerForward));
+
+		//Movement
+		if (IsKeyDown(KEY_W))
+			move = Vector3Add(move, Vector3Scale(playerForward, playerMoveSpeed * dt));
+		if (IsKeyDown(KEY_S))
+			move = Vector3Add(move, Vector3Scale(playerForward, -playerMoveSpeed * dt));
+		if (IsKeyDown(KEY_D))
+			move = Vector3Add(move, Vector3Scale(right, playerMoveSpeed * dt));
+		if (IsKeyDown(KEY_A))
+			move = Vector3Add(move, Vector3Scale(right, -playerMoveSpeed * dt));
+
+
+		//COLLISION
+		Vector3 moveX = { move.x, 0, 0 };
+		Vector3 moveY = { 0, move.y, 0 };
+		Vector3 moveZ = { 0, 0, move.z };
+
+		Vector3 nextPosX = Vector3Add(playerCam.position, moveX);
+		Vector3 nextPosY = Vector3Add(playerCam.position, moveY);
+		Vector3 nextPosZ = Vector3Add(playerCam.position, moveZ);
+		//Check XZ Collision
+
+		if (CheckCollisionXZ(cam, &nextPosX))                         
+			move.x = 0;                                             
+		if (CheckCollisionXZ(cam, &nextPosZ))
+			move.z = 0;
+
+		//Check Y Collision
+
+		if (CheckCollisionY(cam, &nextPosY)) {
+			move.y = 0;
+		}
+
+
+		//Apply updated position and target
+		playerCam.position = Vector3Add(playerCam.position, move);
+		playerCam.target = Vector3Add(playerCam.position, playerForward);
+	}
 
 }
 void RealEditor::UpdateSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
 	Sector* closestFloorSector = nullptr;
 	Sector* closestCeilingSector = nullptr;
@@ -138,7 +207,7 @@ void RealEditor::UpdateSector()
 }
 void RealEditor::UpdateWall()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
 	Wall* closestWall = nullptr;
 	float closestDist = FLT_MAX;
@@ -176,7 +245,7 @@ void RealEditor::UpdateWall()
 }
 void RealEditor::UpdateRamp()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
 	for (auto& ramp: Shared::ramps) {
 
@@ -223,7 +292,7 @@ void RealEditor::UpdateWallFeatures()
 }
 void RealEditor::UpdateDoor()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
 	static DoorSwitch* selectedDoorSwitch = nullptr;
 	static Vector2 savedDir = { 0 };
@@ -260,7 +329,7 @@ void RealEditor::UpdateDoor()
 		{
 			selectedDoorSwitch = &d;
 			savedDir = dir;
-			sign = (Vector3DotProduct(forward, perp) < 0.0f) ? 1.0f : -1.0f;
+			sign = (Vector3DotProduct(freeForward, perp) < 0.0f) ? 1.0f : -1.0f;
 			savedPerp = perp;
 
 			break;
@@ -501,7 +570,7 @@ void RealEditor::Draw()
 
 bool RealEditor::WallCloserThanSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, cam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
 	float wallDist = FLT_MAX;
 	float sectorDist = FLT_MAX;
@@ -534,3 +603,77 @@ bool RealEditor::WallCloserThanSector()
 
 	return wallDist < sectorDist;
 }
+
+bool RealEditor::CheckCollisionXZ(Camera3D* cam, Vector3* nextPos)
+{
+
+	float playerBottom = nextPos->y - playerHeight/2;
+	float playerTop = nextPos->y + playerHeight / 2;
+
+	for (auto& wall : Shared::walls) {
+		if (wall->isDoor && wall->isOpen) continue;
+		if (wall->floor != Shared::floor) continue;
+
+		Vector2 testPosXZ = { nextPos->x, nextPos->z };
+		float wallMinY = wall->floor * wall->wallHeight;
+		float wallMaxY = wallMinY + wall->wallHeight;
+
+		if (CheckCollisionPointLine(testPosXZ, wall->startPos, wall->endPos, 2) && (playerBottom <= wallMaxY && playerTop >= wallMinY)){
+			nextPos->x = cam->position.x;
+			nextPos->z = cam->position.z;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool RealEditor::CheckCollisionY(Camera3D* cam, Vector3* nextPos)
+{
+
+	float playerBottom = nextPos->y - playerHeight / 2;
+	float playerTop = nextPos->y + playerHeight / 2;
+
+	for(auto& sector: Shared::sectors) {
+		if (sector.floor != Shared::floor) continue;
+
+		//Collision with floor/ceiling(All floor points are on the same y so just use 1 of them)....Same for ceiling
+		float floorY = sector.floor * sector.floorPoints[0].y;
+		float ceilingY = floorY + Shared::wallHeight;
+		
+		if (playerBottom < floorY && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
+		{
+			nextPos->y = floorY + playerHeight / 2;
+			return true;
+		}
+
+		if (playerTop > ceilingY && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+		{
+			nextPos->y = ceilingY - playerHeight / 2;
+			return true;
+		}
+
+	}
+
+
+	return false;
+}
+
+bool RealEditor::PointInSector(Vector2 point, const std::vector<Vector2>& poly)
+{
+	bool inside = false;
+
+	for (int i = 0, j = poly.size() - 1; i < poly.size(); j = i++)
+	{
+		if (((poly[i].y > point.y) != (poly[j].y > point.y)) &&
+			(point.x < (poly[j].x - poly[i].x) *
+				(point.y - poly[i].y) /
+				(poly[j].y - poly[i].y) + poly[i].x))
+		{
+			inside = !inside;
+		}
+	}
+
+	return inside;
+}
+

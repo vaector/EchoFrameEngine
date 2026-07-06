@@ -31,12 +31,14 @@ int main() {
     
 
     bool editorMode = true;
+    bool freeCamMode = true;
 
     while (!WindowShouldClose())
     {
 
+		//Press F to switch between Editor Mode and Real Mode
         if (IsKeyPressed(KEY_F) && editorMode) {
-            editorMode = false;
+            editorMode = false;//RealEditor
             DisableCursor();
         }
         else if (IsKeyPressed(KEY_F) && !editorMode) {
@@ -44,11 +46,22 @@ int main() {
             EnableCursor();
         }
 
+        //Press P to switch from freecam to playerCam in real Editor Mode
+        if(IsKeyPressed(KEY_P) && !editorMode){
+            freeCamMode = !freeCamMode;
+            DisableCursor();
+        }
+
+
         // Update
-        if (editorMode)
+        if (editorMode)//TileEditor Updates
             engine.UpdateGui();
-        else if(!editorMode)
-            engine.UpdateReal();
+        else if (!editorMode) {//Real Editor Updates
+            if(freeCamMode)
+                engine.UpdateReal(&engine.realEditor.freeCam);
+            else
+                engine.UpdateReal(&engine.realEditor.playerCam);
+        }
 
         // Draw
         BeginDrawing();
@@ -66,7 +79,10 @@ int main() {
         }
         else if (!editorMode) {
             //Real(3d Stuff)
-            BeginMode3D(engine.realEditor.cam);
+            if(freeCamMode)
+                BeginMode3D(engine.realEditor.freeCam);
+            else
+                BeginMode3D(engine.realEditor.playerCam);
 
             engine.DrawReal();
 

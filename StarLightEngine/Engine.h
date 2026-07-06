@@ -20,7 +20,7 @@ public:
 	Engine();
 	~Engine();
 	void UpdateGui();
-	void UpdateReal();
+	void UpdateReal(Camera3D* cam);
 	void DrawReal();
 	void DrawGui();
 

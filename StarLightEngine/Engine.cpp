@@ -21,9 +21,9 @@ void Engine::UpdateGui()
 	tileEditor.Update();
 }
 
-void Engine::UpdateReal()
+void Engine::UpdateReal(Camera3D* cam)
 {
-	realEditor.Update();
+	realEditor.Update(cam);
 }
 
 void Engine::DrawReal()
