@@ -110,7 +110,7 @@ void TileEditor::UpdateWall()
 			if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 4)) {
 
 				//Remove connection that the wall has with a door switch if it is linked to one.
-				for (int j = 0; Shared::doorSwitches.size(); j++) {
+				for (int j = 0; j < Shared::doorSwitches.size(); j++) {
 					if(Shared::doorSwitches[j].linkedWall == Shared::walls[i])
 						Shared::doorSwitches.erase(Shared::doorSwitches.begin() + j);
 				}
@@ -296,7 +296,7 @@ void TileEditor::UpdateDoor()
 	if(!Shared::doorMode) return;
 
 	for (auto& wall: Shared::walls) {
-		if (CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		if (CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 4) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			wall->isDoor = !wall->isDoor;
 
 			//if wall is no longer a door , remove any door switches linked to it.

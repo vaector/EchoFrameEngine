@@ -265,6 +265,8 @@ void RealEditor::UpdateDoor()
 
 			break;
 		}
+		else if(!dCol.hit && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+			selectedDoorSwitch = nullptr;
 	}
 
 	if (selectedDoorSwitch != nullptr)
@@ -287,6 +289,7 @@ void RealEditor::UpdateDoor()
 			);
 
 		}
+		
 		if (GetMouseWheelMove() != 0)
 		{
 			float wheelMove = GetMouseWheelMove();
@@ -308,11 +311,9 @@ void RealEditor::UpdateDoor()
 
 		if (d.linkedWall->isOpen) {
 			d.linkedWall->wallHeight -= speed;
-			std::cout << "in ";
 		}
 		else if(!d.linkedWall->isOpen){
 			d.linkedWall->wallHeight += speed;
-			std::cout << "out ";
 		}
 
 		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::wallHeight);
