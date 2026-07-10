@@ -16,6 +16,8 @@ namespace Shared {
 	extern bool onImguiWindow;
 	extern bool doorMode;
 	extern std::vector<DoorSwitch> doorSwitches;
+	extern Vector3 playerPos;
+	extern bool setPlayerPos;
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

@@ -14,7 +14,7 @@ void RealEditor::InitCam()
 
 	//Free Cam
 	freeCam.fovy = 60;
-	freeCam.position = { 20,10,20};
+	freeCam.position = { 1024,50,1024};
 	freeCam.projection = CAMERA_PERSPECTIVE;
 	freeCam.target = { 0 };
 	freeCam.up = { 0.0f, 1.0f, 0.0f };
@@ -25,7 +25,7 @@ void RealEditor::InitCam()
 
 	//Player Cam
 	playerCam.fovy = 60;
-	playerCam.position = { 20,50,20 };
+	playerCam.position = { 1024,50,1024 };
 	playerCam.projection = CAMERA_PERSPECTIVE;
 	playerCam.target = { 0 };
 	playerCam.up = { 0.0f, 1.0f, 0.0f };
@@ -54,8 +54,8 @@ void RealEditor::Update(Camera3D* cam)
 	//Update Ramp
 	UpdateRamp();
 
-	UpdateDoor();
-	
+	EditDoor();
+	PlayerDoor();
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -101,6 +101,16 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		freeCam.target = Vector3Add(freeCam.position, freeForward);
 	}
 	else if (cam == &playerCam) {
+
+		//Update Position from TileEditor
+		if (Shared::setPlayerPos)
+		{
+			playerCam.position.x = Shared::playerPos.x;
+			playerCam.position.y = Shared::playerPos.y;
+			playerCam.position.z = Shared::playerPos.z;
+			Shared::setPlayerPos = false;
+		}
+
 		//Camera
 		playerYaw += -mouseDt.x * (mouseSens * DEG2RAD);
 		playerPitch += -mouseDt.y * (mouseSens * DEG2RAD);
@@ -135,21 +145,48 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 nextPosX = Vector3Add(playerCam.position, moveX);
 		Vector3 nextPosY = Vector3Add(playerCam.position, moveY);
 		Vector3 nextPosZ = Vector3Add(playerCam.position, moveZ);
-		//Check XZ Collision
 
-		if (CheckCollisionXZ(cam, &nextPosX))                         
+		//Check XZ Collision
+		if (CheckCollisionWall(cam, &nextPosX))                         
 			move.x = 0;                                             
-		if (CheckCollisionXZ(cam, &nextPosZ))
+		if (CheckCollisionWall(cam, &nextPosZ))
 			move.z = 0;
 
-		//Check Y Collision
 
-		if (CheckCollisionY(cam, &nextPosY)) {
-			move.y = 0;
+
+		// Jump
+		if (IsKeyPressed(KEY_SPACE) && isGround)
+		{
+			verticalVelocity = jump;
+			isGround = false;
+		}
+
+		// Gravity
+		if (!isGround)
+			verticalVelocity -= gravity * dt;
+
+		// Apply vertical velocity
+		move.y = verticalVelocity * dt;
+
+		// Calculate the next Y position AFTER move.y is updated
+		nextPosY = playerCam.position;
+		nextPosY.y += move.y;
+
+		// Check collision
+		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
+		{
+			verticalVelocity = 0.0f;
+			isGround = true;
+
+			move.y = nextPosY.y - playerCam.position.y;
+		}
+		else
+		{
+			isGround = false;
 		}
 
 
-		//Apply updated position and target
+		// Apply updated position and target
 		playerCam.position = Vector3Add(playerCam.position, move);
 		playerCam.target = Vector3Add(playerCam.position, playerForward);
 	}
@@ -184,9 +221,9 @@ void RealEditor::UpdateSector()
 		// ceiling
 		for (int j = 1; j < sector.ceilingPoints.size() - 1; j++)
 		{
-			Vector3 p0 = { sector.ceilingPoints[0].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.ceilingPoints[0].y };
-			Vector3 p1 = { sector.ceilingPoints[j].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.ceilingPoints[j].y };
-			Vector3 p2 = { sector.ceilingPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight, sector.ceilingPoints[j + 1].y };
+			Vector3 p0 = { sector.ceilingPoints[0].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[0].y };
+			Vector3 p1 = { sector.ceilingPoints[j].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[j].y };
+			Vector3 p2 = { sector.ceilingPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[j + 1].y };
 
 			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
 			if (col.hit && col.distance < closestCeilingDist)
@@ -290,7 +327,7 @@ void RealEditor::UpdateWallFeatures()
 		selectedWall->wallHeight = Clamp(selectedWall->wallHeight, 1.0f, Shared::wallHeight);
 	}
 }
-void RealEditor::UpdateDoor()
+void RealEditor::EditDoor()
 {
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
@@ -325,6 +362,7 @@ void RealEditor::UpdateDoor()
 
 		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
 
+		//Select
 		if (dCol.hit)
 		{
 			selectedDoorSwitch = &d;
@@ -334,13 +372,14 @@ void RealEditor::UpdateDoor()
 
 			break;
 		}
+		//Deselect
 		else if(!dCol.hit && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 			selectedDoorSwitch = nullptr;
 	}
 
 	if (selectedDoorSwitch != nullptr)
 	{
-		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr)
+		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr )
 			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
 
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
@@ -389,6 +428,109 @@ void RealEditor::UpdateDoor()
 	}
 
 }
+void RealEditor::PlayerDoor()
+{
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, playerCam);
+
+	static DoorSwitch* selectedDoorSwitch = nullptr;
+	static Vector2 savedDir = { 0 };
+	static Vector3 savedPerp = { 0 };
+	static float sign = 1.0f;
+
+
+	Wall* closestPlayerWall = nullptr;
+	float closestPlayerDist = FLT_MAX;
+	for (auto& wall : Shared::walls)
+	{
+		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
+		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
+		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
+		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                     wall->endPos.y };
+
+		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
+
+		if (wallCol.hit && wallCol.distance < closestPlayerDist)
+		{
+			closestPlayerDist = wallCol.distance;
+			closestPlayerWall = wall;
+		}
+
+	}
+
+
+	for (auto& d : Shared::doorSwitches)
+	{
+
+		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
+		static Wall* closestWall = nullptr;
+		float clostseDist = FLT_MAX;
+		for (auto& wall : Shared::walls) {
+			if (wall->floor != d.floor) continue;
+
+			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
+			if (dist < clostseDist) {
+				clostseDist = dist;
+				closestWall = wall;
+			}
+		}
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
+
+		Vector3 startLeft = { pos };
+		Vector3 startRight = Vector3Add(pos, Vector3Scale({ dir.x, 0, dir.y }, 25));
+		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
+		Vector3 endRight = Vector3Add(endLeft, Vector3Scale({ dir.x, 0, dir.y }, 25));
+
+		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
+
+		//Select
+		if (dCol.hit)
+		{
+			if (closestPlayerWall && closestPlayerDist < dCol.distance)
+				continue;
+
+			selectedDoorSwitch = &d;
+			savedDir = dir;
+			sign = (Vector3DotProduct(freeForward, perp) < 0.0f) ? 1.0f : -1.0f;
+			savedPerp = perp;
+
+			break;
+		}
+		//Deselect
+		else if (!dCol.hit && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+			selectedDoorSwitch = nullptr;
+	}
+
+	if (selectedDoorSwitch != nullptr)
+	{
+		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr)
+			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
+
+		//Deselect Door Switch
+		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+			selectedDoorSwitch = nullptr;
+	}
+
+	float speed = 150.0f * GetFrameTime();
+
+	for (auto& d : Shared::doorSwitches)
+	{
+
+		if (d.linkedWall == nullptr) continue;
+
+		if (d.linkedWall->isOpen) {
+			d.linkedWall->wallHeight -= speed;
+		}
+		else if (!d.linkedWall->isOpen) {
+			d.linkedWall->wallHeight += speed;
+		}
+
+		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::wallHeight);
+	}
+
+}
 void RealEditor::DrawDoorSwitch()
 {
 
@@ -398,7 +540,7 @@ void RealEditor::DrawDoorSwitch()
 		static Wall* closestWall = nullptr;
 		float clostseDist = FLT_MAX;
 		for (auto& wall : Shared::walls) {
-			if (wall->floor != d.floor) continue;
+			
 			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
 			if(dist < clostseDist) {
 				clostseDist = dist;
@@ -604,7 +746,7 @@ bool RealEditor::WallCloserThanSector()
 	return wallDist < sectorDist;
 }
 
-bool RealEditor::CheckCollisionXZ(Camera3D* cam, Vector3* nextPos)
+bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 {
 
 	float playerBottom = nextPos->y - playerHeight/2;
@@ -612,7 +754,6 @@ bool RealEditor::CheckCollisionXZ(Camera3D* cam, Vector3* nextPos)
 
 	for (auto& wall : Shared::walls) {
 		if (wall->isDoor && wall->isOpen) continue;
-		if (wall->floor != Shared::floor) continue;
 
 		Vector2 testPosXZ = { nextPos->x, nextPos->z };
 		float wallMinY = wall->floor * wall->wallHeight;
@@ -628,26 +769,25 @@ bool RealEditor::CheckCollisionXZ(Camera3D* cam, Vector3* nextPos)
 	return false;
 }
 
-bool RealEditor::CheckCollisionY(Camera3D* cam, Vector3* nextPos)
+bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 {
 
 	float playerBottom = nextPos->y - playerHeight / 2;
 	float playerTop = nextPos->y + playerHeight / 2;
 
 	for(auto& sector: Shared::sectors) {
-		if (sector.floor != Shared::floor) continue;
 
 		//Collision with floor/ceiling(All floor points are on the same y so just use 1 of them)....Same for ceiling
-		float floorY = sector.floor * sector.floorPoints[0].y;
-		float ceilingY = floorY + Shared::wallHeight;
+		float floorY = sector.floor * Shared::wallHeight;
+		float ceilingY = floorY + Shared::wallHeight - 1.0f;
 		
-		if (playerBottom < floorY && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
+		if (playerTop > floorY && playerBottom < floorY && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
 		{
 			nextPos->y = floorY + playerHeight / 2;
 			return true;
 		}
 
-		if (playerTop > ceilingY && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+		if (playerBottom < ceilingY && playerTop > ceilingY && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
 		{
 			nextPos->y = ceilingY - playerHeight / 2;
 			return true;
@@ -655,6 +795,48 @@ bool RealEditor::CheckCollisionY(Camera3D* cam, Vector3* nextPos)
 
 	}
 
+
+	return false;
+}
+
+bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
+{
+	float playerBottom = nextPos->y - playerHeight / 2;
+	float playerTop = nextPos->y + playerHeight / 2;
+
+	for (auto& ramp : Shared::ramps) {
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
+		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+
+		float lowY = (float)ramp.rampHeight * ramp.floor;
+		float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight;
+
+		float rampLength = Vector2Distance(ramp.startPos, ramp.endPos);
+
+		//Project the player's XZ position into the ramp's local space: "along" the ramp's
+		//direction (0 = startPos, rampLength = endPos) and "across" it (distance from the centerline)
+		Vector3 toPlayer = { nextPos->x - ramp.startPos.x, 0, nextPos->z - ramp.startPos.y };
+
+		float along = toPlayer.x * dir.x + toPlayer.z * dir.y;
+		float across = toPlayer.x * perp.x + toPlayer.z * perp.z;
+
+		//Outside the ramp's length or width, this ramp doesn't apply
+		if (along < 0.0f || along > rampLength) continue;
+		if (across < -ramp.halfWidth || across > ramp.halfWidth) continue;
+
+		//Height of the ramp's surface at the player's position, interpolated from lowY to highY
+		float t = along / rampLength;
+		float rampY = lowY + (highY - lowY) * t;
+
+		if (playerBottom <= highY && playerTop >= lowY) {
+			if (playerBottom < rampY) {
+				nextPos->y = rampY + playerHeight / 2;
+				return true;
+			}
+		}
+
+	}
 
 	return false;
 }

@@ -25,6 +25,8 @@ private:
 	std::vector<Vector2*> draggingSectorVertices;
 
 	Wall* selectedWall = nullptr;
+
+	bool WallMode = true;
 public:
 
 	const int tileSize = 16;
@@ -45,13 +47,24 @@ public:
 	void UpdateDoor();
 	void UpdateDoorSwitch();
 	void UpdateSelectedWall();
+	void UpdatePlayerPos();
 
+	bool RemoveWall();
+	bool RemoveSector();
+	bool RemoveRamp();
+	bool RemoveDoorSwitch();
 
+	void DrawPlayerPos();
 	void DrawDoorSwitch();
 	void DrawWall();
 	void DrawSector();
 	void DrawRamp();
 	void Draw();
+
+	//Helper
+	Vector2 ClosestPointOnLineSegment(Vector2 p, Vector2 a, Vector2 b);
+	bool PointInSector(Vector2 point, const std::vector<Vector2>& poly);
+	bool pointInWall(Vector2 point, Vector2 startPos, Vector2 endPos);
 };
 
 //-------UpdateSector----- Press "C" to build the sector

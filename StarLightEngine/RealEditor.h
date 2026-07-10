@@ -21,8 +21,11 @@ private:
 	float playerYaw = 0.0f;
 	float playerPitch = 0.0f;
 	Vector3 playerForward;
-	float gravity = 10.f;
-	float playerHeight = 50.0f;
+	float gravity = 150.0f;
+	float jump = 100.0f;
+	bool isGround = false;
+	float verticalVelocity = 0.0f;
+	float playerHeight = 100.0f;
 
 	//---------------
 	Ramp* selectedRamp = nullptr;
@@ -42,7 +45,8 @@ public:
 	void UpdateWall();
 	void UpdateRamp();
 	void UpdateWallFeatures();
-	void UpdateDoor();
+	void EditDoor();
+	void PlayerDoor();
 
 	void DrawDoorSwitch();
 	void DrawWall();
@@ -52,8 +56,11 @@ public:
 
 	//Helper
 	bool WallCloserThanSector();
-	bool CheckCollisionXZ(Camera3D* cam, Vector3* nextPos);
-	bool CheckCollisionY(Camera3D* cam, Vector3* nextPos);
+	bool CheckCollisionWall(Camera3D* cam, Vector3* nextPos);
+	bool CheckCollisionSector(Camera3D* cam, Vector3* nextPos);
+	bool CheckCollisionRamp(Camera3D* cam, Vector3* nextPos);
 	bool PointInSector(Vector2 point, const std::vector<Vector2>& poly);
 };
 
+//Functions with "EDIT" are for the free Camera-> Editing
+//Functions with "PLAYER" are for the player Camera-> Gameplay

@@ -39,6 +39,7 @@ int main() {
 		//Press F to switch between Editor Mode and Real Mode
         if (IsKeyPressed(KEY_F) && editorMode) {
             editorMode = false;//RealEditor
+            Shared::setPlayerPos = true;
             DisableCursor();
         }
         else if (IsKeyPressed(KEY_F) && !editorMode) {
@@ -59,8 +60,10 @@ int main() {
         else if (!editorMode) {//Real Editor Updates
             if(freeCamMode)
                 engine.UpdateReal(&engine.realEditor.freeCam);
-            else
+            else {
                 engine.UpdateReal(&engine.realEditor.playerCam);
+                
+            }
         }
 
         // Draw

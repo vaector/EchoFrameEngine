@@ -19,7 +19,7 @@ TileEditor::TileEditor()
 void TileEditor::InitCamera()
 {
 	cam.rotation = 0.0f;
-	cam.target = { 0 };
+	cam.target = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 	cam.offset = { 0, 0};
 	cam.zoom = 1;
 }
@@ -36,7 +36,7 @@ void TileEditor::Update()
 	UpdateSelectedWall();
 
 	//Update Walls and Vertives(UpdateWallVertices)
-	if(!UpdateWallVertices())
+	if(!UpdateWallVertices() && WallMode)
 		UpdateWall();
 
 	//Update Sector
@@ -48,7 +48,15 @@ void TileEditor::Update()
 	//Door/Switch Update
 	UpdateDoor();
 	UpdateDoorSwitch();
-	
+	UpdatePlayerPos();
+
+	//Remove
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		//Remove Wall/Sector/Ramp/DoorSwitch
+		if (!RemoveWall() && !RemoveDoorSwitch() && !RemoveRamp())
+			RemoveSector();
+
+	}
 }
 
 void TileEditor::UpdateCam()
@@ -92,6 +100,7 @@ void TileEditor::UpdateWall()
 	}
 	else if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 		pendingWall.endPos = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
+	
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && placeHolderWall.startPos != placeHolderWall.endPos) {
 		Vector2 currentTile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };;
 		pendingWall.endPos = currentTile;
@@ -101,31 +110,6 @@ void TileEditor::UpdateWall()
 		pendingWall.inSector = !Shared::sectorMode;
 		//if sectorMode == true then inSector is false(false because the wall is not in a sector and should be added to one).
 		Shared::walls.push_back(new Wall(pendingWall));
-	}
-
-	
-	//Removing Walls
-	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-		for (int i = 0; i < Shared::walls.size(); i++) {
-			if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 4)) {
-
-				//Remove connection that the wall has with a door switch if it is linked to one.
-				for (int j = 0; j < Shared::doorSwitches.size(); j++) {
-					if(Shared::doorSwitches[j].linkedWall == Shared::walls[i])
-						Shared::doorSwitches.erase(Shared::doorSwitches.begin() + j);
-				}
-
-				//Deselecting the wall if it is selected before deleting it.
-				if(selectedWall == Shared::walls[i])
-					selectedWall = nullptr;
-				
-				delete Shared::walls[i];
-				Shared::walls[i] = nullptr;
-				Shared::walls.erase(Shared::walls.begin() + i);
-
-				break;
-			}
-		}
 	}
 
 	//Update Place Holder Wall
@@ -151,6 +135,7 @@ bool TileEditor::UpdateWallVertices()
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		draggingVertices.clear();
 		for (auto& wall : Shared::walls) {
+			if (wall->floor != Shared::floor) continue;
 			if (CheckCollisionPointCircle(mouse, wall->startPos, grabRadius))
 				draggingVertices.push_back(&wall->startPos);
 			if (CheckCollisionPointCircle(mouse, wall->endPos, grabRadius))
@@ -176,28 +161,13 @@ void TileEditor::UpdateSector()
 	if (Shared::onImguiWindow || Shared::walls.size() <= 2)
 		return;
 
-	//Removing Sector
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		for (int j = 0; j < Shared::sectors.size(); j++) {
-			if (Shared::sectors[j].floor == Shared::floor) {
-				for (int i = 1; i < Shared::sectors[j].floorPoints.size() - 1; i++) {
-					Vector2 p0 = Shared::sectors[j].floorPoints[0];
-					Vector2 p1 = Shared::sectors[j].floorPoints[i];
-					Vector2 p2 = Shared::sectors[j].floorPoints[i + 1];
-					if (CheckCollisionPointTriangle(mouse, p0, p1, p2)) {
-						Shared::sectors.erase(Shared::sectors.begin() + j);
-						return;
-					}
-				}
-			}
-		}
-	}
-
 	//Add Sector
 	if (IsKeyPressed(KEY_C)) {
 		std::vector<Vector2> currentSector;
 		bool first = false;
 		for (auto& wall : Shared::walls) {
+			if (wall->floor != Shared::floor) continue;
+
 			if (!wall->inSector) {
 				if (first == false) {
 					currentSector.push_back(wall->startPos);
@@ -250,17 +220,42 @@ void TileEditor::UpdateRamp()
 	//Getting the Tile that is colliding with the mouse in grid space.
 	int tileX = (int)mouse.x / tileSize;
 	int tileY = (int)mouse.y / tileSize;
-
+	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
 
 	//Placing Ramp
 	if (IsKeyPressed(KEY_R)) {
 
-		pendingRamp.startPos = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
+		float dist = FLT_MAX;
+		Vector2* closestFloorPointStart = nullptr;
+		Vector2* closestFloorPointEnd = nullptr;
+		for (auto& sector: Shared::sectors) {
+			if (sector.floor != Shared::floor) continue;
+
+			for (int i = 0; i < sector.floorPoints.size(); i++) {
+				Vector2& p0 = sector.floorPoints[i];
+				Vector2& p1 = sector.floorPoints[(i + 1) % sector.floorPoints.size()];
+
+				float d = Vector2Distance(mouse, ClosestPointOnLineSegment(mouse, p0, p1));
+				if (d < dist) {
+					dist = d;
+					closestFloorPointStart = &p0;
+					closestFloorPointEnd = &p1;
+				}
+			}
+		}
+		
+		//If there is a close wall then add the startPos of the  ramp to the closest point on the wall, otherwise add it to the tile.
+		if ((closestFloorPointStart != nullptr || closestFloorPointEnd != nullptr) && dist < 12) {
+			pendingRamp.startPos = ClosestPointOnLineSegment(mouse, *closestFloorPointStart, *closestFloorPointEnd);
+			placeHolderRamp.startPos = ClosestPointOnLineSegment(mouse, *closestFloorPointStart, *closestFloorPointEnd);
+		}
+		else {
+			pendingRamp.startPos = tile;
+			placeHolderRamp.startPos = tile;
+		}
 
 	}
 	else if (IsKeyReleased(KEY_R)) {
-		
-		Vector2 tile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };;
 		
 		if (Vector2Distance(pendingRamp.startPos, tile) <= tileSize*3)
 			return;
@@ -273,21 +268,44 @@ void TileEditor::UpdateRamp()
 		Shared::ramps.push_back(pendingRamp);
 	}
 
-	//Removing Ramp
-	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-		for (int i = 0; i < Shared::ramps.size(); i++) {
-			if (CheckCollisionPointLine(mouse, Shared::ramps[i].startPos, Shared::ramps[i].endPos, 4))
-				Shared::ramps.erase(Shared::ramps.begin() + i);
-		}
-	}
-
 	//Update Place Holder Ramp
-	if (IsKeyPressed(KEY_R))
-		placeHolderRamp.startPos = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
 	if (IsKeyDown(KEY_R))
 		placeHolderRamp.endPos = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
 	else if (IsKeyReleased(KEY_R))
 		placeHolderRamp = { 0,0 };
+
+
+	//Resize Ramp
+	static Ramp* selectedResizeRamp = nullptr;
+	for (auto& ramp: Shared::ramps) {
+		if (ramp.floor != Shared::floor) continue;
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
+		Vector2 perp = Vector2Scale({ -dir.y, dir.x }, ramp.halfWidth);
+
+		Vector2 startLeft = Vector2Subtract(ramp.startPos, perp);
+		Vector2 startRight = Vector2Add(ramp.startPos, perp);
+		Vector2 endLeft = Vector2Subtract(ramp.endPos, perp);
+		Vector2 endRight = Vector2Add(ramp.endPos, perp);
+
+		if ((CheckCollisionPointLine(mouse, startLeft, endLeft, 4) || CheckCollisionPointLine(mouse, startRight, endRight, 4)) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			selectedResizeRamp = &ramp;
+			WallMode = false;
+		}
+		if(selectedResizeRamp && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			Vector2 delta = GetMouseDelta();
+			
+			if(delta.x > 0)
+				selectedResizeRamp->halfWidth += tileSize * 0.25f;
+			else if (delta.x < 0)
+				selectedResizeRamp->halfWidth -= tileSize * 0.25f;
+			
+		}
+		else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+			selectedResizeRamp = nullptr;
+			WallMode = true;
+		}
+	}
 
 }
 
@@ -335,7 +353,6 @@ void TileEditor::UpdateDoor()
 void TileEditor::UpdateDoorSwitch()
 {
 
-
 	//Update Door Switch Position
 	static DoorSwitch* selectedSwitch = nullptr;
 	for (auto& d : Shared::doorSwitches) {
@@ -350,18 +367,6 @@ void TileEditor::UpdateDoorSwitch()
 	}
 	else if (IsKeyReleased(KEY_C))
 		selectedSwitch = nullptr;
-
-	//Delete Door Switch
-	if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-		for (int i = 0; i < Shared::doorSwitches.size(); i++) {
-			if(Shared::doorSwitches[i].floor != Shared::floor) continue;
-
-			if (CheckCollisionPointRec(mouse, { Shared::doorSwitches[i].pos.x-2, Shared::doorSwitches[i].pos.z-2, 4,4 })) {
-				Shared::doorSwitches.erase(Shared::doorSwitches.begin() + i);
-				break;
-			}
-		}
-	}
 
 }
 
@@ -380,47 +385,205 @@ void TileEditor::UpdateSelectedWall()
 		selectedWall = nullptr;
 }
 
+void TileEditor::UpdatePlayerPos()
+{
+	static bool selected = false;
+	if (CheckCollisionPointCircle(mouse, {Shared::playerPos.x, Shared::playerPos.z}, 6) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+		selected = true;
+		WallMode = false;
+	}
+	if (selected) {
+		Shared::playerPos = { mouse.x, (float)Shared::floor * Shared::wallHeight, mouse.y };
+	}
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		selected = false;
+		WallMode = true;
+	}
+}
+
+bool TileEditor::RemoveWall()
+{
+	//Removing Walls
+	for (int i = 0; i < Shared::walls.size(); i++) {
+		if (Shared::walls[i]->floor != Shared::floor) continue;
+
+		if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 2)) {
+
+			//Remove connection that the wall has with a door switch if it is linked to one.
+			for (int j = 0; j < Shared::doorSwitches.size(); j++) {
+				if (Shared::doorSwitches[j].linkedWall == Shared::walls[i])
+					Shared::doorSwitches.erase(Shared::doorSwitches.begin() + j);
+			}
+
+			//Deselecting the wall if it is selected before deleting it.
+			if (selectedWall == Shared::walls[i])
+				selectedWall = nullptr;
+
+			delete Shared::walls[i];
+			Shared::walls[i] = nullptr;
+			Shared::walls.erase(Shared::walls.begin() + i);
+
+			return true;
+		}
+	}
+	return false;
+}
+
+bool TileEditor::RemoveSector()
+{
+	//Removing Sector
+	for (int j = 0; j < Shared::sectors.size(); j++) {
+		if (Shared::sectors[j].floor != Shared::floor) continue;
+
+		for (int i = 1; i < Shared::sectors[j].floorPoints.size() - 1; i++) {
+			Vector2 p0 = Shared::sectors[j].floorPoints[0];
+			Vector2 p1 = Shared::sectors[j].floorPoints[i];
+			Vector2 p2 = Shared::sectors[j].floorPoints[i + 1];
+			if (CheckCollisionPointTriangle(mouse, p0, p1, p2)) {
+				Shared::sectors.erase(Shared::sectors.begin() + j);
+				return true;
+			}
+		}
+
+	}
+	return false;
+}
+
+bool TileEditor::RemoveRamp()
+{
+	//Removing Ramp
+	for (int i = 0; i < Shared::ramps.size(); i++) {
+		Ramp& ramp = Shared::ramps[i];
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
+		Vector2 perp = Vector2Scale({ -dir.y, dir.x }, (float)ramp.halfWidth);
+
+		Vector2 startLeft = Vector2Subtract(ramp.startPos, perp);
+		Vector2 startRight = Vector2Add(ramp.startPos, perp);
+		Vector2 endLeft = Vector2Subtract(ramp.endPos, perp);
+		Vector2 endRight = Vector2Add(ramp.endPos, perp);
+
+		if (CheckCollisionPointLine(mouse, startLeft, endLeft, 4) ||
+			CheckCollisionPointLine(mouse, startRight, endRight, 4)) {
+			Shared::ramps.erase(Shared::ramps.begin() + i);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool TileEditor::RemoveDoorSwitch()
+{
+	for (int i = 0; i < Shared::doorSwitches.size(); i++) {
+		if (Shared::doorSwitches[i].floor != Shared::floor) continue;
+
+		if (CheckCollisionPointRec(mouse, { Shared::doorSwitches[i].pos.x - 2, Shared::doorSwitches[i].pos.z - 2, 4,4 })) {
+			Shared::doorSwitches.erase(Shared::doorSwitches.begin() + i);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void TileEditor::DrawPlayerPos()
+{
+	DrawCircleV({Shared::playerPos.x, Shared::playerPos.z}, 6, BLUE);
+}
+
 void TileEditor::DrawDoorSwitch()
 {
-	for(auto& doorSwitch: Shared::doorSwitches) {
+	for (int i = 0; i < Shared::doorSwitches.size(); i++) {
+		DoorSwitch& doorSwitch = Shared::doorSwitches[i];
 		if (doorSwitch.floor != Shared::floor) continue;
 
 		DrawRectangle(doorSwitch.pos.x - 2, doorSwitch.pos.z - 2, 4, 4, RED);
+		DrawText(std::to_string(i).c_str(), doorSwitch.pos.x + 4, doorSwitch.pos.z - 4, 2, WHITE);
 	}
 }
 
 void TileEditor::DrawWall()
 {
 	for (auto& wall: Shared::walls) {
-		if (wall->floor != Shared::floor) continue;
-		//Draw Wall/Door
-		if(wall->isDoor)
-			DrawLine(wall->startPos.x, wall->startPos.y, wall->endPos.x, wall->endPos.y, ORANGE);
-		else
-			DrawLine(wall->startPos.x, wall->startPos.y, wall->endPos.x, wall->endPos.y, PURPLE);
-		//Draw Verices
-		DrawCircle(wall->startPos.x, wall->startPos.y, 2, BLUE);
-		DrawCircle(wall->endPos.x, wall->endPos.y, 2, BLUE);
+		
+		if (wall->floor == Shared::floor) {
+			//Draw Wall/Door
+			if (wall->isDoor) {
+
+				DrawLineEx(wall->startPos, wall->endPos,2 ,{ 255,161,0,255 });
+				int index = -1;
+				for (int i = 0; i < Shared::doorSwitches.size(); i++)
+				{
+					if(Shared::doorSwitches[i].linkedWall == wall)
+						index = i;
+				}
+				if (index != -1) {
+					std::string indexStr = std::to_string(index);
+					DrawText(indexStr.c_str(), (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2, 2, { 255,255,255,255 });
+					
+				}
+			}
+			else
+				DrawLineEx(wall->startPos, wall->endPos, 2, {200,122,255,255});
+			
+			//Draw Verices
+			DrawCircle(wall->startPos.x, wall->startPos.y, 2, {0,0,255,255});
+			DrawCircle(wall->endPos.x, wall->endPos.y, 2, { 0,0,255,255 });
+		}
+		else if (wall->floor == Shared::floor - 1) {
+			//Draw Wall/Door
+			if (wall->isDoor)
+				DrawLineEx(wall->startPos, wall->endPos, 2, {255,161,0,100});
+			else
+				DrawLineEx(wall->startPos, wall->endPos, 2, {200,122,255,100});
+			
+			//Draw Verices
+			DrawCircle(wall->startPos.x, wall->startPos.y, 2, {0,0,255,100});
+			DrawCircle(wall->endPos.x, wall->endPos.y, 2, { 0,0,255,100 });
+		}
+		
 	}
-	DrawLine(placeHolderWall.startPos.x, placeHolderWall.startPos.y, placeHolderWall.endPos.x, placeHolderWall.endPos.y, PURPLE);
+	DrawLineEx(placeHolderWall.startPos, placeHolderWall.endPos, 2, PURPLE);
 }
 
 void TileEditor::DrawSector()
 {
 	for (auto& sector : Shared::sectors) {
-		if (sector.floor != Shared::floor) continue;
 
-		DrawTriangleFan(sector.ceilingPoints.data(), sector.ceilingPoints.size(), {255,0,0,50});
+		if(sector.floor == Shared::floor)
+			DrawTriangleFan(sector.ceilingPoints.data(), sector.ceilingPoints.size(), { 255,0,0,50 });
+		else if (sector.floor == Shared::floor - 1)
+			DrawTriangleFan(sector.ceilingPoints.data(), sector.ceilingPoints.size(), { 255,0,0,10});
+		
 	}
 }
 
 void TileEditor::DrawRamp()
 {
 	for (Ramp& ramp : Shared::ramps) {
-		if (ramp.floor != Shared::floor) continue;
-		DrawLine(ramp.startPos.x, ramp.startPos.y, ramp.endPos.x, ramp.endPos.y, GREEN);
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
+		Vector2 perp = Vector2Scale({ -dir.y, dir.x }, ramp.halfWidth);
+
+		Vector2 startLeft = Vector2Subtract(ramp.startPos, perp);
+		Vector2 startRight = Vector2Add(ramp.startPos, perp);
+		Vector2 endLeft = Vector2Subtract(ramp.endPos, perp);
+		Vector2 endRight = Vector2Add(ramp.endPos, perp);
+
+		if (ramp.floor == Shared::floor) {
+			DrawLineEx(startLeft, startRight, 2, { 0,255,0,255 });  //low edge
+			DrawLineEx(endLeft, endRight, 2, { 0,255,0,255 });      //high edge
+			DrawLineEx(startLeft, endLeft, 2, { 150,255,150,255 });     //left side
+			DrawLineEx(startRight, endRight, 2, { 150,255,150,255 });   //right side
+		}
+		else if (ramp.floor == Shared::floor - 1) {
+			DrawLineEx(startLeft, startRight, 2, {0,255,0,100});  //low edge
+			DrawLineEx(endLeft, endRight, 2, {0,255,0,100});      //high edge
+			DrawLineEx(startLeft, endLeft, 2, {0,255,0,100});     //left side
+			DrawLineEx(startRight, endRight, 2, {0,255,0,100});   //right side
+		}
 	}
-	DrawLine(placeHolderRamp.startPos.x, placeHolderRamp.startPos.y, placeHolderRamp.endPos.x, placeHolderRamp.endPos.y, GREEN);
+	DrawLineEx(placeHolderRamp.startPos, placeHolderRamp.endPos, 2, GREEN);
 }
 
 void TileEditor::Draw()
@@ -460,4 +623,48 @@ void TileEditor::Draw()
 
 	DrawDoorSwitch();
 
+	DrawPlayerPos();
+
+}
+
+Vector2 TileEditor::ClosestPointOnLineSegment(Vector2 p, Vector2 a, Vector2 b)
+{
+	Vector2 ab = Vector2Subtract(b, a);
+
+	float abLengthSq = Vector2DotProduct(ab, ab);
+
+	// Line segment is a single point.
+	if (abLengthSq <= 0.0001f)
+		return a;
+
+	float t = Vector2DotProduct(Vector2Subtract(p, a), ab) / abLengthSq;
+	t = Clamp(t, 0.0f, 1.0f);
+
+	return Vector2Add(a, Vector2Scale(ab, t));
+}
+
+bool TileEditor::PointInSector(Vector2 point, const std::vector<Vector2>& poly)
+{
+	bool inside = false;
+
+	for (int i = 0, j = poly.size() - 1; i < poly.size(); j = i++)
+	{
+		if (((poly[i].y > point.y) != (poly[j].y > point.y)) &&
+			(point.x < (poly[j].x - poly[i].x) *
+				(point.y - poly[i].y) /
+				(poly[j].y - poly[i].y) + poly[i].x))
+		{
+			inside = !inside;
+		}
+	}
+
+	return inside;
+}
+
+bool TileEditor::pointInWall(Vector2 point, Vector2 startPos, Vector2 endPos)
+{
+	if (CheckCollisionPointLine(point, startPos, endPos, 4))
+		return true;
+
+	return false;
 }
