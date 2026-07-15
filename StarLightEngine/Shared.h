@@ -12,6 +12,8 @@ namespace Shared {
 	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;
 	extern bool sectorMode;
+	extern bool floorOnly;
+	extern bool ceilingOnly;
 	extern int floor;
 	extern bool onImguiWindow;
 	extern bool doorMode;

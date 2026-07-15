@@ -48,6 +48,7 @@ public:
 	void UpdateDoorSwitch();
 	void UpdateSelectedWall();
 	void UpdatePlayerPos();
+	void SplitWall();
 
 	bool RemoveWall();
 	bool RemoveSector();
@@ -70,3 +71,4 @@ public:
 //-------UpdateSector----- Press "C" to build the sector
 //-------UpdateRamp------- Press "R" to build the ramp
 //-------DELETE----------- Right click to delete objects(walls, ramps, door switches)
+//-------DOOR------------- Right click after selecting Door Mode to add doors.

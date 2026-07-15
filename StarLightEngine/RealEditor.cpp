@@ -613,41 +613,45 @@ void RealEditor::DrawSector()
 	for (auto& sector : Shared::sectors)
 	{
 		//Floor
-		rlBegin(RL_TRIANGLES);
-		rlSetTexture(sector.floorTexture->id);
-		rlColor4ub(255, 255, 255, 255);
-		for (int i = 1; i < sector.floorPoints.size() - 1; i++)
-		{
-			rlTexCoord2f(sector.floorPoints[0].x / 32.0f, sector.floorPoints[0].y / 32.0f);
-			rlVertex3f(sector.floorPoints[0].x, sector.floor * Shared::wallHeight, sector.floorPoints[0].y);
+		if (sector.hasFloor) {
+			rlBegin(RL_TRIANGLES);
+			rlSetTexture(sector.floorTexture->id);
+			rlColor4ub(255, 255, 255, 255);
+			for (int i = 1; i < sector.floorPoints.size() - 1; i++)
+			{
+				rlTexCoord2f(sector.floorPoints[0].x / 32.0f, sector.floorPoints[0].y / 32.0f);
+				rlVertex3f(sector.floorPoints[0].x, sector.floor * Shared::wallHeight, sector.floorPoints[0].y);
 
-			rlTexCoord2f(sector.floorPoints[i].x / 32.0f, sector.floorPoints[i].y / 32.0f);
-			rlVertex3f(sector.floorPoints[i].x, sector.floor * Shared::wallHeight, sector.floorPoints[i].y);
+				rlTexCoord2f(sector.floorPoints[i].x / 32.0f, sector.floorPoints[i].y / 32.0f);
+				rlVertex3f(sector.floorPoints[i].x, sector.floor * Shared::wallHeight, sector.floorPoints[i].y);
 
-			rlTexCoord2f(sector.floorPoints[i + 1].x / 32.0f, sector.floorPoints[i + 1].y / 32.0f);
-			rlVertex3f(sector.floorPoints[i + 1].x, sector.floor * Shared::wallHeight, sector.floorPoints[i + 1].y);
+				rlTexCoord2f(sector.floorPoints[i + 1].x / 32.0f, sector.floorPoints[i + 1].y / 32.0f);
+				rlVertex3f(sector.floorPoints[i + 1].x, sector.floor * Shared::wallHeight, sector.floorPoints[i + 1].y);
+			}
+			rlEnd();
+			rlSetTexture(0);
 		}
-		rlEnd();
-		rlSetTexture(0);
 		
 		//Ceiling
-		rlBegin(RL_TRIANGLES);
-		rlSetTexture(sector.ceilingTexture->id);
-		rlColor4ub(255, 255, 255, 255);
-		for (int i = 1; i < sector.ceilingPoints.size() - 1; i++)
-		{
-			rlTexCoord2f(sector.ceilingPoints[i + 1].x / 32.0f, sector.ceilingPoints[i + 1].y / 32.0f);
-			rlVertex3f(sector.ceilingPoints[i + 1].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[i + 1].y);
+		if (sector.hasCeiling) {
+			rlBegin(RL_TRIANGLES);
+			rlSetTexture(sector.ceilingTexture->id);
+			rlColor4ub(255, 255, 255, 255);
+			for (int i = 1; i < sector.ceilingPoints.size() - 1; i++)
+			{
+				rlTexCoord2f(sector.ceilingPoints[i + 1].x / 32.0f, sector.ceilingPoints[i + 1].y / 32.0f);
+				rlVertex3f(sector.ceilingPoints[i + 1].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[i + 1].y);
 
-			rlTexCoord2f(sector.ceilingPoints[i].x / 32.0f, sector.ceilingPoints[i].y / 32.0f);
-			rlVertex3f(sector.ceilingPoints[i].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[i].y);
+				rlTexCoord2f(sector.ceilingPoints[i].x / 32.0f, sector.ceilingPoints[i].y / 32.0f);
+				rlVertex3f(sector.ceilingPoints[i].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[i].y);
 
-			rlTexCoord2f(sector.ceilingPoints[0].x / 32.0f, sector.ceilingPoints[0].y / 32.0f);
-			rlVertex3f(sector.ceilingPoints[0].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[0].y);
-			
+				rlTexCoord2f(sector.ceilingPoints[0].x / 32.0f, sector.ceilingPoints[0].y / 32.0f);
+				rlVertex3f(sector.ceilingPoints[0].x, (sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[0].y);
+
+			}
+			rlEnd();
+			rlSetTexture(0);
 		}
-		rlEnd();
-		rlSetTexture(0);
 	}
 	rlEnableDepthTest();
 }
@@ -781,20 +785,19 @@ bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 		float floorY = sector.floor * Shared::wallHeight;
 		float ceilingY = floorY + Shared::wallHeight - 1.0f;
 		
-		if (playerTop > floorY && playerBottom < floorY && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
+		if (playerTop > floorY && playerBottom < floorY && sector.hasFloor && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
 		{
 			nextPos->y = floorY + playerHeight / 2;
 			return true;
 		}
 
-		if (playerBottom < ceilingY && playerTop > ceilingY && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+		if (playerBottom < ceilingY && playerTop > ceilingY && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
 		{
 			nextPos->y = ceilingY - playerHeight / 2;
 			return true;
 		}
 
 	}
-
 
 	return false;
 }

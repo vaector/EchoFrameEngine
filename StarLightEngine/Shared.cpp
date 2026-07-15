@@ -8,6 +8,8 @@ namespace Shared {
 	Texture2D* selectedTexture = &textures["tile1"];
 	std::vector<Sector> sectors;
 	bool sectorMode = true;
+	bool floorOnly = false;
+	bool ceilingOnly = false;
 	int floor = 0;
 	bool onImguiWindow = false;
 	std::vector<Ramp> ramps;

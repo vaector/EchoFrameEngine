@@ -27,4 +27,6 @@ struct Sector{
 	int floor = 0;
 	Texture2D* floorTexture = nullptr; 
 	Texture2D* ceilingTexture = nullptr;
+	bool hasFloor = true;
+	bool hasCeiling = true;
 };
