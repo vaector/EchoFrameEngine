@@ -537,6 +537,28 @@ bool TileEditor::RemoveSector()
 			Vector2 p1 = Shared::sectors[j].floorPoints[i];
 			Vector2 p2 = Shared::sectors[j].floorPoints[i + 1];
 			if (CheckCollisionPointTriangle(mouse, p0, p1, p2)) {
+
+				//When deleting a sector make the wall.inSector = false so that we could use it again unless the wall itself is also deleted.
+				for (int k = 0; k < Shared::walls.size(); k++) {
+					auto& wall = Shared::walls[k];
+
+					bool flagStartPos = false;
+					bool flagEndPos = false;
+					for (int l = 0; l < Shared::sectors[j].floorPoints.size(); l++) {
+						auto& floorPoint = Shared::sectors[j].floorPoints[l];
+
+						if (wall->startPos == floorPoint)
+							flagStartPos = true;
+					}
+					for (int l = 0; l < Shared::sectors[j].floorPoints.size(); l++) {
+						auto& floorPoint = Shared::sectors[j].floorPoints[l];
+
+						if (wall->endPos == floorPoint)
+							flagEndPos = true;
+					}
+					if (flagEndPos && flagStartPos)
+						wall->inSector = false;
+				}
 				Shared::sectors.erase(Shared::sectors.begin() + j);
 				return true;
 			}
