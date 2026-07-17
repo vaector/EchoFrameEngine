@@ -19,6 +19,9 @@
     <Filter Include="Source Files\Imgui">
       <UniqueIdentifier>{d8373427-4695-403e-b299-6d79cca46477}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\external">
+      <UniqueIdentifier>{be0a7384-9584-4323-9076-0e9a441a9b25}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -124,6 +127,9 @@
     </ClInclude>
     <ClInclude Include="imgui\imgui_stdlib.h">
       <Filter>Header Files\Imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="external\earcut.hpp">
+      <Filter>Header Files\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

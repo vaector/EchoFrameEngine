@@ -25,6 +25,7 @@ struct DoorSwitch {
 struct Sector{
 	std::vector<Vector2> floorPoints;
 	std::vector<Vector2> ceilingPoints;
+	std::vector<int> indices = {};
 	int floor = 0;
 	Texture2D* floorTexture = nullptr; 
 	Texture2D* ceilingTexture = nullptr;

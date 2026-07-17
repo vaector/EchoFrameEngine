@@ -6,6 +6,32 @@
 #include "Shared.h"
 #include <vector>
 
+//Enabling earcut.hpp to use raylib's Vector2
+#include "external/earcut.hpp"
+namespace mapbox {
+	namespace util {
+
+		template <>
+		struct nth<0, Vector2>
+		{
+			static double get(const Vector2& p)
+			{
+				return p.x;
+			}
+		};
+
+		template <>
+		struct nth<1, Vector2>
+		{
+			static double get(const Vector2& p)
+			{
+				return p.y;
+			}
+		};
+
+	}
+}
+
 
 TileEditor::TileEditor()
 {
@@ -183,13 +209,35 @@ void TileEditor::UpdateSector()
 		}
 
 		if (currentSector.size() >= 3) {
-			if(Shared::ceilingOnly)
-				Shared::sectors.push_back({ currentSector, currentSector, Shared::floor, Shared::selectedTexture, Shared::selectedTexture, false, true, Shared::layer });//False-> Floor | True-> Ceiling
-			else if(Shared::floorOnly)
-				Shared::sectors.push_back({ currentSector, currentSector, Shared::floor, Shared::selectedTexture, Shared::selectedTexture, true, false, Shared::layer });//True-> Floor | False-> Ceiling
-			else
-				Shared::sectors.push_back({ currentSector, currentSector, Shared::floor, Shared::selectedTexture, Shared::selectedTexture, true, true, Shared::layer });//True-> Floor | True-> Ceiling
-		
+
+			// Convert to Earcut format
+			std::vector<std::vector<Vector2>> polygon;
+			polygon.push_back(currentSector);
+
+			Sector sector;
+			sector.floorPoints = currentSector;
+			sector.ceilingPoints = currentSector;
+			sector.indices = mapbox::earcut<int>(polygon);
+
+			sector.floor = Shared::floor;
+			sector.floorTexture = Shared::selectedTexture;
+			sector.ceilingTexture = Shared::selectedTexture;
+			sector.layer = Shared::layer;
+
+			if (Shared::ceilingOnly) {
+				sector.hasFloor = false;
+				sector.hasCeiling = true;
+			}
+			else if (Shared::floorOnly) {
+				sector.hasFloor = true;
+				sector.hasCeiling = false;
+			}
+			else {
+				sector.hasFloor = true;
+				sector.hasCeiling = true;
+			}
+
+			Shared::sectors.push_back(sector);
 		}
 
 	}
@@ -604,13 +652,26 @@ void TileEditor::DrawWall()
 
 void TileEditor::DrawSector()
 {
-	for (auto& sector : Shared::sectors) {
+	for (auto& sector : Shared::sectors)
+	{
+		Color color;
 
-		if(sector.floor == Shared::floor)
-			DrawTriangleFan(sector.ceilingPoints.data(), sector.ceilingPoints.size(), { 255,0,0,50 });
+		if (sector.floor == Shared::floor)
+			color = { 255, 0, 0, 50 };
 		else if (sector.floor == Shared::floor - 1)
-			DrawTriangleFan(sector.ceilingPoints.data(), sector.ceilingPoints.size(), { 255,0,0,10});
-		
+			color = { 255, 0, 0, 10 };
+		else
+			continue;
+
+		for (int i = 0; i < sector.indices.size(); i += 3)
+		{
+			DrawTriangle(
+				sector.ceilingPoints[sector.indices[i]],
+				sector.ceilingPoints[sector.indices[i + 2]],
+				sector.ceilingPoints[sector.indices[i + 1]],
+				color
+			);
+		}
 	}
 }
 

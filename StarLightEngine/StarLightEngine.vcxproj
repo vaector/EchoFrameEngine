@@ -145,6 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="external\earcut.hpp" />
     <ClInclude Include="ImguiWindow.h" />
     <ClInclude Include="imgui\extras\FA6FreeSolidFontData.h" />
     <ClInclude Include="imgui\extras\IconsFontAwesome6.h" />
