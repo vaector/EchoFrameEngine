@@ -8,4 +8,5 @@ struct Ramp {
 	int floor;
 	float rampHeight;
 	int halfWidth = 50;
+	int layer = 0;
 };

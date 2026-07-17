@@ -20,6 +20,7 @@ namespace Shared {
 	extern std::vector<DoorSwitch> doorSwitches;
 	extern Vector3 playerPos;
 	extern bool setPlayerPos;
+	extern int layer;
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

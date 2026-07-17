@@ -11,6 +11,7 @@ struct Wall{ //Wall|Door(A wall can be a door)
 	bool inSector = false;
 	bool isDoor = false;
 	bool isOpen = false;
+	int layer = 0;
 };
 
 struct DoorSwitch {
@@ -18,7 +19,7 @@ struct DoorSwitch {
 	int floor = 0;
 	Texture2D* texture = nullptr;
 	Wall* linkedWall = nullptr;
-
+	int layer = 0;
 };
 
 struct Sector{
@@ -29,4 +30,5 @@ struct Sector{
 	Texture2D* ceilingTexture = nullptr;
 	bool hasFloor = true;
 	bool hasCeiling = true;
+	int layer = 0;
 };

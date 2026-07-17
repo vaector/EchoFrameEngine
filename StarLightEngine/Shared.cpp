@@ -18,4 +18,5 @@ namespace Shared {
 	std::vector<DoorSwitch> doorSwitches;
 	Vector3 playerPos = { 1024,0,1024};
 	bool setPlayerPos = false;
+	int layer = 0;
 }
