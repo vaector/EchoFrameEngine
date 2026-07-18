@@ -20,6 +20,7 @@ int main() {
 
     //Init Textures(Images)
     Importer::InitTextures();
+    Importer::InitModels();
 
     Engine engine;
 

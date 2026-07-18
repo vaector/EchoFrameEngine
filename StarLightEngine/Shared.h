@@ -8,6 +8,7 @@ namespace Shared {
 	extern std::vector<Wall*> walls;
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;
+	extern std::unordered_map<std::string, Model> models;
 	extern std::vector<Sector> sectors;
 	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;

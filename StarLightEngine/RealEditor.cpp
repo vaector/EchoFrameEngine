@@ -14,7 +14,7 @@ void RealEditor::InitCam()
 
 	//Free Cam
 	freeCam.fovy = 60;
-	freeCam.position = { 1024,50,1024};
+	freeCam.position = { 1024,50,1024};//1024
 	freeCam.projection = CAMERA_PERSPECTIVE;
 	freeCam.target = { 0 };
 	freeCam.up = { 0.0f, 1.0f, 0.0f };

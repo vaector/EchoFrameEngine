@@ -1,10 +1,10 @@
 #include "Shared.h"
 
-
 namespace Shared {
 	std::vector<Wall*> walls;
 	int wallHeight = 128;
 	std::unordered_map<std::string, Texture2D> textures;
+	std::unordered_map<std::string, Model> models;
 	Texture2D* selectedTexture = &textures["tile1"];
 	std::vector<Sector> sectors;
 	bool sectorMode = true;
@@ -19,4 +19,5 @@ namespace Shared {
 	Vector3 playerPos = { 1024,0,1024};
 	bool setPlayerPos = false;
 	int layer = 0;
+
 }

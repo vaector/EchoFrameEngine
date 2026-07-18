@@ -27,3 +27,18 @@ void Importer::InitTextures()
 		}
 	}
 }
+
+void Importer::InitModels()
+{
+
+	if (!fs::exists("models"))
+		TraceLog(LOG_FATAL, "ERROR::MODELS_FOLDER_DOES_NOT_EXIST");
+	else {
+		for (auto& entry : fs::directory_iterator("models")) {
+			std::string fileName = entry.path().stem().string(); //stem-> removes the extension.
+
+			Shared::models[fileName] = LoadModel(entry.path().string().c_str());
+			std::cout << fileName << std::endl;
+		}
+	}
+}
