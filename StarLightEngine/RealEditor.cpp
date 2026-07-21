@@ -38,6 +38,18 @@ void RealEditor::InitCam()
 
 void RealEditor::Update(Camera3D* cam)
 {
+	if(Shared::onImguiWindow) return;
+
+	//Update Cursor Lock
+	static bool cursorLocked = true;
+	if(IsKeyPressed(KEY_TAB))
+	{
+		cursorLocked = !cursorLocked;
+		if(cursorLocked) DisableCursor();
+		else EnableCursor();
+	}
+
+	if(!cursorLocked) return;
 	
 	//Update Camera
 	UpdateCam(cam);
@@ -56,6 +68,9 @@ void RealEditor::Update(Camera3D* cam)
 
 	EditDoor();
 	PlayerDoor();
+
+	CreateEntity();
+	UpdateEntity();
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -67,10 +82,10 @@ void RealEditor::UpdateCam(Camera3D* cam)
 	if (cam == &freeCam) {
 		//Camera
 
-
-		freeYaw += -mouseDt.x * (mouseSens * DEG2RAD);
-		freePitch += -mouseDt.y * (mouseSens * DEG2RAD);
-
+		if (freeCamToggle) {
+			freeYaw += -mouseDt.x * (mouseSens * DEG2RAD);
+			freePitch += -mouseDt.y * (mouseSens * DEG2RAD);
+		}
 		freePitch = Clamp(freePitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
 
 		freeForward.x = cosf(freePitch) * sinf(freeYaw);
@@ -145,14 +160,27 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 nextPosX = Vector3Add(playerCam.position, moveX);
 		Vector3 nextPosY = Vector3Add(playerCam.position, moveY);
 		Vector3 nextPosZ = Vector3Add(playerCam.position, moveZ);
+		
 
-		//Check XZ Collision
+		//Check XZ Wall Collision
 		if (CheckCollisionWall(cam, &nextPosX))                         
 			move.x = 0;                                             
 		if (CheckCollisionWall(cam, &nextPosZ))
 			move.z = 0;
 
 
+		//Check collision with entities
+		if (CheckCollisionPlayerEntityXZ(&playerCam, &nextPosX)) {
+			move.x = 0;
+		}
+		if (CheckCollisionPlayerEntityXZ(&playerCam, &nextPosZ)) {
+			move.z = 0;
+		}
+		
+
+		// Gravity
+		if (!isGround)
+			verticalVelocity -= gravity * dt;
 
 		// Jump
 		if (IsKeyPressed(KEY_SPACE) && isGround)
@@ -161,10 +189,6 @@ void RealEditor::UpdateCam(Camera3D* cam)
 			isGround = false;
 		}
 
-		// Gravity
-		if (!isGround)
-			verticalVelocity -= gravity * dt;
-
 		// Apply vertical velocity
 		move.y = verticalVelocity * dt;
 
@@ -172,6 +196,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		nextPosY = playerCam.position;
 		nextPosY.y += move.y;
 
+		UpdatePlayerHeight(&playerCam, &nextPosY);
 		// Check collision
 		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
 		{
@@ -185,6 +210,11 @@ void RealEditor::UpdateCam(Camera3D* cam)
 			isGround = false;
 		}
 
+		if (CheckCollisionPlayerEntityY(&playerCam, &nextPosY)) {
+			verticalVelocity = 0;
+			move.y = nextPosY.y - playerCam.position.y;
+			isGround = true;
+		}
 
 		// Apply updated position and target
 		playerCam.position = Vector3Add(playerCam.position, move);
@@ -192,12 +222,16 @@ void RealEditor::UpdateCam(Camera3D* cam)
 	}
 
 }
+void RealEditor::UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos)
+{
+	playerBottom = nextPos->y - playerHeight / 2;
+	playerTop = nextPos->y + playerHeight / 2;
+}
 void RealEditor::UpdateSector()
 {
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
 
-	Sector* closestFloorSector = nullptr;
-	Sector* closestCeilingSector = nullptr;
+
 	float closestFloorDist = FLT_MAX;
 	float closestCeilingDist = FLT_MAX;
 
@@ -214,7 +248,7 @@ void RealEditor::UpdateSector()
 			if (col.hit && col.distance < closestFloorDist)
 			{
 				closestFloorDist = col.distance;
-				closestFloorSector = &sector;
+				selectedFloor = &sector;
 			}
 		}
 
@@ -229,17 +263,17 @@ void RealEditor::UpdateSector()
 			if (col.hit && col.distance < closestCeilingDist)
 			{
 				closestCeilingDist = col.distance;
-				closestCeilingSector = &sector;
+				selectedCeiling = &sector;
 			}
 		}
 	}
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 	{
-		if (closestFloorSector && closestFloorDist < closestCeilingDist)
-			closestFloorSector->floorTexture = Shared::selectedTexture;
-		else if (closestCeilingSector)
-			closestCeilingSector->ceilingTexture = Shared::selectedTexture;
+		if (selectedFloor && closestFloorDist < closestCeilingDist)
+			selectedFloor->floorTexture = Shared::selectedTexture;
+		else if (selectedCeiling)
+			selectedCeiling->ceilingTexture = Shared::selectedTexture;
 	}
 }
 void RealEditor::UpdateWall()
@@ -728,6 +762,98 @@ void RealEditor::Draw()
 	DrawRamp();
 
 	DrawDoorSwitch();
+
+	DrawEntity();
+}
+
+void RealEditor::UpdateEntity()
+{
+
+	//Move entities
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	for (auto& entity : Shared::entities) {
+		RayCollision hit = GetRayCollisionBox(ray, entity.collider);
+		if (hit.hit && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			selectedEntity = &entity;
+			freeCamToggle = false;
+		}
+	}
+
+	//If an entity is selected
+	if (selectedEntity != nullptr) {
+		//Move the entity and its collider
+		Vector3 perp = Vector3CrossProduct(freeForward, { 0,1,0 });
+		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(freeForward, -GetMouseDelta().y)));
+		
+		selectedEntity->position = Vector3Add({ selectedEntity->position.x, 0, selectedEntity->position.z }, Vector3Scale(delta, 2.5f));
+		selectedEntity->collider.max = Vector3Add({ selectedEntity->collider.max.x, 0, selectedEntity->collider.max.z }, Vector3Scale(delta, 2.5f));
+		selectedEntity->collider.min = Vector3Add({ selectedEntity->collider.min.x, 0, selectedEntity->collider.min.z }, Vector3Scale(delta, 2.5f));
+
+		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
+		Rectangle rect;
+		rect.x = selectedEntity->collider.min.x;
+		rect.y = selectedEntity->collider.min.z; 
+
+		rect.width = selectedEntity->collider.max.x - selectedEntity->collider.min.x;
+		rect.height = selectedEntity->collider.max.z - selectedEntity->collider.min.z;
+
+		for (auto& wall : Shared::walls) {
+			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+			{
+				selectedEntity->position = Vector3Subtract({ selectedEntity->position.x, 0, selectedEntity->position.z }, Vector3Scale(delta, 2.5f));
+				selectedEntity->collider.max = Vector3Subtract({ selectedEntity->collider.max.x, 0, selectedEntity->collider.max.z }, Vector3Scale(delta, 2.5f));
+				selectedEntity->collider.min = Vector3Subtract({ selectedEntity->collider.min.x, 0, selectedEntity->collider.min.z }, Vector3Scale(delta, 2.5f));
+			}
+		}
+	}
+
+	//Deselect entity
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		selectedEntity = nullptr;
+		freeCamToggle = true;
+	}
+}
+
+void RealEditor::CreateEntity()
+{
+	if (Shared::selectedModel == nullptr || selectedFloor == nullptr) return;
+
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		Entity newEntity;
+		newEntity.modelName = *Shared::selectedModel;
+
+		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
+		Vector3 spawnPos = Vector3Add(freeCam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+
+		newEntity.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+
+		BoundingBox box = GetModelBoundingBox(Shared::models[newEntity.modelName]);
+
+		box.min.x *= newEntity.scale.x;
+		box.min.y *= newEntity.scale.y;
+		box.min.z *= newEntity.scale.z;
+
+		box.max.x *= newEntity.scale.x;
+		box.max.y *= newEntity.scale.y;
+		box.max.z *= newEntity.scale.z;
+
+
+		box.min = Vector3Add(box.min, newEntity.position);
+		box.max = Vector3Add(box.max, newEntity.position);
+
+		newEntity.collider = box;
+
+		Shared::entities.push_back(newEntity);
+		Shared::selectedModel = nullptr;
+	}
+}
+
+void RealEditor::DrawEntity()
+{
+	for (auto& entity : Shared::entities) {
+		DrawModelEx(Shared::models[entity.modelName], entity.position, { 0,0,0 }, 0, entity.scale, WHITE);
+		DrawBoundingBox(entity.collider, RED);
+	}
 }
 
 bool RealEditor::WallCloserThanSector()
@@ -769,9 +895,6 @@ bool RealEditor::WallCloserThanSector()
 bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 {
 
-	float playerBottom = nextPos->y - playerHeight/2;
-	float playerTop = nextPos->y + playerHeight / 2;
-
 	for (auto& wall : Shared::walls) {
 		if (wall->isDoor && wall->isOpen) continue;
 
@@ -791,9 +914,6 @@ bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 
 bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 {
-
-	float playerBottom = nextPos->y - playerHeight / 2;
-	float playerTop = nextPos->y + playerHeight / 2;
 
 	for(auto& sector: Shared::sectors) {
 
@@ -820,44 +940,50 @@ bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 
 bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
 {
-	float playerBottom = nextPos->y - playerHeight / 2;
-	float playerTop = nextPos->y + playerHeight / 2;
+    const float skin = 0.05f; // same resting-contact margin used for entities
 
-	for (auto& ramp : Shared::ramps) {
+    for (auto& ramp : Shared::ramps) {
 
-		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
-		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+        Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
+        Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
 
-		float lowY = (float)ramp.rampHeight * ramp.floor;
-		float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight;
+        float lowY = (float)ramp.rampHeight * ramp.floor;
+        float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight;
 
-		float rampLength = Vector2Distance(ramp.startPos, ramp.endPos);
+        float rampLength = Vector2Distance(ramp.startPos, ramp.endPos);
 
-		//Project the player's XZ position into the ramp's local space: "along" the ramp's
-		//direction (0 = startPos, rampLength = endPos) and "across" it (distance from the centerline)
-		Vector3 toPlayer = { nextPos->x - ramp.startPos.x, 0, nextPos->z - ramp.startPos.y };
+        Vector3 toPlayer = { nextPos->x - ramp.startPos.x, 0, nextPos->z - ramp.startPos.y };
 
-		float along = toPlayer.x * dir.x + toPlayer.z * dir.y;
-		float across = toPlayer.x * perp.x + toPlayer.z * perp.z;
+        float along = toPlayer.x * dir.x + toPlayer.z * dir.y;
+        float across = toPlayer.x * perp.x + toPlayer.z * perp.z;
 
-		//Outside the ramp's length or width, this ramp doesn't apply
-		if (along < 0.0f || along > rampLength) continue;
-		if (across < -ramp.halfWidth || across > ramp.halfWidth) continue;
+        if (along < 0.0f || along > rampLength) continue;
+        if (across < -ramp.halfWidth || across > ramp.halfWidth) continue;
 
-		//Height of the ramp's surface at the player's position, interpolated from lowY to highY
-		float t = along / rampLength;
-		float rampY = lowY + (highY - lowY) * t;
+        float t = along / rampLength;
+        float rampY = lowY + (highY - lowY) * t; // local surface height at this point
 
-		if (playerBottom <= highY && playerTop >= lowY) {
-			if (playerBottom < rampY) {
-				nextPos->y = rampY + playerHeight / 2;
-				return true;
-			}
-		}
+        if (verticalVelocity <= 0.0f)
+        {
+            // Falling or resting -> only land if we're actually straddling the surface
+            if (playerBottom <= rampY && playerTop >= rampY)
+            {
+                nextPos->y = rampY + playerHeight / 2 + skin;
+                return true;
+            }
+        }
+        else
+        {
+            // Moving upward -> treat the ramp's underside like a ceiling, bump instead of climb
+            if (playerTop >= rampY && playerBottom < rampY)
+            {
+                nextPos->y = rampY - playerHeight / 2 - skin;
+                return true;
+            }
+        }
+    }
 
-	}
-
-	return false;
+    return false;
 }
 
 bool RealEditor::PointInSector(Vector2 point, const std::vector<Vector2>& poly)
@@ -877,4 +1003,101 @@ bool RealEditor::PointInSector(Vector2 point, const std::vector<Vector2>& poly)
 
 	return inside;
 }
+
+bool RealEditor::CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect)
+{
+	Vector2 topLeft = { rect.x, rect.y };
+	Vector2 topRight = { rect.x + rect.width, rect.y };
+	Vector2 bottomLeft = { rect.x, rect.y + rect.height };
+	Vector2 bottomRight = { rect.x + rect.width, rect.y + rect.height };
+
+	// Check the 4 rectangle edges
+	if (CheckCollisionLines(lineStart, lineEnd, topLeft, topRight, nullptr))
+		return true;
+
+	if (CheckCollisionLines(lineStart, lineEnd, topRight, bottomRight, nullptr))
+		return true;
+
+	if (CheckCollisionLines(lineStart, lineEnd, bottomRight, bottomLeft, nullptr))
+		return true;
+
+	if (CheckCollisionLines(lineStart, lineEnd, bottomLeft, topLeft, nullptr))
+		return true;
+
+	// Optional: if the line is completely inside the rectangle
+	if (CheckCollisionPointRec(lineStart, rect) ||
+		CheckCollisionPointRec(lineEnd, rect))
+		return true;
+
+	return false;
+}
+
+bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
+{
+
+	if (cam != &playerCam)
+		return false;
+
+	playerCollider.min = {
+		nextPos->x - playerRadius,
+		nextPos->y - playerHeight / 2,
+		nextPos->z - playerRadius
+	};
+
+	playerCollider.max = {
+		nextPos->x + playerRadius,
+		nextPos->y + playerHeight / 2,
+		nextPos->z + playerRadius
+	};
+
+	for (auto& e : Shared::entities) {
+		if (CheckCollisionBoxes(e.collider, playerCollider)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
+{
+	if (cam != &playerCam)
+		return false;
+
+	const float gap = 0.05f; //Small value so that the player is not exactly on or bellow the entity(enables the player to collide smoothly and move)
+
+	playerCollider.min = {
+		nextPos->x - playerRadius,
+		nextPos->y - playerHeight / 2,
+		nextPos->z - playerRadius
+	};
+
+	playerCollider.max = {
+		nextPos->x + playerRadius,
+		nextPos->y + playerHeight / 2,
+		nextPos->z + playerRadius
+	};
+
+	for (auto& e : Shared::entities) {
+		if (CheckCollisionBoxes(e.collider, playerCollider)) {
+
+			float eBottom = e.collider.min.y;
+			float eTop = e.collider.max.y;
+
+			if (verticalVelocity <= 0.0f)
+			{
+				// Land slightly ABOVE the top face
+				nextPos->y = eTop + playerHeight / 2 + gap;
+				return true;
+			}
+			else
+			{
+				//stop slightly BELOW the underside
+				nextPos->y = eBottom - playerHeight / 2 - gap;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 

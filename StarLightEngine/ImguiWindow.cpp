@@ -4,6 +4,7 @@
 #include "imgui/rlImGui.h"
 #include "Shared.h"
 #include "imgui/imgui_stdlib.h"
+#include "Entity.h"
 
 void ImguiWindow::UpdateImguiTileEditor()
 {
@@ -16,10 +17,12 @@ void ImguiWindow::UpdateImguiTileEditor()
 	}
 
 	rlImGuiBegin();
+
+	//------TileMap Editor Window------
 	ImGui::Begin("TileMap Editor");
 
-	ImGui::SetWindowSize({ 200,600 });
-	ImGui::SetWindowPos({ 0,0 });
+	ImGui::SetWindowSize({ 200,600 }, ImGuiCond_Once);
+	ImGui::SetWindowPos({ 0,0 }, ImGuiCond_Once);
 
 	//Drop Down box for choosing textures
 	static std::string selectedT = "tile1";
@@ -67,6 +70,41 @@ void ImguiWindow::UpdateImguiTileEditor()
 	ImGui::Checkbox("Door Mode", &Shared::doorMode);
 
 	ImGui::End();
+
+	//------3D Models Window------
+	ImGui::Begin("3D Models");
+	ImGui::SetWindowSize({ 200,600 }, ImGuiCond_Once);
+	ImGui::SetWindowPos({ 880,0 }, ImGuiCond_Once);
+
+	static std::string search;
+	static std::string selectedModel;
+
+	ImGui::InputText("Search", &search);
+
+	if (ImGui::BeginListBox("Models"))
+	{
+		for (auto& [name, model] : Shared::models)
+		{
+			if (!search.empty() && name.find(search) == std::string::npos)
+				continue;
+
+			bool selected = (selectedModel == name);
+
+			if (ImGui::Selectable(name.c_str(), selected))
+			{
+				selectedModel = name;
+				Shared::selectedModel = &selectedModel;
+			}
+
+			if (selected)
+				ImGui::SetItemDefaultFocus();
+		}
+
+		ImGui::EndListBox();
+	}
+	
+	ImGui::End();
+
 	rlImGuiEnd();
 
 	first = false;

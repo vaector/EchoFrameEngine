@@ -1,11 +1,14 @@
 #include "Shared.h"
 
+
 namespace Shared {
 	std::vector<Wall*> walls;
 	int wallHeight = 128;
 	std::unordered_map<std::string, Texture2D> textures;
 	std::unordered_map<std::string, Model> models;
 	Texture2D* selectedTexture = &textures["tile1"];
+	std::string* selectedModel = nullptr;
+	std::vector<Entity> entities;
 	std::vector<Sector> sectors;
 	bool sectorMode = true;
 	bool floorOnly = false;

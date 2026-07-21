@@ -21,15 +21,23 @@ private:
 	float playerYaw = 0.0f;
 	float playerPitch = 0.0f;
 	Vector3 playerForward;
-	float gravity = 150.0f;
-	float jump = 100.0f;
+	float gravity = 200.0f;
+	float jump = 150.0f;
 	bool isGround = false;
 	float verticalVelocity = 0.0f;
 	float playerHeight = 100.0f;
+	float playerRadius = 5.0f;//Width of the palayer
+	BoundingBox playerCollider;
+	float playerBottom;
+	float playerTop;
 
+	bool freeCamToggle = true;//If true then free cam can be moved with mouse, otherwise if false then the free cam does not move(Camera Rotation wise).
 	//---------------
 	Ramp* selectedRamp = nullptr;
 	Wall* selectedWall = nullptr;
+	Sector* selectedFloor = nullptr;
+	Sector* selectedCeiling = nullptr;
+	Entity* selectedEntity = nullptr;
 
 public:
 	//3d Camera
@@ -41,6 +49,7 @@ public:
 
 	void Update(Camera3D* cam);
 	void UpdateCam(Camera3D* cam);
+	void UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos);
 	void UpdateSector();
 	void UpdateWall();
 	void UpdateRamp();
@@ -53,6 +62,11 @@ public:
 	void DrawSector();
 	void DrawRamp();
 	void Draw();
+	       
+	//Entities
+	void UpdateEntity();
+	void CreateEntity();
+	void DrawEntity();
 
 	//Helper
 	bool WallCloserThanSector();
@@ -60,7 +74,15 @@ public:
 	bool CheckCollisionSector(Camera3D* cam, Vector3* nextPos);
 	bool CheckCollisionRamp(Camera3D* cam, Vector3* nextPos);
 	bool PointInSector(Vector2 point, const std::vector<Vector2>& poly);
+	bool CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect);
+	bool CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos);
+	bool CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos);
 };
 
 //Functions with "EDIT" are for the free Camera-> Editing
 //Functions with "PLAYER" are for the player Camera-> Gameplay
+
+//Press "TAB" to lock/unlock the cursor in the Real Editor Mode
+//Press "F" to switch between Real Editor Mode and Tile Editor Mode
+//Press "P" to switch between Free Camera and Player Camera in the Real Editor Mode
+//Press "SPACE" to jump in the Player Camera Mode

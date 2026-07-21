@@ -29,7 +29,6 @@ void Engine::UpdateReal(Camera3D* cam)
 void Engine::DrawReal()
 {
 	realEditor.Draw();
-	DrawModel(Shared::models["green_crate1"], {1024,0,1024},60, WHITE);
 }
 
 void Engine::DrawGui()

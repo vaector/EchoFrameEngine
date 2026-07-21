@@ -66,6 +66,9 @@
     <ClCompile Include="imgui\imgui_stdlib.cpp">
       <Filter>Source Files\Imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h">
@@ -130,6 +133,9 @@
     </ClInclude>
     <ClInclude Include="external\earcut.hpp">
       <Filter>Header Files\external</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

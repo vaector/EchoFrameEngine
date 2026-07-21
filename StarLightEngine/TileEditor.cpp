@@ -55,6 +55,8 @@ void TileEditor::Update()
 	mouse = GetScreenToWorld2D(GetMousePosition(), cam);
 	Shared::onImguiWindow = (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered());
 
+	if (Shared::onImguiWindow) return;
+
 	//Update Camera
 	UpdateCam();
 
