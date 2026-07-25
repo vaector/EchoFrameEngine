@@ -8,10 +8,12 @@
 
 int main() {
     
-    const int screenWidth = 1024;
+    const int screenWidth = 1680;
     const int screenHeight = 1024;
 
     // Create the window and set FPS
+    
+    SetConfigFlags(FLAG_WINDOW_MAXIMIZED);
     InitWindow(screenWidth, screenHeight, "StarLight Engine");
     SetTargetFPS(60);
 
