@@ -71,6 +71,18 @@ void RealEditor::Update(Camera3D* cam)
 
 	CreateEntity();
 	UpdateEntity();
+
+	CreateNpc();
+
+	int currentAnim = 1;  // Which animation to play (0 = first animation)
+	if (IsKeyDown(KEY_G)) currentAnim = 0;
+	bool isLoop = true;   // Should it loop?
+
+	for (auto& [name, npc] : Shared::npcs) {
+		npc.playAnim(currentAnim, isLoop);
+		if (IsKeyPressed(KEY_N))
+			npc.stopAnim();
+	}
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -246,7 +258,7 @@ void RealEditor::UpdateSector()
 			Vector3 p2 = { sector.floorPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[j + 1].y };
 
 			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
-			if (col.hit && col.distance < closestFloorDist)
+			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && col.distance < closestFloorDist)
 			{
 				closestFloorDist = col.distance;
 				selectedFloor = &sector;
@@ -261,7 +273,7 @@ void RealEditor::UpdateSector()
 			Vector3 p2 = { sector.ceilingPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[j + 1].y };
 
 			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
-			if (col.hit && col.distance < closestCeilingDist)
+			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && col.distance < closestCeilingDist)
 			{
 				closestCeilingDist = col.distance;
 				selectedCeiling = &sector;
@@ -269,13 +281,16 @@ void RealEditor::UpdateSector()
 		}
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-	{
-		if (selectedFloor && closestFloorDist < closestCeilingDist)
-			selectedFloor->floorTexture = Shared::selectedTexture;
-		else if (selectedCeiling)
-			selectedCeiling->ceilingTexture = Shared::selectedTexture;
+	//Deselect
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		selectedCeiling = nullptr;
+		selectedFloor = nullptr;
 	}
+
+	if (selectedFloor && closestFloorDist < closestCeilingDist)
+		selectedFloor->floorTexture = Shared::selectedTexture;
+	else if (selectedCeiling)
+		selectedCeiling->ceilingTexture = Shared::selectedTexture;
 }
 void RealEditor::UpdateWall()
 {
@@ -627,7 +642,7 @@ void RealEditor::DrawWall()
 		rlSetTexture(wall->texture->id);
 
 		if (selectedWall == wall)
-			rlColor4ub(255, 0, 0, 255);
+			rlColor4ub(255, 0, 0, 150);
 		else
 			rlColor4ub(255, 255, 255, 255);
 		
@@ -653,7 +668,11 @@ void RealEditor::DrawSector()
 		{
 			rlBegin(RL_TRIANGLES);
 			rlSetTexture(sector.floorTexture->id);
-			rlColor4ub(255, 255, 255, 255);
+			
+			if (selectedFloor == &sector)
+				rlColor4ub(255, 0, 0, 150);
+			else
+				rlColor4ub(255, 255, 255, 255);
 
 			for (int i = 0; i + 2 < sector.indices.size(); i += 3)
 			{
@@ -680,7 +699,11 @@ void RealEditor::DrawSector()
 		{
 			rlBegin(RL_TRIANGLES);
 			rlSetTexture(sector.ceilingTexture->id);
-			rlColor4ub(255, 255, 255, 255);
+			
+			if (selectedCeiling == &sector)
+				rlColor4ub(255, 0, 0, 150);
+			else
+				rlColor4ub(255, 255, 255, 255);
 
 			for (int i = 0; i + 2 < sector.indices.size(); i += 3)
 			{
@@ -765,6 +788,8 @@ void RealEditor::Draw()
 	DrawDoorSwitch();
 
 	DrawEntity();
+
+	DrawNpc();
 }
 
 void RealEditor::UpdateEntity()
@@ -862,7 +887,7 @@ void RealEditor::UpdateEntity()
 
 void RealEditor::CreateEntity()
 {
-	if (Shared::selectedModel == nullptr || selectedFloor == nullptr) return;
+	if (Shared::selectedModel == nullptr || selectedFloor == nullptr || Shared::npcMode) return;
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		Entity newEntity;
@@ -900,6 +925,70 @@ void RealEditor::DrawEntity()
 		DrawModelEx(Shared::models[entity.modelName], entity.position, { 0,0,0 }, 0, entity.scale, WHITE);
 		DrawBoundingBox(entity.collider, RED);
 	}
+}
+
+void RealEditor::CreateNpc()
+{
+	if (!camMode || !Shared::npcMode || !camMode) return;//If not free Cam
+
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && Shared::selectedModel != nullptr && selectedFloor != nullptr) {
+		NPC npc;
+
+		npc.modelName = *Shared::selectedModel;
+		npc.name = *Shared::selectedModel;
+
+		std::string path = "models/";
+		path += npc.name;
+		path += ".glb";
+		std::cout << path;
+
+
+		npc.scale = { 64,64,64 };
+		npc.model = Shared::models[npc.modelName];
+
+		//Position
+		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
+		Vector3 spawnPos = Vector3Add(freeCam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		npc.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+
+		//Collider
+		BoundingBox box = GetModelBoundingBox(Shared::models[npc.modelName]);
+		npc.scale = Vector3Scale(npc.scale, 0.01);
+		box.min.x *= npc.scale.x;
+		box.min.y *= npc.scale.y;
+		box.min.z *= npc.scale.z;
+
+		box.max.x *= npc.scale.x;
+		box.max.y *= npc.scale.y;
+		box.max.z *= npc.scale.z;
+
+		box.min = Vector3Add(box.min, npc.position);
+		box.max = Vector3Add(box.max, npc.position);
+
+		npc.collider = box;
+		
+
+		int animCount = 0;
+		npc.modelAnim = LoadModelAnimations(path.c_str(), &animCount);
+
+		if (npc.modelAnim == nullptr && animCount > 0) {
+			npc.animCount = 0;
+			std::cout << "Failed to load animations for: " << path << "\n";
+		}
+		else
+			npc.animCount = animCount;
+
+		Shared::npcs[npc.name] = npc;
+	}
+}
+
+void RealEditor::DrawNpc()
+{
+	for (auto& [name, npc] : Shared::npcs) {
+		DrawModelEx(npc.model, npc.position, { 0, 0, 0 }, 0.0f, npc.scale, WHITE);
+		DrawBoundingBox(npc.collider, RED);
+	}
+
 }
 
 bool RealEditor::WallCloserThanSector()

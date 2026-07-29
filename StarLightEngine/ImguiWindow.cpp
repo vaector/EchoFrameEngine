@@ -18,30 +18,33 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 	rlImGuiBegin();
 
-	//------TileMap Editor Window------
-	ImGui::Begin("TileMap Editor");
+	ImGui::SetNextWindowSizeConstraints(
+		ImVec2(200, 300),
+		ImVec2(600, 800)
+	);
 
-	ImGui::SetWindowSize({ 200,600 }, ImGuiCond_Once);
-	ImGui::SetWindowPos({ 0,0 }, ImGuiCond_Once);
+	//------TileMap Editor Window------
+	ImGui::Begin("TileMap Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::SetWindowPos({ 0,0 });
 
 	//Drop Down box for choosing textures
 	static std::string selectedT = "tile1";
-	if (ImGui::BeginCombo("Textures", selectedT.c_str())) {
-
-		for (auto& [key, val] : Shared::textures) {
-
-			bool selected = (key == selectedT);
-
-			if (ImGui::Selectable(key.c_str())) {
-				Shared::selectedTexture = &val;
-				selectedT = key.c_str();
-			}
-
-			if (selected)
-				ImGui::SetItemDefaultFocus();
-
+	int count = 0;
+	ImGui::Text(selectedT.c_str());
+	ImGui::NewLine();
+	for (auto& [key, tex] : Shared::textures)
+	{
+		if (ImGui::ImageButton(
+			key.c_str(),
+			(ImTextureID)(intptr_t)tex.id,
+			ImVec2(64, 64)))
+		{
+			Shared::selectedTexture = &tex;
+			selectedT = key;
 		}
-		ImGui::EndCombo();
+
+		if (++count % 4 != 0)
+			ImGui::SameLine();
 	}
 
 	//Checkbox for sectorMode
@@ -69,41 +72,49 @@ void ImguiWindow::UpdateImguiTileEditor()
 	//Door Mode
 	ImGui::Checkbox("Door Mode", &Shared::doorMode);
 
+	ImGui::NewLine();
+
+	//NPC mode
+	ImGui::Checkbox("NPC Mode", &Shared::npcMode);
+
+
 	ImGui::End();
 
 	//------3D Models Window------
-	ImGui::Begin("3D Models");
-	ImGui::SetWindowSize({ 200,600 }, ImGuiCond_Once);
-	ImGui::SetWindowPos({ 880,0 }, ImGuiCond_Once);
+	if (!Shared::editorMode) {
+		ImGui::Begin("3D Models");
+		ImGui::SetWindowSize({ 200,600 });//ImGuiCond_Once -> for only the first frame
+		ImGui::SetWindowPos({ (float)GetScreenWidth() - 200,0 });
 
-	static std::string search;
-	static std::string selectedModel;
+		static std::string search;
+		static std::string selectedModel;
 
-	ImGui::InputText("Search", &search);
+		ImGui::InputText("Search", &search);
 
-	if (ImGui::BeginListBox("Models"))
-	{
-		for (auto& [name, model] : Shared::models)
+		if (ImGui::BeginListBox("Models"))
 		{
-			if (!search.empty() && name.find(search) == std::string::npos)
-				continue;
-
-			bool selected = (selectedModel == name);
-
-			if (ImGui::Selectable(name.c_str(), selected))
+			for (auto& [name, model] : Shared::models)
 			{
-				selectedModel = name;
-				Shared::selectedModel = &selectedModel;
+				if (!search.empty() && name.find(search) == std::string::npos)
+					continue;
+
+				bool selected = (selectedModel == name);
+
+				if (ImGui::Selectable(name.c_str(), selected))
+				{
+					selectedModel = name;
+					Shared::selectedModel = &selectedModel;
+				}
+
+				if (selected)
+					ImGui::SetItemDefaultFocus();
 			}
 
-			if (selected)
-				ImGui::SetItemDefaultFocus();
+			ImGui::EndListBox();
 		}
 
-		ImGui::EndListBox();
+		ImGui::End();
 	}
-	
-	ImGui::End();
 
 	rlImGuiEnd();
 

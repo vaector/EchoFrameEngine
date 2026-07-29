@@ -474,6 +474,12 @@ void TileEditor::SplitWall()
 {
 	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || Shared::doorMode) return;
 
+	//Getting the Tile that is colliding with the mouse in grid space.
+	int tileX = (int)mouse.x / tileSize;
+	int tileY = (int)mouse.y / tileSize;
+	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
+
+
 	for(int i = Shared::walls.size() - 1; i >= 0; i--) {
 		auto& wall = Shared::walls[i];
 		if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
@@ -482,7 +488,7 @@ void TileEditor::SplitWall()
 
 		if (CheckCollisionPointLine(mouse, Vector2Add(wall->startPos, Vector2Scale(dir, 4)), Vector2Subtract(wall->endPos, Vector2Scale(dir, 4)), 4)) {
 			Vector2 oldEndPos = wall->endPos;
-			wall->endPos = mouse;
+			wall->endPos = tile;
 
 			Wall* newWall = new Wall();
 			newWall->startPos = wall->endPos;
@@ -490,7 +496,10 @@ void TileEditor::SplitWall()
 			newWall->floor = wall->floor;
 			newWall->wallHeight = wall->wallHeight;
 			newWall->texture = wall->texture;
-			newWall->inSector = wall->inSector;
+
+			wall->inSector = false;
+			newWall->inSector = false;
+
 			newWall->layer = wall->layer;
 			
 			Shared::walls.insert(Shared::walls.begin() + i + 1, newWall);

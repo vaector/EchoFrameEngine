@@ -9,7 +9,7 @@ private:
 	float mouseSens = 0.1f;
 
 	//FreeCam
-	int freeMoveSpeed = 125;
+	int freeMoveSpeed = 175;
 
 	float freeYaw = 0.0f;
 	float freePitch = 0.0f;
@@ -25,8 +25,8 @@ private:
 	float jump = 150.0f;
 	bool isGround = false;
 	float verticalVelocity = 0.0f;
-	float playerHeight = 100.0f;
-	float playerRadius = 5.0f;//Width of the palayer
+	float playerHeight = 150.0f;
+	float playerRadius = 8.0f;//Width of the palayer
 	BoundingBox playerCollider;
 	float playerBottom;
 	float playerTop;
@@ -69,6 +69,10 @@ public:
 	void CreateEntity();
 	void DrawEntity();
 
+	//NPC
+	void CreateNpc();
+	void DrawNpc();
+
 	//Helper
 	bool WallCloserThanSector();
 	bool CheckCollisionWall(Camera3D* cam, Vector3* nextPos);
@@ -87,3 +91,5 @@ public:
 //Press "F" to switch between Real Editor Mode and Tile Editor Mode
 //Press "P" to switch between Free Camera and Player Camera in the Real Editor Mode
 //Press "SPACE" to jump in the Player Camera Mode
+//Hold "C" to move Entities and editable objects
+//Hold "Left CTRL" to change the y Position of Entities and editable objects.

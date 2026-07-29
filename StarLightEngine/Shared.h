@@ -4,8 +4,10 @@
 #include <string>
 #include "Ramp.h"
 #include "Entity.h"
+#include "NPC.h"
 
 namespace Shared {
+	extern bool editorMode;
 	extern std::vector<Wall*> walls;
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;
@@ -25,6 +27,10 @@ namespace Shared {
 	extern Vector3 playerPos;
 	extern bool setPlayerPos;
 	extern int layer;
+
+	extern bool npcMode;
+	extern std::unordered_map<std::string, NPC> npcs;
+
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

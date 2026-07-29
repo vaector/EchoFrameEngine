@@ -15,6 +15,7 @@ int main() {
     
     SetConfigFlags(FLAG_WINDOW_MAXIMIZED);
     InitWindow(screenWidth, screenHeight, "StarLight Engine");
+    //ToggleBorderlessWindowed();
     SetTargetFPS(60);
 
     //ImGui Context
@@ -33,34 +34,33 @@ int main() {
     ImguiWindow imgui;
     
 
-    bool editorMode = true;
     bool freeCamMode = true;
 
     while (!WindowShouldClose())
     {
 
 		//Press F to switch between Editor Mode and Real Mode
-        if (IsKeyPressed(KEY_F) && editorMode) {
-            editorMode = false;//RealEditor
+        if (IsKeyPressed(KEY_F) && Shared::editorMode) {
+            Shared::editorMode = false;//RealEditor
             Shared::setPlayerPos = true;
             DisableCursor();
         }
-        else if (IsKeyPressed(KEY_F) && !editorMode) {
-            editorMode = true;
+        else if (IsKeyPressed(KEY_F) && !Shared::editorMode) {
+            Shared::editorMode = true;
             EnableCursor();
         }
 
         //Press P to switch from freecam to playerCam in real Editor Mode
-        if(IsKeyPressed(KEY_P) && !editorMode){
+        if(IsKeyPressed(KEY_P) && !Shared::editorMode){
             freeCamMode = !freeCamMode;
             DisableCursor();
         }
 
 
         // Update
-        if (editorMode)//TileEditor Updates
+        if (Shared::editorMode)//TileEditor Updates
             engine.UpdateGui();
-        else if (!editorMode) {//Real Editor Updates
+        else if (!Shared::editorMode) {//Real Editor Updates
             if(freeCamMode)
                 engine.UpdateReal(&engine.realEditor.freeCam);
             else {
@@ -74,7 +74,7 @@ int main() {
         ClearBackground(BLACK); 
 
 
-        if (editorMode) {
+        if (Shared::editorMode) {
             
             //GUI(2d Stuff)
             BeginMode2D(engine.tileEditor.cam);
@@ -83,7 +83,7 @@ int main() {
 
             EndMode2D();
         }
-        else if (!editorMode) {
+        else if (!Shared::editorMode) {
             //Real(3d Stuff)
             if(freeCamMode)
                 BeginMode3D(engine.realEditor.freeCam);
