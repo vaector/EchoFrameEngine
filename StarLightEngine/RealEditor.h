@@ -72,6 +72,7 @@ public:
 	//NPC
 	void CreateNpc();
 	void DrawNpc();
+	void RemoveNpc();
 
 	//Helper
 	bool WallCloserThanSector();

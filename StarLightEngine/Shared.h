@@ -16,7 +16,7 @@ namespace Shared {
 	extern std::vector<Sector> sectors;
 	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;
-	extern std::string* selectedModel;
+	extern std::string* selectedModelName;
 	extern bool sectorMode;
 	extern bool floorOnly;
 	extern bool ceilingOnly;
@@ -30,6 +30,7 @@ namespace Shared {
 
 	extern bool npcMode;
 	extern std::unordered_map<std::string, NPC> npcs;
+	extern std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 }
 

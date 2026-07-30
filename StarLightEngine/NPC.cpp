@@ -50,7 +50,6 @@ void NPC::playAnim(int& currentAnim, bool& isLoop)
         
     }
 
-    std::cout<< this->modelAnim[currentAnim].name << std::endl;
     UpdateModelAnimation(this->model, this->modelAnim[currentAnim], this->currentFrameMap[currentAnim]);
 }
 

@@ -5,6 +5,7 @@
 #include "Shared.h"
 #include "imgui/imgui_stdlib.h"
 #include "Entity.h"
+#include <iostream>
 
 void ImguiWindow::UpdateImguiTileEditor()
 {
@@ -19,7 +20,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 	rlImGuiBegin();
 
 	ImGui::SetNextWindowSizeConstraints(
-		ImVec2(200, 300),
+		ImVec2(200, 200),
 		ImVec2(600, 800)
 	);
 
@@ -80,16 +81,23 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 	ImGui::End();
 
+
+	ImGui::SetNextWindowSizeConstraints(
+		ImVec2(200, 400),
+		ImVec2(600, 800)
+	);
+
 	//------3D Models Window------
 	if (!Shared::editorMode) {
-		ImGui::Begin("3D Models");
-		ImGui::SetWindowSize({ 200,600 });//ImGuiCond_Once -> for only the first frame
-		ImGui::SetWindowPos({ (float)GetScreenWidth() - 200,0 });
+		ImGui::Begin("3D Models", nullptr, ImGuiChildFlags_AlwaysAutoResize);
+		ImGui::SetWindowPos({ (float)GetScreenWidth() - 600,0 });
 
+		//Search for models
 		static std::string search;
 		static std::string selectedModel;
 
 		ImGui::InputText("Search", &search);
+		ImGui::NewLine();
 
 		if (ImGui::BeginListBox("Models"))
 		{
@@ -103,7 +111,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
 					selectedModel = name;
-					Shared::selectedModel = &selectedModel;
+					Shared::selectedModelName = &selectedModel;
 				}
 
 				if (selected)
@@ -112,10 +120,23 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 			ImGui::EndListBox();
 		}
+		ImGui::NewLine();
+		//Animations of selested model
+		if (Shared::selectedModelName != nullptr) {
+
+			for (auto& [name, animNames] : Shared::modelAnimationNames) {
+				if (name == *Shared::selectedModelName) {
+					for (auto& name: animNames) {
+						ImGui::Text(name.c_str());
+						ImGui::NewLine();
+					}
+				}
+			}
+
+		}
 
 		ImGui::End();
 	}
-
 	rlImGuiEnd();
 
 	first = false;

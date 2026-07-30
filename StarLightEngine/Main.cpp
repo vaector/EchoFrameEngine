@@ -24,6 +24,7 @@ int main() {
     //Init Textures(Images)
     Importer::InitTextures();
     Importer::InitModels();
+    Importer::InitModelAnimationNames();
 
     Engine engine;
 

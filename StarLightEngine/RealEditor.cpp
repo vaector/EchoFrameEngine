@@ -73,16 +73,11 @@ void RealEditor::Update(Camera3D* cam)
 	UpdateEntity();
 
 	CreateNpc();
+	RemoveNpc();
 
-	int currentAnim = 1;  // Which animation to play (0 = first animation)
-	if (IsKeyDown(KEY_G)) currentAnim = 0;
-	bool isLoop = true;   // Should it loop?
-
-	for (auto& [name, npc] : Shared::npcs) {
-		npc.playAnim(currentAnim, isLoop);
-		if (IsKeyPressed(KEY_N))
-			npc.stopAnim();
-	}
+	int c = 1; bool loop = true;
+	for (auto& [name, npc] : Shared::npcs)
+		npc.playAnim(c, loop);
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -796,8 +791,9 @@ void RealEditor::UpdateEntity()
 {
 	if (camMode == false) return;//Player Cam
 
-	//Move entities
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+
+	//Move entities
 	for (auto& entity : Shared::entities) {
 		RayCollision hit = GetRayCollisionBox(ray, entity.collider);
 		if (hit.hit && IsKeyPressed(KEY_C)) {
@@ -887,11 +883,11 @@ void RealEditor::UpdateEntity()
 
 void RealEditor::CreateEntity()
 {
-	if (Shared::selectedModel == nullptr || selectedFloor == nullptr || Shared::npcMode) return;
+	if (Shared::selectedModelName == nullptr || selectedFloor == nullptr || Shared::npcMode) return;
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		Entity newEntity;
-		newEntity.modelName = *Shared::selectedModel;
+		newEntity.modelName = *Shared::selectedModelName;
 
 		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
 		Vector3 spawnPos = Vector3Add(freeCam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
@@ -915,7 +911,7 @@ void RealEditor::CreateEntity()
 		newEntity.collider = box;
 
 		Shared::entities.push_back(newEntity);
-		Shared::selectedModel = nullptr;
+		Shared::selectedModelName = nullptr;
 	}
 }
 
@@ -931,19 +927,18 @@ void RealEditor::CreateNpc()
 {
 	if (!camMode || !Shared::npcMode || !camMode) return;//If not free Cam
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && Shared::selectedModel != nullptr && selectedFloor != nullptr) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && Shared::selectedModelName != nullptr && selectedFloor != nullptr) {
 		NPC npc;
 
-		npc.modelName = *Shared::selectedModel;
-		npc.name = *Shared::selectedModel;
+		npc.modelName = *Shared::selectedModelName;
+		npc.name = *Shared::selectedModelName;
 
 		std::string path = "models/";
 		path += npc.name;
 		path += ".glb";
-		std::cout << path;
 
 
-		npc.scale = { 64,64,64 };
+		npc.scale = { 50,50,50 };
 		npc.model = Shared::models[npc.modelName];
 
 		//Position
@@ -987,6 +982,24 @@ void RealEditor::DrawNpc()
 	for (auto& [name, npc] : Shared::npcs) {
 		DrawModelEx(npc.model, npc.position, { 0, 0, 0 }, 0.0f, npc.scale, WHITE);
 		DrawBoundingBox(npc.collider, RED);
+	}
+
+}
+
+void RealEditor::RemoveNpc()
+{
+	if (camMode == false) return;//Player Cam
+
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+
+	//Remove npc
+	for (auto& [name, npc]: Shared::npcs) {
+
+		RayCollision hit = GetRayCollisionBox(ray, npc.collider);
+		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			Shared::npcs.erase(name);
+			break;
+		}
 	}
 
 }

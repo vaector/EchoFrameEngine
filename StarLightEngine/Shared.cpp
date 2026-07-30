@@ -8,7 +8,7 @@ namespace Shared {
 	std::unordered_map<std::string, Texture2D> textures;
 	std::unordered_map<std::string, Model> models;
 	Texture2D* selectedTexture = &textures["tile1"];
-	std::string* selectedModel = nullptr;
+	std::string* selectedModelName = nullptr;
 	std::vector<Entity> entities;
 	std::vector<Sector> sectors;
 	bool sectorMode = true;
@@ -26,5 +26,6 @@ namespace Shared {
 
 	bool npcMode = false;
 	std::unordered_map<std::string, NPC> npcs;
+	std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 }
