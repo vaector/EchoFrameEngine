@@ -39,6 +39,7 @@ private:
 	Sector* selectedFloor = nullptr;
 	Sector* selectedCeiling = nullptr;
 	Entity* selectedEntity = nullptr;
+	NPC* selectedNpc = nullptr;
 
 public:
 	//3d Camera
@@ -72,6 +73,7 @@ public:
 	//NPC
 	void CreateNpc();
 	void DrawNpc();
+	void UpdateNpc();
 	void RemoveNpc();
 
 	//Helper
@@ -83,6 +85,7 @@ public:
 	bool CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect);
 	bool CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos);
 	bool CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos);
+	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original,Vector3 position,Vector3 scale);
 };
 
 //Functions with "EDIT" are for the free Camera-> Editing
@@ -92,5 +95,6 @@ public:
 //Press "F" to switch between Real Editor Mode and Tile Editor Mode
 //Press "P" to switch between Free Camera and Player Camera in the Real Editor Mode
 //Press "SPACE" to jump in the Player Camera Mode
-//Hold "C" to move Entities and editable objects
-//Hold "Left CTRL" to change the y Position of Entities and editable objects.
+//Hold "C" to move Entities and editable objects(Also to apply other editing featueres like scaling)
+//Press "Up/Down Arrow" to change the y Position of Entities and editable objects.
+//Press "Left/Right Arrow" to change scale.

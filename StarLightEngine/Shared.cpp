@@ -27,5 +27,4 @@ namespace Shared {
 	bool npcMode = false;
 	std::unordered_map<std::string, NPC> npcs;
 	std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
-
 }

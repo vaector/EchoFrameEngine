@@ -78,6 +78,7 @@ void RealEditor::Update(Camera3D* cam)
 	int c = 1; bool loop = true;
 	for (auto& [name, npc] : Shared::npcs)
 		npc.playAnim(c, loop);
+
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -809,49 +810,54 @@ void RealEditor::UpdateEntity()
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(freeForward, -GetMouseDelta().y)));
 		Vector3 move = Vector3Scale(delta, 2.5f);
 		
-		bool isCtrlHeld = false;
-		if (IsKeyDown(KEY_LEFT_CONTROL)) {
-			move.y = GetMouseDelta().y * 0.25f;
-			isCtrlHeld = true;
-		}
-		else {
+		if (IsKeyPressed(KEY_UP))
+			move.y = 4.0f;
+		else if (IsKeyPressed(KEY_DOWN)) 
+			move.y = -4.0f;
+		else
 			move.y = 0.0f;
-			isCtrlHeld = false;
-		}
 
 		//Updating Y
 		selectedEntity->position = Vector3Add(selectedEntity->position, {0,move.y, 0});
-		selectedEntity->collider.max = Vector3Add(selectedEntity->collider.max, { 0,move.y, 0 });
-		selectedEntity->collider.min = Vector3Add(selectedEntity->collider.min, { 0,move.y, 0 });
+		selectedEntity->collider = GetUpdatedBoundingBox(selectedEntity->originalCollider, selectedEntity->position, selectedEntity->scale);
 
 
 		//Updating XZ and check Wall collisons
-		if (!isCtrlHeld) {
 
-			selectedEntity->position = Vector3Add(selectedEntity->position, move);
-			selectedEntity->collider.max = Vector3Add(selectedEntity->collider.max, move);
-			selectedEntity->collider.min = Vector3Add(selectedEntity->collider.min, move);
+		selectedEntity->position = Vector3Add(selectedEntity->position, { move.x, 0, move.z});
+		selectedEntity->collider = GetUpdatedBoundingBox(selectedEntity->originalCollider, selectedEntity->position, selectedEntity->scale);
 
-			//Convert the collider into 2d XZ Plane to check if it collides with a wall.
-			Rectangle rect;
-			rect.x = selectedEntity->collider.min.x;
-			rect.y = selectedEntity->collider.min.z;
+		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
+		Rectangle rect;
+		rect.x = selectedEntity->collider.min.x;
+		rect.y = selectedEntity->collider.min.z;
 
-			rect.width = selectedEntity->collider.max.x - selectedEntity->collider.min.x;
-			rect.height = selectedEntity->collider.max.z - selectedEntity->collider.min.z;
+		rect.width = selectedEntity->collider.max.x - selectedEntity->collider.min.x;
+		rect.height = selectedEntity->collider.max.z - selectedEntity->collider.min.z;
 
-			for (auto& wall : Shared::walls) {
-				if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
-				{
-					selectedEntity->position = Vector3Subtract(selectedEntity->position, move);
-					selectedEntity->collider.max = Vector3Subtract(selectedEntity->collider.max, move);
-					selectedEntity->collider.min = Vector3Subtract(selectedEntity->collider.min, move);
-				}
+		for (auto& wall : Shared::walls) {
+			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+			{
+				selectedEntity->position = Vector3Subtract(selectedEntity->position, { move.x, 0, move.z });
+				selectedEntity->collider = GetUpdatedBoundingBox(selectedEntity->originalCollider, selectedEntity->position, selectedEntity->scale);
+
 			}
+		}
 
 
+		//Change Scale while pressing arrow keys
+		if (IsKeyPressed(KEY_RIGHT)) {
+			selectedEntity->scale = Vector3Add(selectedEntity->scale, {2,2,2});
 		}
+		else if (IsKeyPressed(KEY_LEFT)) {
+			selectedEntity->scale = Vector3Subtract(selectedEntity->scale, {2,2,2});
 		}
+
+		selectedEntity->scale = Vector3Clamp(selectedEntity->scale, { 1, 1, 1 }, { 200,100, 100 });
+		selectedEntity->collider = GetUpdatedBoundingBox(selectedEntity->originalCollider, selectedEntity->position, selectedEntity->scale);
+
+
+	}
 
 	//Deselect
 	if (IsKeyReleased(KEY_C)) {
@@ -887,6 +893,8 @@ void RealEditor::CreateEntity()
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		Entity newEntity;
+		newEntity.id = Shared::entities.size() + 1;
+		
 		newEntity.modelName = *Shared::selectedModelName;
 
 		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
@@ -895,6 +903,7 @@ void RealEditor::CreateEntity()
 		newEntity.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
 		BoundingBox box = GetModelBoundingBox(Shared::models[newEntity.modelName]);
+		newEntity.originalCollider = box;
 
 		box.min.x *= newEntity.scale.x;
 		box.min.y *= newEntity.scale.y;
@@ -913,6 +922,7 @@ void RealEditor::CreateEntity()
 		Shared::entities.push_back(newEntity);
 		Shared::selectedModelName = nullptr;
 	}
+	
 }
 
 void RealEditor::DrawEntity()
@@ -929,7 +939,6 @@ void RealEditor::CreateNpc()
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && Shared::selectedModelName != nullptr && selectedFloor != nullptr) {
 		NPC npc;
-
 		npc.modelName = *Shared::selectedModelName;
 		npc.name = *Shared::selectedModelName;
 
@@ -984,6 +993,28 @@ void RealEditor::DrawNpc()
 		DrawBoundingBox(npc.collider, RED);
 	}
 
+}
+
+void RealEditor::UpdateNpc()
+{
+	if (camMode == false) return;//Player Cam
+
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+
+	//Remove npc
+	for (auto& [name, npc] : Shared::npcs) {
+
+		RayCollision hit = GetRayCollisionBox(ray, npc.collider);
+		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			selectedNpc = &npc;
+			break;
+		}
+	}
+
+	//Deselect
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		selectedNpc = nullptr;
+	}
 }
 
 void RealEditor::RemoveNpc()
@@ -1246,6 +1277,27 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 		}
 	}
 	return false;
+}
+
+BoundingBox RealEditor::GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale)
+{
+	BoundingBox box;
+
+	box.min =
+	{
+		position.x + original.min.x * scale.x,
+		position.y + original.min.y * scale.y,
+		position.z + original.min.z * scale.z
+	};
+
+	box.max =
+	{
+		position.x + original.max.x * scale.x,
+		position.y + original.max.y * scale.y,
+		position.z + original.max.z * scale.z
+	};
+
+	return box;
 }
 
 

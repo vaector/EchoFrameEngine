@@ -6,7 +6,7 @@ class NPC : public Entity
 {
 
 public:
-	std::string name = "";//The NPC's name(Also the model name)
+	std::string name = "";//The NPC name(Also the model name)
 	ModelAnimation* modelAnim = nullptr;//A pointer to all the animations from pur model's .GLB
 	Model model;//Model
 
@@ -21,5 +21,6 @@ public:
 
 	void playAnim(int& currentAnim, bool& isLoop);
 	void stopAnim();
+	
 };
 
