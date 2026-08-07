@@ -121,6 +121,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 			ImGui::EndListBox();
 		}
 		ImGui::NewLine();
+
 		//Animations of selested model
 		if (Shared::selectedModelName != nullptr) {
 
@@ -135,8 +136,55 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		}
 
+		//--------CUTSCENES-----------
+		ImGui::SeparatorText("Cutscenes Section");
+
+		//Add Track
+		static Track* newTrack = nullptr;
+		
+		if (ImGui::Button("Add Track")) {
+			newTrack = new Track();
+		}
+		ImGui::NewLine();
+		//Add Keyframes
+		if (Shared::selectedEntity && newTrack) {
+
+			if (ImGui::Button("Add KeyFrame")) {
+				KeyFrame k;
+				k.frame = 0;
+				k.position = Shared::selectedEntity->position;
+				k.scale = Shared::selectedEntity->scale;
+
+				newTrack->keyframes.push_back(k);
+				
+			}
+
+		}
+
+		ImGui::NewLine();
+		//Save Track to cutscene
+		if (newTrack && Shared::selectedEntity) {
+			if (ImGui::Button("Save Track"))
+			{
+				Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].push_back(*newTrack);
+				newTrack = nullptr;
+			}
+		}
+		
+		//Display Tracks for each Entity
+		ImGui::NewLine();
+		for(auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+			ImGui::Separator();
+			ImGui::Text(Shared::entities[id].modelName.c_str());
+
+			for(auto& track : tracks) {
+				ImGui::Text("Track with %d keyframes", track.keyframes.size());
+			}
+		}
+
 		ImGui::End();
 	}
+
 	rlImGuiEnd();
 
 	first = false;

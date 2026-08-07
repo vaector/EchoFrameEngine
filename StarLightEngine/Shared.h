@@ -5,6 +5,7 @@
 #include "Ramp.h"
 #include "Entity.h"
 #include "NPC.h"
+#include "Cutscene.h"
 
 namespace Shared {
 	extern bool editorMode;
@@ -12,7 +13,7 @@ namespace Shared {
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;
 	extern std::unordered_map<std::string, Model> models;
-	extern std::vector<Entity> entities;
+	extern std::unordered_map<int, Entity> entities;
 	extern std::vector<Sector> sectors;
 	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;
@@ -31,6 +32,9 @@ namespace Shared {
 	extern bool npcMode;
 	extern std::unordered_map<std::string, NPC> npcs;
 	extern std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
+
+	extern Entity* selectedEntity;
+	extern Cutscene cutscenes;
 
 }
 

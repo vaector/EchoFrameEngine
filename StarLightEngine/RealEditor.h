@@ -38,7 +38,6 @@ private:
 	Wall* selectedWall = nullptr;
 	Sector* selectedFloor = nullptr;
 	Sector* selectedCeiling = nullptr;
-	Entity* selectedEntity = nullptr;
 	NPC* selectedNpc = nullptr;
 
 public:
