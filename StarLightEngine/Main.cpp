@@ -20,11 +20,17 @@ int main() {
 
     //ImGui Context
     rlImGuiSetup(true);
+    //Initialize Audio
+	InitAudioDevice();
 
     //Init Textures(Images)
     Importer::InitTextures();
     Importer::InitModels();
     Importer::InitModelAnimationNames();
+
+    //Init Sounds and Music
+    Importer::InitSounds();
+    Importer::InitMusic();
 
     Engine engine;
 
@@ -106,7 +112,14 @@ int main() {
         EndDrawing();
     }
 
+    //Unload
+    Importer::UnloadTextures();
+    Importer::UnloadModels();
+    Importer::UnloadSounds();
+    Importer::UnloadMusic();
+
     rlImGuiShutdown();
+	CloseAudioDevice();
     CloseWindow(); 
 
     return 0;

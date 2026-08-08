@@ -64,3 +64,63 @@ void Importer::InitModelAnimationNames()
 		}
 	}
 }
+
+void Importer::InitSounds()
+{
+
+	if (!fs::exists("audio/sounds"))
+		TraceLog(LOG_FATAL, "ERROR::AUDIO_SOUNDS_FOLDER_DOES_NOT_EXIST");
+	else {
+		for (auto& entry : fs::directory_iterator("audio/sounds")) {
+			std::string fileName = entry.path().stem().string(); //stem-> removes the extension.
+
+			Shared::sounds[fileName] = LoadSound(entry.path().string().c_str());
+			//std::cout << fileName << std::endl;
+		}
+	}
+}
+
+void Importer::InitMusic()
+{
+	if (!fs::exists("audio/music"))
+		TraceLog(LOG_FATAL, "ERROR::AUDIO_MUSIC_FOLDER_DOES_NOT_EXIST");
+	else {
+		for (auto& entry : fs::directory_iterator("audio/music")) {
+			std::string fileName = entry.path().stem().string(); //stem-> removes the extension.
+
+			Shared::music[fileName] = LoadMusicStream(entry.path().string().c_str());
+			std::cout << fileName << std::endl;
+		}
+	}
+}
+
+void Importer::UnloadTextures()
+{
+	for(auto& [name, texture] : Shared::textures)
+		UnloadTexture(texture);
+	Shared::textures.clear();
+}
+
+void Importer::UnloadModels()
+{
+	for(auto& [name, model] : Shared::models)
+		UnloadModel(model);	
+	Shared::models.clear();
+}
+
+void Importer::UnloadSounds()
+{
+	for(auto& [name, sound] : Shared::sounds)
+		UnloadSound(sound);
+	Shared::sounds.clear();
+}
+
+void Importer::UnloadMusic()
+{
+	for(auto& [name, music] : Shared::music)
+		UnloadMusicStream(music);
+	Shared::music.clear();
+}
+
+
+

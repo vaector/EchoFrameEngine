@@ -3,6 +3,7 @@
 #include "rlgl.h"
 #include <iostream>
 #include "Cutscene.h"
+#include "Audio.h"
 
 RealEditor::RealEditor()
 {
@@ -152,7 +153,11 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 right = Vector3Normalize(Vector3CrossProduct(playerForward, { 0,1,0 }));
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, playerForward));
 
-		//Movement
+		//MOVEMENT AND WALKING SFX
+
+		bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D);
+		Audio::Play(Shared::sounds["running"], true, walking);
+
 		if (IsKeyDown(KEY_W))
 			move = Vector3Add(move, Vector3Scale(playerForward, playerMoveSpeed * dt));
 		if (IsKeyDown(KEY_S))

@@ -136,13 +136,13 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		}
 
-		//--------CUTSCENES-----------
+		//--------CUTSCENES FOR ENTITIES-----------
 		ImGui::SeparatorText("Cutscenes Section");
 
 		//Add Track
 		static Track* newTrack = nullptr;
 		
-		if (ImGui::Button("Add Track")) {
+		if (ImGui::Button("Add Track")) {\
 			newTrack = new Track();
 		}
 		ImGui::NewLine();

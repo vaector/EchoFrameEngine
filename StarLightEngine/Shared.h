@@ -36,6 +36,8 @@ namespace Shared {
 	extern Entity* selectedEntity;
 	extern Cutscene cutscenes;
 
+	extern std::unordered_map<std::string, Sound> sounds;
+	extern std::unordered_map<std::string, Music> music;
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)
