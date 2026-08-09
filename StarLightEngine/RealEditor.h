@@ -16,13 +16,13 @@ private:
 	Vector3 freeForward;
 
 	//PlayerCam
-	int playerMoveSpeed = 125;
+	int playerMoveSpeed = 150;
 
 	float playerYaw = 0.0f;
 	float playerPitch = 0.0f;
 	Vector3 playerForward;
-	float gravity = 200.0f;
-	float jump = 150.0f;
+	float gravity = 512.0f;
+	float jump = 250.0f;
 	bool isGround = false;
 	float verticalVelocity = 0.0f;
 	float playerHeight = 150.0f;

@@ -18,3 +18,9 @@ void Audio::Play(Sound& sound, bool loop , bool condition)
 		}
 	}	
 }
+
+void Audio::Play(Music& music)
+{
+	if (!IsMusicStreamPlaying(music))
+		PlayMusicStream(music);
+}

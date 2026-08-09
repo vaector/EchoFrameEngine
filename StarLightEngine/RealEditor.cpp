@@ -89,7 +89,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 	float dt = GetFrameTime();
 	Vector3 move = { 0 };
 	Vector2 mouseDt = GetMouseDelta();
-	
+
 	if (cam == &freeCam) {
 		camMode = true;
 		//Camera
@@ -154,7 +154,6 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, playerForward));
 
 		//MOVEMENT AND WALKING SFX
-
 		bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D);
 		Audio::Play(Shared::sounds["running"], true, walking);
 
@@ -212,7 +211,8 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		nextPosY = playerCam.position;
 		nextPosY.y += move.y;
 
-		UpdatePlayerHeight(&playerCam, &nextPosY);
+		UpdatePlayerHeight(&playerCam, &nextPosY);//Renews the player Bottom and Top values.
+
 		// Check collision
 		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
 		{
@@ -1148,24 +1148,19 @@ bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
         float t = along / rampLength;
         float rampY = lowY + (highY - lowY) * t; // local surface height at this point
 
-        if (verticalVelocity <= 0.0f)
-        {
-            // Falling or resting -> only land if we're actually straddling the surface
-            if (playerBottom <= rampY && playerTop >= rampY)
-            {
-                nextPos->y = rampY + playerHeight / 2 + skin;
-                return true;
-            }
-        }
-        else
-        {
-            // Moving upward -> treat the ramp's underside like a ceiling, bump instead of climb
-            if (playerTop >= rampY && playerBottom < rampY)
-            {
-                nextPos->y = rampY - playerHeight / 2 - skin;
-                return true;
-            }
-        }
+		// Falling or resting -> only land if we're actually straddling the surface
+		if (playerBottom <= rampY && playerTop > rampY)
+		{
+			nextPos->y = rampY + playerHeight / 2 + skin;
+			return true;
+		}
+		// Moving upward -> treat the ramp's underside like a ceiling, bump instead of climb
+		else if (playerTop >= rampY && playerBottom < rampY)
+		{
+			nextPos->y = rampY - playerHeight / 2 - skin;
+			return true;
+		}
+
     }
 
     return false;

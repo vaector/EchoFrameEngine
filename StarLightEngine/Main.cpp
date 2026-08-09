@@ -45,7 +45,7 @@ int main() {
 
     while (!WindowShouldClose())
     {
-
+    
 		//Press F to switch between Editor Mode and Real Mode
         if (IsKeyPressed(KEY_F) && Shared::editorMode) {
             Shared::editorMode = false;//RealEditor
