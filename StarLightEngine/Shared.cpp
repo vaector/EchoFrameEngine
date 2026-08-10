@@ -1,5 +1,6 @@
 #include "Shared.h"
 
+std::string tile1 = "tile1";//Default texture name
 
 namespace Shared {
 	bool editorMode = true;
@@ -8,6 +9,7 @@ namespace Shared {
 	std::unordered_map<std::string, Texture2D> textures;
 	std::unordered_map<std::string, Model> models;
 	Texture2D* selectedTexture = &textures["tile1"];
+	std::string* selectedTextureName = &tile1;
 	std::string* selectedModelName = nullptr;
 	std::unordered_map<int, Entity> entities;
 	std::vector<Sector> sectors;

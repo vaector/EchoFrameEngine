@@ -31,7 +31,8 @@ namespace mapbox {
 
 	}
 }
-
+//Set the static wallId
+int Wall::currentWallId = 0;
 
 TileEditor::TileEditor()
 {
@@ -87,6 +88,7 @@ void TileEditor::Update()
 			RemoveSector();
 
 	}
+
 }
 
 void TileEditor::UpdateCam()
@@ -137,8 +139,11 @@ void TileEditor::UpdateWall()
 		pendingWall.wallHeight = Shared::wallHeight;
 		pendingWall.floor = Shared::floor;
 		pendingWall.texture = Shared::selectedTexture;
+		pendingWall.textureName = *Shared::selectedTextureName;
 		pendingWall.inSector = !Shared::sectorMode;
 		pendingWall.layer = Shared::layer;
+		pendingWall.id = Wall::currentWallId;
+		Wall::currentWallId++;
 		//if sectorMode == true then inSector is false(false because the wall is not in a sector and should be added to one).
 		Shared::walls.push_back(new Wall(pendingWall));
 	}
@@ -223,7 +228,9 @@ void TileEditor::UpdateSector()
 
 			sector.floor = Shared::floor;
 			sector.floorTexture = Shared::selectedTexture;
+			sector.floorTextureName = *Shared::selectedTextureName;
 			sector.ceilingTexture = Shared::selectedTexture;
+			sector.ceilingTextureName = *Shared::selectedTextureName;
 			sector.layer = Shared::layer;
 
 			if (Shared::ceilingOnly) {
@@ -327,8 +334,10 @@ void TileEditor::UpdateRamp()
 		pendingRamp.floor = Shared::floor;
 		pendingRamp.rampHeight = Shared::wallHeight;
 		pendingRamp.layer = Shared::layer;
+		pendingRamp.textureName = *Shared::selectedTextureName;
 		
 		Shared::ramps.push_back(pendingRamp);
+
 	}
 
 	//Update Place Holder Ramp
@@ -401,7 +410,9 @@ void TileEditor::UpdateDoor()
 						DoorSwitch newSwitch;
 						newSwitch.floor = Shared::floor;
 						newSwitch.texture = Shared::selectedTexture;
+						newSwitch.textureName = *Shared::selectedTextureName;
 						newSwitch.linkedWall = selectedWall;
+						newSwitch.wallId = selectedWall->id;
 						//Pos
 						Vector3 wallCenter = { (selectedWall->startPos.x + selectedWall->endPos.x) / 2, selectedWall->wallHeight / 2 ,(selectedWall->startPos.y + selectedWall->endPos.y) / 2 };
 						newSwitch.pos = wallCenter;
@@ -496,6 +507,9 @@ void TileEditor::SplitWall()
 			newWall->floor = wall->floor;
 			newWall->wallHeight = wall->wallHeight;
 			newWall->texture = wall->texture;
+			newWall->textureName = wall->textureName;
+			newWall->id = Wall::currentWallId;
+			Wall::currentWallId++;
 
 			wall->inSector = false;
 			newWall->inSector = false;

@@ -17,6 +17,7 @@ namespace Shared {
 	extern std::vector<Sector> sectors;
 	extern std::vector<Ramp> ramps;
 	extern Texture2D* selectedTexture;
+	extern std::string* selectedTextureName;
 	extern std::string* selectedModelName;
 	extern bool sectorMode;
 	extern bool floorOnly;

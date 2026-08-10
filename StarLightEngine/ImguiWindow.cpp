@@ -6,6 +6,7 @@
 #include "imgui/imgui_stdlib.h"
 #include "Entity.h"
 #include <iostream>
+#include "SaveSystem.h"
 
 void ImguiWindow::UpdateImguiTileEditor()
 {
@@ -28,6 +29,17 @@ void ImguiWindow::UpdateImguiTileEditor()
 	ImGui::Begin("TileMap Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos({ 0,0 });
 
+	//Save and Load
+	ImGui::NewLine();
+	//Save and Load buttons
+	if (ImGui::Button("Save")) {
+		SaveSystem::SaveGame("savegame.json");
+	}
+	if (ImGui::Button("Load")) {
+		SaveSystem::LoadGame("savegame.json");
+	}
+	ImGui::NewLine();
+
 	//Drop Down box for choosing textures
 	static std::string selectedT = "tile1";
 	int count = 0;
@@ -42,6 +54,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 		{
 			Shared::selectedTexture = &tex;
 			selectedT = key;
+			Shared::selectedTextureName = &selectedT;
 		}
 
 		if (++count % 4 != 0)
@@ -67,7 +80,6 @@ void ImguiWindow::UpdateImguiTileEditor()
 		if (Shared::layer <= 0)
 			Shared::layer = 0;
 	}
-
 	ImGui::NewLine();
 
 	//Door Mode
