@@ -15,26 +15,26 @@ void RealEditor::InitCam()
 {
 
 	//Free Cam
-	freeCam.fovy = 60;
-	freeCam.position = { 1024,50,1024};//1024
-	freeCam.projection = CAMERA_PERSPECTIVE;
-	freeCam.target = { 0 };
-	freeCam.up = { 0.0f, 1.0f, 0.0f };
+	Shared::free.cam.fovy = 60;
+	Shared::free.cam.position = { 1024,50,1024};//1024
+	Shared::free.cam.projection = CAMERA_PERSPECTIVE;
+	Shared::free.cam.target = { 0 };
+	Shared::free.cam.up = { 0.0f, 1.0f, 0.0f };
 
-	freeForward = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
-	freeYaw = atan2f(freeForward.z, freeForward.x);
-	freePitch = asinf(freeForward.y);
+	Shared::free.forward = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+	Shared::free.yaw = atan2f(Shared::free.forward.z, Shared::free.forward.x);
+	Shared::free.pitch = asinf(Shared::free.forward.y);
 
 	//Player Cam
-	playerCam.fovy = 60;
-	playerCam.position = { 1024,50,1024 };
-	playerCam.projection = CAMERA_PERSPECTIVE;
-	playerCam.target = { 0 };
-	playerCam.up = { 0.0f, 1.0f, 0.0f };
+	Shared::player.cam.fovy = 60;
+	Shared::player.cam.position = { 1024,50,1024 };
+	Shared::player.cam.projection = CAMERA_PERSPECTIVE;
+	Shared::player.cam.target = { 0 };
+	Shared::player.cam.up = { 0.0f, 1.0f, 0.0f };
 
-	playerForward = Vector3Normalize(Vector3Subtract(playerCam.target, playerCam.position));
-	playerYaw = atan2f(playerForward.z, playerForward.x);
-	playerPitch = asinf(playerForward.y);
+	Shared::player.forward = Vector3Normalize(Vector3Subtract(Shared::player.cam.target, Shared::player.cam.position));
+	Shared::player.yaw = atan2f(Shared::player.forward.z, Shared::player.forward.x);
+	Shared::player.pitch = asinf(Shared::player.forward.y);
 }
 
 void RealEditor::Update(Camera3D* cam)
@@ -90,81 +90,81 @@ void RealEditor::UpdateCam(Camera3D* cam)
 	Vector3 move = { 0 };
 	Vector2 mouseDt = GetMouseDelta();
 
-	if (cam == &freeCam) {
+	if (cam == &Shared::free.cam) {
 		camMode = true;
 		//Camera
 
 		if (freeCamToggle) {
-			freeYaw += -mouseDt.x * (mouseSens * DEG2RAD);
-			freePitch += -mouseDt.y * (mouseSens * DEG2RAD);
+			Shared::free.yaw += -mouseDt.x * (mouseSens * DEG2RAD);
+			Shared::free.pitch += -mouseDt.y * (mouseSens * DEG2RAD);
 		}
-		freePitch = Clamp(freePitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
+		Shared::free.pitch = Clamp(Shared::free.pitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
 
-		freeForward.x = cosf(freePitch) * sinf(freeYaw);
-		freeForward.y = sinf(freePitch);
-		freeForward.z = cosf(freePitch) * cosf(freeYaw);
+		Shared::free.forward.x = cosf(Shared::free.pitch) * sinf(Shared::free.yaw);
+		Shared::free.forward.y = sinf(Shared::free.pitch);
+		Shared::free.forward.z = cosf(Shared::free.pitch) * cosf(Shared::free.yaw);
 
-		freeForward = Vector3Normalize(freeForward);
+		Shared::free.forward = Vector3Normalize(Shared::free.forward);
 
-		Vector3 right = Vector3Normalize(Vector3CrossProduct(freeForward, { 0,1,0 }));
-		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, freeForward));
+		Vector3 right = Vector3Normalize(Vector3CrossProduct(Shared::free.forward, { 0,1,0 }));
+		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::free.forward));
 
 		//Movement
 		if (IsKeyDown(KEY_W))
-			move = Vector3Add(move, Vector3Scale(freeForward, freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(Shared::free.forward, Shared::free.moveSpeed * dt));
 		if (IsKeyDown(KEY_S))
-			move = Vector3Add(move, Vector3Scale(freeForward, -freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(Shared::free.forward, -Shared::free.moveSpeed * dt));
 		if (IsKeyDown(KEY_D))
-			move = Vector3Add(move, Vector3Scale(right, freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(right, Shared::free.moveSpeed * dt));
 		if (IsKeyDown(KEY_A))
-			move = Vector3Add(move, Vector3Scale(right, -freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(right, -Shared::free.moveSpeed * dt));
 		if (IsKeyDown(KEY_E))
-			move = Vector3Add(move, Vector3Scale(up, freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(up, Shared::free.moveSpeed * dt));
 		if (IsKeyDown(KEY_Q))
-			move = Vector3Add(move, Vector3Scale(up, -freeMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(up, -Shared::free.moveSpeed * dt));
 
 
-		freeCam.position = Vector3Add(freeCam.position, move);
-		freeCam.target = Vector3Add(freeCam.position, freeForward);
+		Shared::free.cam.position = Vector3Add(Shared::free.cam.position, move);
+		Shared::free.cam.target = Vector3Add(Shared::free.cam.position, Shared::free.forward);
 	}
-	else if (cam == &playerCam) {
+	else if (cam == &Shared::player.cam) {
 		camMode = false;
 		//Update Position from TileEditor
 		if (Shared::setPlayerPos)
 		{
-			playerCam.position.x = Shared::playerPos.x;
-			playerCam.position.y = Shared::playerPos.y;
-			playerCam.position.z = Shared::playerPos.z;
+			Shared::player.cam.position.x = Shared::playerPos.x;
+			Shared::player.cam.position.y = Shared::playerPos.y;
+			Shared::player.cam.position.z = Shared::playerPos.z;
 			Shared::setPlayerPos = false;
 		}
 
 		//Camera
-		playerYaw += -mouseDt.x * (mouseSens * DEG2RAD);
-		playerPitch += -mouseDt.y * (mouseSens * DEG2RAD);
+		Shared::player.yaw += -mouseDt.x * (mouseSens * DEG2RAD);
+		Shared::player.pitch += -mouseDt.y * (mouseSens * DEG2RAD);
 
-		playerPitch = Clamp(playerPitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
+		Shared::player.pitch = Clamp(Shared::player.pitch, -89.0f * DEG2RAD, 89.0f * DEG2RAD);
 
-		playerForward.x = cosf(playerPitch) * sinf(playerYaw);
-		playerForward.y = sinf(playerPitch);
-		playerForward.z = cosf(playerPitch) * cosf(playerYaw);
+		Shared::player.forward.x = cosf(Shared::player.pitch) * sinf(Shared::player.yaw);
+		Shared::player.forward.y = sinf(Shared::player.pitch);
+		Shared::player.forward.z = cosf(Shared::player.pitch) * cosf(Shared::player.yaw);
 
-		playerForward = Vector3Normalize(playerForward);
+		Shared::player.forward = Vector3Normalize(Shared::player.forward);
 
-		Vector3 right = Vector3Normalize(Vector3CrossProduct(playerForward, { 0,1,0 }));
-		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, playerForward));
+		Vector3 right = Vector3Normalize(Vector3CrossProduct(Shared::player.forward, { 0,1,0 }));
+		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::player.forward));
 
 		//MOVEMENT AND WALKING SFX
 		bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D);
 		Audio::Play(Shared::sounds["running"], true, walking);
 
 		if (IsKeyDown(KEY_W))
-			move = Vector3Add(move, Vector3Scale(playerForward, playerMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(Shared::player.forward, Shared::player.moveSpeed * dt));
 		if (IsKeyDown(KEY_S))
-			move = Vector3Add(move, Vector3Scale(playerForward, -playerMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(Shared::player.forward, -Shared::player.moveSpeed * dt));
 		if (IsKeyDown(KEY_D))
-			move = Vector3Add(move, Vector3Scale(right, playerMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(right, Shared::player.moveSpeed * dt));
 		if (IsKeyDown(KEY_A))
-			move = Vector3Add(move, Vector3Scale(right, -playerMoveSpeed * dt));
+			move = Vector3Add(move, Vector3Scale(right, -Shared::player.moveSpeed * dt));
 
 
 		//COLLISION
@@ -172,9 +172,9 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 moveY = { 0, move.y, 0 };
 		Vector3 moveZ = { 0, 0, move.z };
 
-		Vector3 nextPosX = Vector3Add(playerCam.position, moveX);
-		Vector3 nextPosY = Vector3Add(playerCam.position, moveY);
-		Vector3 nextPosZ = Vector3Add(playerCam.position, moveZ);
+		Vector3 nextPosX = Vector3Add(Shared::player.cam.position, moveX);
+		Vector3 nextPosY = Vector3Add(Shared::player.cam.position, moveY);
+		Vector3 nextPosZ = Vector3Add(Shared::player.cam.position, moveZ);
 		
 
 		//Check XZ Wall Collision
@@ -185,67 +185,67 @@ void RealEditor::UpdateCam(Camera3D* cam)
 
 
 		//Check collision with entities
-		if (CheckCollisionPlayerEntityXZ(&playerCam, &nextPosX)) {
+		if (CheckCollisionPlayerEntityXZ(&Shared::player.cam, &nextPosX)) {
 			move.x = 0;
 		}
-		if (CheckCollisionPlayerEntityXZ(&playerCam, &nextPosZ)) {
+		if (CheckCollisionPlayerEntityXZ(&Shared::player.cam, &nextPosZ)) {
 			move.z = 0;
 		}
 		
 
 		// Gravity
-		if (!isGround)
-			verticalVelocity -= gravity * dt;
+		if (!Shared::player.isGround)
+			Shared::player.verticalVelocity -= Shared::player.gravity * dt;
 
 		// Jump
-		if (IsKeyPressed(KEY_SPACE) && isGround)
+		if (IsKeyPressed(KEY_SPACE) && Shared::player.isGround)
 		{
-			verticalVelocity = jump;
-			isGround = false;
+			Shared::player.verticalVelocity = Shared::player.jump;
+			Shared::player.isGround = false;
 		}
 
 		// Apply vertical velocity
-		move.y = verticalVelocity * dt;
+		move.y = Shared::player.verticalVelocity * dt;
 
 		// Calculate the next Y position AFTER move.y is updated
-		nextPosY = playerCam.position;
+		nextPosY = Shared::player.cam.position;
 		nextPosY.y += move.y;
 
-		UpdatePlayerHeight(&playerCam, &nextPosY);//Renews the player Bottom and Top values.
+		UpdatePlayerHeight(&Shared::player.cam, &nextPosY);//Renews the player Bottom and Top values.
 
 		// Check collision
 		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
 		{
-			verticalVelocity = 0.0f;
-			isGround = true;
+			Shared::player.verticalVelocity = 0.0f;
+			Shared::player.isGround = true;
 
-			move.y = nextPosY.y - playerCam.position.y;
+			move.y = nextPosY.y - Shared::player.cam.position.y;
 		}
 		else
 		{
-			isGround = false;
+			Shared::player.isGround = false;
 		}
 
-		if (CheckCollisionPlayerEntityY(&playerCam, &nextPosY)) {
-			verticalVelocity = 0;
-			move.y = nextPosY.y - playerCam.position.y;
-			isGround = true;
+		if (CheckCollisionPlayerEntityY(&Shared::player.cam, &nextPosY)) {
+			Shared::player.verticalVelocity = 0;
+			move.y = nextPosY.y - Shared::player.cam.position.y;
+			Shared::player.isGround = true;
 		}
 
 		// Apply updated position and target
-		playerCam.position = Vector3Add(playerCam.position, move);
-		playerCam.target = Vector3Add(playerCam.position, playerForward);
+		Shared::player.cam.position = Vector3Add(Shared::player.cam.position, move);
+		Shared::player.cam.target = Vector3Add(Shared::player.cam.position, Shared::player.forward);
 	}
 
 }
 void RealEditor::UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos)
 {
-	playerBottom = nextPos->y - playerHeight / 2;
-	playerTop = nextPos->y + playerHeight / 2;
+	Shared::player.bottom = nextPos->y - Shared::player.height / 2;
+	Shared::player.top = nextPos->y + Shared::player.height / 2;
 }
 void RealEditor::UpdateSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 
 	float closestFloorDist = FLT_MAX;
@@ -297,7 +297,7 @@ void RealEditor::UpdateSector()
 }
 void RealEditor::UpdateWall()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	Wall* closestWall = nullptr;
 	float closestDist = FLT_MAX;
@@ -335,7 +335,7 @@ void RealEditor::UpdateWall()
 }
 void RealEditor::UpdateRamp()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	for (auto& ramp: Shared::ramps) {
 
@@ -382,7 +382,7 @@ void RealEditor::UpdateWallFeatures()
 }
 void RealEditor::EditDoor()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	static DoorSwitch* selectedDoorSwitch = nullptr;
 	static Vector2 savedDir = { 0 };
@@ -420,7 +420,7 @@ void RealEditor::EditDoor()
 		{
 			selectedDoorSwitch = &d;
 			savedDir = dir;
-			sign = (Vector3DotProduct(freeForward, perp) < 0.0f) ? 1.0f : -1.0f;
+			sign = (Vector3DotProduct(Shared::free.forward, perp) < 0.0f) ? 1.0f : -1.0f;
 			savedPerp = perp;
 
 			break;
@@ -483,7 +483,7 @@ void RealEditor::EditDoor()
 }
 void RealEditor::PlayerDoor()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, playerCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::player.cam);
 
 	static DoorSwitch* selectedDoorSwitch = nullptr;
 	static Vector2 savedDir = { 0 };
@@ -546,7 +546,7 @@ void RealEditor::PlayerDoor()
 
 			selectedDoorSwitch = &d;
 			savedDir = dir;
-			sign = (Vector3DotProduct(freeForward, perp) < 0.0f) ? 1.0f : -1.0f;
+			sign = (Vector3DotProduct(Shared::free.forward, perp) < 0.0f) ? 1.0f : -1.0f;
 			savedPerp = perp;
 
 			break;
@@ -799,7 +799,7 @@ void RealEditor::UpdateEntity()
 {
 	if (camMode == false) return;//Player Cam
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	//Move entities
 	for (auto& [id, entity] : Shared::entities) {
@@ -813,8 +813,8 @@ void RealEditor::UpdateEntity()
 	//If an entity is selected
 	if (Shared::selectedEntity != nullptr) {
 		//Move the entity and its collider
-		Vector3 perp = Vector3CrossProduct(freeForward, { 0,1,0 });
-		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(freeForward, -GetMouseDelta().y)));
+		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
+		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
 		Vector3 move = Vector3Scale(delta, 2.5f);
 		
 		if (IsKeyPressed(KEY_UP))
@@ -899,12 +899,13 @@ void RealEditor::CreateEntity()
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		Entity newEntity;
-		newEntity.id = Shared::entities.size() + 1;
+		newEntity.id = Entity::currentId;
+		Entity::currentId++;
 		
 		newEntity.modelName = *Shared::selectedModelName;
 
-		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
-		Vector3 spawnPos = Vector3Add(freeCam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
 
 		newEntity.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
@@ -957,8 +958,8 @@ void RealEditor::CreateNpc()
 		npc.model = Shared::models[npc.modelName];
 
 		//Position
-		Vector3 direction = Vector3Normalize(Vector3Subtract(freeCam.target, freeCam.position));
-		Vector3 spawnPos = Vector3Add(freeCam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
 		npc.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
 		//Collider
@@ -1005,7 +1006,7 @@ void RealEditor::UpdateNpc()
 {
 	if (camMode == false) return;//Player Cam
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	//Remove npc
 	for (auto& [name, npc] : Shared::npcs) {
@@ -1027,7 +1028,7 @@ void RealEditor::RemoveNpc()
 {
 	if (camMode == false) return;//Player Cam
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	//Remove npc
 	for (auto& [name, npc]: Shared::npcs) {
@@ -1043,7 +1044,7 @@ void RealEditor::RemoveNpc()
 
 bool RealEditor::WallCloserThanSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, freeCam);
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	float wallDist = FLT_MAX;
 	float sectorDist = FLT_MAX;
@@ -1087,7 +1088,7 @@ bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 		float wallMinY = wall->floor * wall->wallHeight;
 		float wallMaxY = wallMinY + wall->wallHeight;
 
-		if (CheckCollisionPointLine(testPosXZ, wall->startPos, wall->endPos, 2) && (playerBottom <= wallMaxY && playerTop >= wallMinY)){
+		if (CheckCollisionPointLine(testPosXZ, wall->startPos, wall->endPos, 2) && (Shared::player.bottom <= wallMaxY && Shared::player.top >= wallMinY)){
 			nextPos->x = cam->position.x;
 			nextPos->z = cam->position.z;
 			return true;
@@ -1106,15 +1107,15 @@ bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 		float floorY = sector.floor * Shared::wallHeight;
 		float ceilingY = floorY + Shared::wallHeight - 1.0f;
 		
-		if (playerTop > floorY && playerBottom < floorY && sector.hasFloor && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
+		if (Shared::player.top > floorY && Shared::player.bottom < floorY && sector.hasFloor && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
 		{
-			nextPos->y = floorY + playerHeight / 2;
+			nextPos->y = floorY + Shared::player.height / 2;
 			return true;
 		}
 
-		if (playerBottom < ceilingY && playerTop > ceilingY && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+		if (Shared::player.bottom < ceilingY && Shared::player.top > ceilingY && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
 		{
-			nextPos->y = ceilingY - playerHeight / 2;
+			nextPos->y = ceilingY - Shared::player.height / 2;
 			return true;
 		}
 
@@ -1149,15 +1150,15 @@ bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
         float rampY = lowY + (highY - lowY) * t; // local surface height at this point
 
 		// Falling or resting -> only land if we're actually straddling the surface
-		if (playerBottom <= rampY && playerTop > rampY)
+		if (Shared::player.bottom <= rampY && Shared::player.top > rampY)
 		{
-			nextPos->y = rampY + playerHeight / 2 + skin;
+			nextPos->y = rampY + Shared::player.height / 2 + skin;
 			return true;
 		}
 		// Moving upward -> treat the ramp's underside like a ceiling, bump instead of climb
-		else if (playerTop >= rampY && playerBottom < rampY)
+		else if (Shared::player.top >= rampY && Shared::player.bottom < rampY)
 		{
-			nextPos->y = rampY - playerHeight / 2 - skin;
+			nextPos->y = rampY - Shared::player.height / 2 - skin;
 			return true;
 		}
 
@@ -1215,23 +1216,23 @@ bool RealEditor::CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rect
 bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 {
 
-	if (cam != &playerCam)
+	if (cam != &Shared::player.cam)
 		return false;
 
-	playerCollider.min = {
-		nextPos->x - playerRadius,
-		nextPos->y - playerHeight / 2,
-		nextPos->z - playerRadius
+	Shared::player.collider.min = {
+		nextPos->x - Shared::player.radius,
+		nextPos->y - Shared::player.height / 2,
+		nextPos->z - Shared::player.radius
 	};
 
-	playerCollider.max = {
-		nextPos->x + playerRadius,
-		nextPos->y + playerHeight / 2,
-		nextPos->z + playerRadius
+	Shared::player.collider.max = {
+		nextPos->x + Shared::player.radius,
+		nextPos->y + Shared::player.height / 2,
+		nextPos->z + Shared::player.radius
 	};
 
 	for (auto& [id, entity] : Shared::entities) {
-		if (CheckCollisionBoxes(entity.collider, playerCollider)) {
+		if (CheckCollisionBoxes(entity.collider, Shared::player.collider)) {
 			return true;
 		}
 	}
@@ -1240,39 +1241,39 @@ bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 
 bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 {
-	if (cam != &playerCam)
+	if (cam != &Shared::player.cam)
 		return false;
 
 	const float gap = 0.05f; //Small value so that the player is not exactly on or bellow the entity(enables the player to collide smoothly and move)
 
-	playerCollider.min = {
-		nextPos->x - playerRadius,
-		nextPos->y - playerHeight / 2,
-		nextPos->z - playerRadius
+	Shared::player.collider.min = {
+		nextPos->x - Shared::player.radius,
+		nextPos->y - Shared::player.height / 2,
+		nextPos->z - Shared::player.radius
 	};
 
-	playerCollider.max = {
-		nextPos->x + playerRadius,
-		nextPos->y + playerHeight / 2,
-		nextPos->z + playerRadius
+	Shared::player.collider.max = {
+		nextPos->x + Shared::player.radius,
+		nextPos->y + Shared::player.height / 2,
+		nextPos->z + Shared::player.radius
 	};
 
 	for (auto& [id, e] : Shared::entities) {
-		if (CheckCollisionBoxes(e.collider, playerCollider)) {
+		if (CheckCollisionBoxes(e.collider, Shared::player.collider)) {
 
 			float eBottom = e.collider.min.y;
 			float eTop = e.collider.max.y;
 
-			if (verticalVelocity <= 0.0f)
+			if (Shared::player.verticalVelocity <= 0.0f)
 			{
 				// Land slightly ABOVE the top face
-				nextPos->y = eTop + playerHeight / 2 + gap;
+				nextPos->y = eTop + Shared::player.height / 2 + gap;
 				return true;
 			}
 			else
 			{
 				//stop slightly BELOW the underside
-				nextPos->y = eBottom - playerHeight / 2 - gap;
+				nextPos->y = eBottom - Shared::player.height / 2 - gap;
 				return true;
 			}
 		}

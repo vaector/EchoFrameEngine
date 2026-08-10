@@ -25,7 +25,16 @@ private:
 	static void LoadDoorSwitches(json& j);
 
 	static void SaveEntities(json& j);
+	static void LoadEntities(json& j);
+
 	static void SaveNPCs(json& j);
+	static void LoadNPCs(json& j);
+
+	static void SaveCutscenes(json& j);
+	static void LoadCutscenes(json& j);
+
+	static void SavePlayer(json& j);
+	static void LoadPlayer(json& j);
 
 };
 

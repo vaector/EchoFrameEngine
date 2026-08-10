@@ -8,29 +8,6 @@ private:
 
 	float mouseSens = 0.1f;
 
-	//FreeCam
-	int freeMoveSpeed = 175;
-
-	float freeYaw = 0.0f;
-	float freePitch = 0.0f;
-	Vector3 freeForward;
-
-	//PlayerCam
-	int playerMoveSpeed = 150;
-
-	float playerYaw = 0.0f;
-	float playerPitch = 0.0f;
-	Vector3 playerForward;
-	float gravity = 512.0f;
-	float jump = 250.0f;
-	bool isGround = false;
-	float verticalVelocity = 0.0f;
-	float playerHeight = 150.0f;
-	float playerRadius = 8.0f;//Width of the palayer
-	BoundingBox playerCollider;
-	float playerBottom;
-	float playerTop;
-
 	bool freeCamToggle = true;//If true then free cam can be moved with mouse, otherwise if false then the free cam does not move(Camera Rotation wise).
 	bool camMode = true;//True = FreeCam
 	//---------------
@@ -41,9 +18,6 @@ private:
 	NPC* selectedNpc = nullptr;
 
 public:
-	//3d Camera
-	Camera3D freeCam;
-	Camera3D playerCam;
 
 	RealEditor();
 	void InitCam();

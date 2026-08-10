@@ -15,6 +15,6 @@ class Track
 public:
 	std::vector<KeyFrame> keyframes;
 	float time = 0.0f;
-	size_t currentFrame = 0;
+	int currentFrame = 0;
 };
 

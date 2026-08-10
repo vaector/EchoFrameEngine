@@ -171,6 +171,7 @@
     <ClInclude Include="Importer.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="NPC.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Ramp.h" />
     <ClInclude Include="RealEditor.h" />
     <ClInclude Include="SaveSystem.h" />

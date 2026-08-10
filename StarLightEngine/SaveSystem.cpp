@@ -15,7 +15,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 		return;
 	}
 	//Open File
-	std::ofstream file("save/" + filename);
+	std::ofstream file("save/" + filename);//Read and Write (ofstream)
 	if (!file.is_open())
 	{
 		TraceLog(LOG_ERROR, "ERROR::COULD_NOT_OPEN_SAVE_FILE");
@@ -23,20 +23,29 @@ void SaveSystem::SaveGame(const std::string& filename)
 	}
 
 	//Create JSON object and save it in the file
-	json json;
-	SaveWalls(json);
-	SaveSectors(json);
-	SaveRamps(json);
-	SaveDoorSwitches(json);
+	json data;
+	SaveWalls(data);
+	SaveSectors(data);
+	SaveRamps(data);
+	SaveDoorSwitches(data);
+	SaveEntities(data);
+	SaveNPCs(data);
+	SaveCutscenes(data);
+	SavePlayer(data);
 
-	file << json.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
+	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
 }
 
 void SaveSystem::LoadGame(const std::string& filename)
 {
+	//Open Folder
+	if (!fs::exists("save")) {
+		TraceLog(LOG_FATAL, "ERROR::SAVE_FOLDER_DOES_NOT_EXIST");
+		return;
+	}
 
-	std::ifstream file("save/" + filename);
+	std::ifstream file("save/" + filename);//Read only (ifstream)
 
 	if (!file.is_open())
 	{
@@ -53,6 +62,10 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadSectors(data);
 	LoadRamps(data);
 	LoadDoorSwitches(data);
+	LoadEntities(data);
+	LoadNPCs(data);
+	LoadCutscenes(data);
+	LoadPlayer(data);
 }
 
 void SaveSystem::SaveWalls(json& j)
@@ -281,6 +294,7 @@ void SaveSystem::SaveEntities(json& j)
 	for(auto& [id, entity] : Shared::entities) {
 		json e;
 		e["id"] = id;
+		e["currentId"] = Entity::currentId;
 		e["modelName"] = entity.modelName;
 		e["position"] = { entity.position.x, entity.position.y, entity.position.z };
 		e["scale"] = { entity.scale.x, entity.scale.y, entity.scale.z };
@@ -291,6 +305,26 @@ void SaveSystem::SaveEntities(json& j)
 	}
 }
 
+void SaveSystem::LoadEntities(json& j)
+{
+	Shared::entities.clear();
+	if (!j.contains("entities"))
+		return;
+	
+	for (auto& e : j["entities"]) {
+		Entity entity;
+		entity.id = e["id"].get<int>();
+		Entity::currentId = e["currentId"].get<int>();
+		entity.modelName = e["modelName"].get<std::string>();
+		entity.position = { e["position"][0].get<float>(), e["position"][1].get<float>(), e["position"][2].get<float>() };
+		entity.scale = { e["scale"][0].get<float>(), e["scale"][1].get<float>(), e["scale"][2].get<float>() };
+		entity.collider = { {e["collider"][0][0], e["collider"][0][1], e["collider"][0][2]}, {e["collider"][1][0], e["collider"][1][1], e["collider"][1][2]} };
+		entity.originalCollider = { {e["originalCollider"][0][0], e["originalCollider"][0][1], e["originalCollider"][0][2]}, {e["originalCollider"][1][0], e["originalCollider"][1][1], e["originalCollider"][1][2]} };
+	
+		Shared::entities[entity.id] = entity;
+	}
+}
+
 void SaveSystem::SaveNPCs(json& j)
 {
 	j["npcs"] = json::array();
@@ -298,6 +332,7 @@ void SaveSystem::SaveNPCs(json& j)
 		json n;
 		//Entity Stuff
 		n["id"] = npc.id;
+		n["currentId"] = Entity::currentId;
 		n["modelName"] = npc.modelName;
 		n["position"] = { npc.position.x, npc.position.y, npc.position.z };
 		n["scale"] = { npc.scale.x, npc.scale.y, npc.scale.z };
@@ -305,9 +340,162 @@ void SaveSystem::SaveNPCs(json& j)
 		n["originalCollider"] = { { npc.originalCollider.min.x, npc.originalCollider.min.y, npc.originalCollider.min.z },{ npc.originalCollider.max.x, npc.originalCollider.max.y, npc.originalCollider.max.z } };
 
 		//NPC Stuff
-		n["name"] = npc.name;
+		n["name"] = npc.name;//Model and modelANimation is derived from the npc name.
+		n["animSpeed"] = npc.animSpeed;
+		n["currentAnim"] = npc.currentAnim;
+		n["isPlayingMap"] = npc.isPlayingMap;
+		n["isFinishedMap"] = npc.isFinishedMap;
+		n["currentAccumulatorMap"] = npc.currentAccumulatorMap;
+		n["currentFrameMap"] = npc.currentFrameMap;
+
 
 		j["npcs"].push_back(n);
 	}
+}
+
+void SaveSystem::LoadNPCs(json& j)
+{
+	Shared::npcs.clear();
+	if (!j.contains("npcs"))
+		return;
+
+	for (auto& n : j["npcs"]) {
+		//Entity stuff
+		NPC npc;
+		npc.id = n["id"].get<int>();
+		Entity::currentId = n["currentId"].get<int>();
+		npc.modelName = n["modelName"].get<std::string>();
+		npc.position = { n["position"][0].get<float>(), n["position"][1].get<float>(), n["position"][2].get<float>() };
+		npc.scale = { n["scale"][0].get<float>(), n["scale"][1].get<float>(), n["scale"][2].get<float>() };
+		npc.collider = { {n["collider"][0][0], n["collider"][0][1], n["collider"][0][2]}, {n["collider"][1][0], n["collider"][1][1], n["collider"][1][2]} };
+		npc.originalCollider = { {n["originalCollider"][0][0], n["originalCollider"][0][1], n["originalCollider"][0][2]}, {n["originalCollider"][1][0], n["originalCollider"][1][1], n["originalCollider"][1][2]} };
+
+		//Npc stuff
+		npc.name = n["name"].get<std::string>();
+		npc.animSpeed = n["animSpeed"].get<float>();
+		npc.currentAnim = n["currentAnim"].get<int>();
+		npc.isPlayingMap = n["isPlayingMap"].get<std::unordered_map<int, bool>>();
+		npc.isFinishedMap = n["isFinishedMap"].get<std::unordered_map<int, bool>>();
+		npc.currentAccumulatorMap = n["currentAccumulatorMap"].get<std::unordered_map<int, float>>();
+		npc.currentFrameMap = n["currentFrameMap"].get<std::unordered_map<int, int>>();
+
+		npc.model = Shared::models[npc.name];
+
+		std::string path = "models/";
+		path += npc.name;
+		path += ".glb";
+		npc.modelAnim = LoadModelAnimations(path.c_str(), &npc.animCount);
+
+		Shared::npcs[npc.name] = npc;
+	}
+}
+
+void SaveSystem::SaveCutscenes(json& j)
+{
+	j["cutscenes"] = json::array();
+
+	//Entity
+	for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+		json c;
+		c["entityId"] = id;
+		c["tracks"] = json::array();
+
+		for (auto& t : tracks) {
+			json track;
+			track["time"] = t.time;
+			track["currentFrame"] = t.currentFrame;
+			track["keyframes"] = json::array();
+
+			for (auto& key : t.keyframes) {
+				json k;
+				k["frame"] = key.frame;
+				k["position"] = { key.position.x, key.position.y, key.position.z };
+				k["scale"] = { key.scale.x, key.scale.y, key.scale.z };
+				k["rotation"] = { key.rotation.x, key.rotation.y, key.rotation.z };
+
+				track["keyframes"].push_back(k);
+			}
+
+			c["tracks"].push_back(track);
+		}
+
+		j["cutscenes"].push_back(c);
+
+	}
+
+	//Npc
+
+}
+
+void SaveSystem::LoadCutscenes(json& j)
+{
+	Shared::cutscenes.entityCutscene.clear();
+	Shared::cutscenes.npcCutscene.clear();
+
+	if (!j.contains("cutscenes"))
+		return;
+
+	for (auto& c : j["cutscenes"]) {
+		int entityId = c["entityId"].get<int>();
+		std::vector<Track> tracks;
+
+		for (auto& t : c["tracks"]) {
+			Track track;
+
+			track.time = t["time"].get<float>();
+			track.currentFrame = t["currentFrame"].get<int>();
+
+			for (auto& key : t["keyframes"]) {
+				KeyFrame k;
+
+				k.frame = key["frame"].get<int>();
+				k.position = { key["position"][0].get<float>(), key["position"][1].get<float>(), key["position"][2].get<float>() };
+				k.scale = { key["scale"][0].get<float>(), key["scale"][1].get<float>(), key["scale"][2].get<float>() };
+				k.rotation = { key["rotation"][0].get<float>(), key["rotation"][1].get<float>(), key["rotation"][2].get<float>() };
+
+				track.keyframes.push_back(k);
+			}
+
+			tracks.push_back(track);
+		}
+
+		Shared::cutscenes.entityCutscene[entityId] = tracks;
+	}
+
+	// NPC cutscene loading goes here
+}
+
+void SaveSystem::SavePlayer(json& j)
+{
+	j["player"] = json::object();
+	json player;
+	player["moveSpeed"] = Shared::player.moveSpeed;
+	player["gravity"] = Shared::player.gravity;
+	player["jump"] = Shared::player.jump;
+	player["height"] = Shared::player.height;
+	player["radius"] = Shared::player.radius;
+
+	player["setPlayerPos"] = Shared::setPlayerPos;
+	player["playerPos"] = { Shared::playerPos.x, Shared::playerPos.y, Shared::playerPos.z };
+
+	j["player"] = player;
+}
+
+void SaveSystem::LoadPlayer(json& j)
+{
+	if (!j.contains("player"))
+		return;
+
+	auto& p = j["player"];
+
+	Shared::player.moveSpeed = p["moveSpeed"].get<int>();
+	Shared::player.gravity = p["gravity"].get<float>();
+	Shared::player.jump = p["jump"].get<float>();
+	Shared::player.height = p["height"].get<float>();
+	Shared::player.radius = p["radius"].get<float>();
+
+	Shared::setPlayerPos = p["setPlayerPos"].get<bool>();
+	Shared::playerPos = { p["playerPos"][0].get<float>(), p["playerPos"][1].get<float>() , p["playerPos"][2].get<float>() };
+
 }
 

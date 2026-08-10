@@ -11,6 +11,6 @@ public:
 	Vector3 scale = {50,50,50};
 	BoundingBox collider = {0};
 	BoundingBox originalCollider = { 0 };
-
+	static int currentId;
 };
 

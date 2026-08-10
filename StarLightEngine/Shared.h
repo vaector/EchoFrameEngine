@@ -6,6 +6,7 @@
 #include "Entity.h"
 #include "NPC.h"
 #include "Cutscene.h"
+#include "Player.h"
 
 namespace Shared {
 	extern bool editorMode;
@@ -28,6 +29,9 @@ namespace Shared {
 	extern std::vector<DoorSwitch> doorSwitches;
 	extern Vector3 playerPos;
 	extern bool setPlayerPos;
+	extern Player player;
+	extern Player free;
+
 	extern int layer;
 
 	extern bool npcMode;
@@ -39,6 +43,7 @@ namespace Shared {
 
 	extern std::unordered_map<std::string, Sound> sounds;
 	extern std::unordered_map<std::string, Music> music;
+
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

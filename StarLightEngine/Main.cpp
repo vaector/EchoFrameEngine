@@ -63,23 +63,21 @@ int main() {
             DisableCursor();
         }
 
-
         // Update
         if (Shared::editorMode)//TileEditor Updates
             engine.UpdateGui();
         else if (!Shared::editorMode) {//Real Editor Updates
             if(freeCamMode)
-                engine.UpdateReal(&engine.realEditor.freeCam);
+                engine.UpdateReal(&Shared::free.cam);
             else {
-                engine.UpdateReal(&engine.realEditor.playerCam);
+                engine.UpdateReal(&Shared::player.cam);
                 
             }
         }
 
         // Draw
         BeginDrawing();
-        ClearBackground(BLACK); 
-
+        ClearBackground(BLACK);
 
         if (Shared::editorMode) {
             
@@ -93,9 +91,9 @@ int main() {
         else if (!Shared::editorMode) {
             //Real(3d Stuff)
             if(freeCamMode)
-                BeginMode3D(engine.realEditor.freeCam);
+                BeginMode3D(Shared::free.cam);
             else
-                BeginMode3D(engine.realEditor.playerCam);
+                BeginMode3D(Shared::player.cam);
 
             engine.DrawReal();
 
