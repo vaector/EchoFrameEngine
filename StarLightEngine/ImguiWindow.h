@@ -7,6 +7,7 @@ class ImguiWindow
 
 public:
 	void UpdateImguiTileEditor();
+	void UpdateImguiExitPopup(bool& running);
 
 	bool first = true;
 	std::unordered_map<int, std::string> layerNameMap;

@@ -17,6 +17,7 @@ int main() {
     InitWindow(screenWidth, screenHeight, "StarLight Engine");
     //ToggleBorderlessWindowed();
     SetTargetFPS(60);
+    SetExitKey(KEY_NULL);
 
     //ImGui Context
     rlImGuiSetup(true);
@@ -43,9 +44,14 @@ int main() {
 
     bool freeCamMode = true;
 
-    while (!WindowShouldClose())
+    bool running = true;
+    while (running)
     {
-    
+        //Close window upon pressing the Window "Red X" Button.
+        if (WindowShouldClose())
+            running = false;
+
+
 		//Press F to switch between Editor Mode and Real Mode
         if (IsKeyPressed(KEY_F) && Shared::editorMode) {
             Shared::editorMode = false;//RealEditor
@@ -105,7 +111,12 @@ int main() {
         }
 
         //Imgui
+        rlImGuiBegin();
         imgui.UpdateImguiTileEditor();
+        imgui.UpdateImguiExitPopup(running);
+
+        rlImGuiEnd();
+
 
         EndDrawing();
     }

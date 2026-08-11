@@ -18,8 +18,6 @@ void ImguiWindow::UpdateImguiTileEditor()
 		layerNameMap[2] = "Objects";
 	}
 
-	rlImGuiBegin();
-
 	ImGui::SetNextWindowSizeConstraints(
 		ImVec2(200, 200),
 		ImVec2(600, 800)
@@ -29,14 +27,50 @@ void ImguiWindow::UpdateImguiTileEditor()
 	ImGui::Begin("TileMap Editor", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SetWindowPos({ 0,0 });
 
-	//Save and Load
+
 	ImGui::NewLine();
-	//Save and Load buttons
-	if (ImGui::Button("Save")) {
-		SaveSystem::SaveGame("savegame.json");
+	// Save
+	if (ImGui::Button("Save"))
+		ImGui::OpenPopup("Save?");
+
+	if (ImGui::BeginPopupModal("Save?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Are you sure you want to overwrite the save?");
+
+		if (ImGui::Button("Yes"))
+		{
+			SaveSystem::SaveGame("savegame.json");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
 	}
-	if (ImGui::Button("Load")) {
-		SaveSystem::LoadGame("savegame.json");
+
+	// Load
+	if (ImGui::Button("Load"))
+		ImGui::OpenPopup("Load?");
+
+	if (ImGui::BeginPopupModal("Load?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Are you sure? Current data will be lost.");
+
+		if (ImGui::Button("Yes"))
+		{
+			SaveSystem::LoadGame("savegame.json");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
 	}
 	ImGui::NewLine();
 
@@ -197,7 +231,37 @@ void ImguiWindow::UpdateImguiTileEditor()
 		ImGui::End();
 	}
 
-	rlImGuiEnd();
-
 	first = false;
+}
+
+void ImguiWindow::UpdateImguiExitPopup(bool& running)
+{
+
+	if (IsKeyPressed(KEY_ESCAPE)) {
+		ImGui::OpenPopup("Exit?");
+	}
+
+	if (ImGui::BeginPopupModal("Exit?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Do you want to save before exiting?");
+
+		if (ImGui::Button("Save & Exit"))
+		{
+			SaveSystem::SaveGame("savegame.json");
+			running = false;
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Exit"))
+			running = false;
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+
+	}
 }

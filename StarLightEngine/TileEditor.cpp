@@ -319,8 +319,7 @@ void TileEditor::UpdateRamp()
 			placeHolderRamp.startPos = ClosestPointOnLineSegment(mouse, *closestFloorPointStart, *closestFloorPointEnd);
 		}
 		else {
-			pendingRamp.startPos = tile;
-			placeHolderRamp.startPos = tile;
+			
 		}
 
 	}
@@ -360,20 +359,19 @@ void TileEditor::UpdateRamp()
 		Vector2 endLeft = Vector2Subtract(ramp.endPos, perp);
 		Vector2 endRight = Vector2Add(ramp.endPos, perp);
 
-		if ((CheckCollisionPointLine(mouse, startLeft, endLeft, 4) || CheckCollisionPointLine(mouse, startRight, endRight, 4)) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		if ((CheckCollisionPointLine(mouse, startLeft, endLeft, 4) || CheckCollisionPointLine(mouse, startRight, endRight, 4)) && IsKeyPressed(KEY_C)) {
 			selectedResizeRamp = &ramp;
 			WallMode = false;
 		}
-		if(selectedResizeRamp && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			Vector2 delta = GetMouseDelta();
+		if(selectedResizeRamp && IsKeyDown(KEY_C)) {
 			
-			if(delta.x > 0)
-				selectedResizeRamp->halfWidth += tileSize * 0.25f;
-			else if (delta.x < 0)
-				selectedResizeRamp->halfWidth -= tileSize * 0.25f;
+			if(IsKeyPressed(KEY_RIGHT))
+				selectedResizeRamp->halfWidth += tileSize;
+			else if (IsKeyPressed(KEY_LEFT))
+				selectedResizeRamp->halfWidth -= tileSize;
 			
 		}
-		else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+		else if (IsKeyReleased(KEY_C)) {
 			selectedResizeRamp = nullptr;
 			WallMode = true;
 		}
