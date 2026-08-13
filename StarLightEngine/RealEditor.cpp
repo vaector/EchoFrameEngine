@@ -254,32 +254,61 @@ void RealEditor::UpdateSector()
 	for (auto& sector : Shared::sectors)
 	{
 		// floor
-		for (int j = 1; j < sector.floorPoints.size() - 1; j++)
+		for (int j = 0; j < sector.indices.size(); j += 3)
 		{
-			Vector3 p0 = { sector.floorPoints[0].x,   (float)(sector.floor * Shared::wallHeight), sector.floorPoints[0].y };
-			Vector3 p1 = { sector.floorPoints[j].x,   (float)(sector.floor * Shared::wallHeight), sector.floorPoints[j].y };
-			Vector3 p2 = { sector.floorPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[j + 1].y };
+			int i0 = sector.indices[j];
+			int i1 = sector.indices[j + 1];
+			int i2 = sector.indices[j + 2];
+
+			Vector3 p0 = {
+				sector.floorPoints[i0].x,
+				(float)(sector.floor * Shared::wallHeight),
+				sector.floorPoints[i0].y
+			};
+
+			Vector3 p1 = {
+				sector.floorPoints[i1].x,
+				(float)(sector.floor * Shared::wallHeight),
+				sector.floorPoints[i1].y
+			};
+
+			Vector3 p2 = {
+				sector.floorPoints[i2].x,
+				(float)(sector.floor * Shared::wallHeight),
+				sector.floorPoints[i2].y
+			};
 
 			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
-			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && col.distance < closestFloorDist)
+
+			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+				col.distance < closestFloorDist)
 			{
 				closestFloorDist = col.distance;
 				selectedFloor = &sector;
+				selectedCeiling = nullptr;
 			}
 		}
-
 		// ceiling
-		for (int j = 1; j < sector.ceilingPoints.size() - 1; j++)
+		for (int j = 0; j < sector.indices.size(); j += 3)
 		{
-			Vector3 p0 = { sector.ceilingPoints[0].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[0].y };
-			Vector3 p1 = { sector.ceilingPoints[j].x,   (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[j].y };
-			Vector3 p2 = { sector.ceilingPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight) + Shared::wallHeight - 1.0f, sector.ceilingPoints[j + 1].y };
+			int i0 = sector.indices[j];
+			int i1 = sector.indices[j + 1];
+			int i2 = sector.indices[j + 2];
+
+			float y = (float)(sector.floor * Shared::wallHeight)+ Shared::wallHeight - 1.0f;
+
+			Vector3 p0 = { sector.ceilingPoints[i0].x, y, sector.ceilingPoints[i0].y };
+			Vector3 p1 = { sector.ceilingPoints[i1].x, y, sector.ceilingPoints[i1].y };
+			Vector3 p2 = { sector.ceilingPoints[i2].x, y, sector.ceilingPoints[i2].y };
 
 			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
-			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && col.distance < closestCeilingDist)
+
+			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
+				col.distance < closestCeilingDist)
 			{
 				closestCeilingDist = col.distance;
 				selectedCeiling = &sector;
+				selectedFloor = nullptr;
 			}
 		}
 	}
@@ -290,10 +319,13 @@ void RealEditor::UpdateSector()
 		selectedFloor = nullptr;
 	}
 
-	if (selectedFloor && closestFloorDist < closestCeilingDist)
-		selectedFloor->floorTextureName = *Shared::selectedTextureName;
-	else if (selectedCeiling)
-		selectedCeiling->ceilingTextureName = *Shared::selectedTextureName;
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		if (selectedFloor)
+			selectedFloor->floorTextureName = *Shared::selectedTextureName;
+		if (selectedCeiling)
+			selectedCeiling->ceilingTextureName = *Shared::selectedTextureName;
+	}
+	
 }
 void RealEditor::UpdateWall()
 {
@@ -754,9 +786,6 @@ void RealEditor::DrawRamp()
 		float tileX = 12;
 		float tileY = 12;
 
-		if (selectedRamp != nullptr)
-			rlEnableWireMode();
-
 		rlBegin(RL_QUADS);
 		rlSetTexture(Shared::textures[ramp.textureName].id);
 
@@ -772,8 +801,6 @@ void RealEditor::DrawRamp()
 
 		rlEnd();
 		rlSetTexture(0);
-
-		rlDisableWireMode();
 	}
 }
 
@@ -785,9 +812,6 @@ void RealEditor::Draw()
 	//Draw Walls
 	DrawWall();
 
-	//Draw Sector
-	DrawSector();
-
 	DrawRamp();
 
 	DrawDoorSwitch();
@@ -795,6 +819,9 @@ void RealEditor::Draw()
 	DrawEntity();
 
 	DrawNpc();
+	
+
+	DrawSector();
 }
 
 void RealEditor::UpdateEntity()
