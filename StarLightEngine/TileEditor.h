@@ -69,6 +69,6 @@ public:
 };
 
 //-------UpdateSector----- Press "C" to build the sector
-//-------UpdateRamp------- Press "R" to build the ramp
+//-------UpdateRamp------- Press "R" to build the ramp. Hold "C" to to resize the ramp using the "Right" and "Left" Arrow Keys to Add/Subtract from the Ramp width.
 //-------DELETE----------- Right click to delete objects(walls, ramps, door switches)
 //-------DOOR------------- Right click after selecting Door Mode to add doors.

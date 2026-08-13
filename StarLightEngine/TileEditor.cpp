@@ -138,7 +138,6 @@ void TileEditor::UpdateWall()
 		pendingWall.endPos = currentTile;
 		pendingWall.wallHeight = Shared::wallHeight;
 		pendingWall.floor = Shared::floor;
-		pendingWall.texture = Shared::selectedTexture;
 		pendingWall.textureName = *Shared::selectedTextureName;
 		pendingWall.inSector = !Shared::sectorMode;
 		pendingWall.layer = Shared::layer;
@@ -227,9 +226,7 @@ void TileEditor::UpdateSector()
 			sector.indices = mapbox::earcut<int>(polygon);
 
 			sector.floor = Shared::floor;
-			sector.floorTexture = Shared::selectedTexture;
 			sector.floorTextureName = *Shared::selectedTextureName;
-			sector.ceilingTexture = Shared::selectedTexture;
 			sector.ceilingTextureName = *Shared::selectedTextureName;
 			sector.layer = Shared::layer;
 
@@ -329,7 +326,6 @@ void TileEditor::UpdateRamp()
 			return;
 
 		pendingRamp.endPos = tile;
-		pendingRamp.texture = Shared::selectedTexture;
 		pendingRamp.floor = Shared::floor;
 		pendingRamp.rampHeight = Shared::wallHeight;
 		pendingRamp.layer = Shared::layer;
@@ -407,7 +403,6 @@ void TileEditor::UpdateDoor()
 					if (CheckCollisionPointLine(mouse, selectedWall->startPos, selectedWall->endPos, 2) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 						DoorSwitch newSwitch;
 						newSwitch.floor = Shared::floor;
-						newSwitch.texture = Shared::selectedTexture;
 						newSwitch.textureName = *Shared::selectedTextureName;
 						newSwitch.linkedWall = selectedWall;
 						newSwitch.wallId = selectedWall->id;
@@ -504,7 +499,6 @@ void TileEditor::SplitWall()
 			newWall->endPos = oldEndPos;
 			newWall->floor = wall->floor;
 			newWall->wallHeight = wall->wallHeight;
-			newWall->texture = wall->texture;
 			newWall->textureName = wall->textureName;
 			newWall->id = Wall::currentWallId;
 			Wall::currentWallId++;

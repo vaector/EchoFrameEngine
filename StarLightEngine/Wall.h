@@ -9,7 +9,6 @@ struct Wall{ //Wall|Door(A wall can be a door)
 	Vector2 endPos = { 0,0 };
 	float wallHeight = 0;
 	int floor = 0;
-	Texture2D* texture = nullptr;
 	std::string  textureName = "";
 	bool inSector = false;
 	bool isDoor = false;
@@ -22,7 +21,6 @@ struct Wall{ //Wall|Door(A wall can be a door)
 struct DoorSwitch {
 	Vector3 pos = { 0 };
 	int floor = 0;
-	Texture2D* texture = nullptr;
 	std::string  textureName = "";
 	Wall* linkedWall = nullptr;
 	int wallId = -1;
@@ -34,8 +32,6 @@ struct Sector{
 	std::vector<Vector2> ceilingPoints;
 	std::vector<int> indices = {};
 	int floor = 0;
-	Texture2D* floorTexture = nullptr; 
-	Texture2D* ceilingTexture = nullptr;
 	std::string  floorTextureName = "";
 	std::string  ceilingTextureName = "";
 	bool hasFloor = true;

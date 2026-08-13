@@ -291,9 +291,9 @@ void RealEditor::UpdateSector()
 	}
 
 	if (selectedFloor && closestFloorDist < closestCeilingDist)
-		selectedFloor->floorTexture = Shared::selectedTexture;
+		selectedFloor->floorTextureName = *Shared::selectedTextureName;
 	else if (selectedCeiling)
-		selectedCeiling->ceilingTexture = Shared::selectedTexture;
+		selectedCeiling->ceilingTextureName = *Shared::selectedTextureName;
 }
 void RealEditor::UpdateWall()
 {
@@ -329,7 +329,7 @@ void RealEditor::UpdateWall()
 
 	//Change texture
 	if (closestWall && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		closestWall->texture = Shared::selectedTexture;
+		closestWall->textureName = *Shared::selectedTextureName;
 	}
 
 }
@@ -360,10 +360,14 @@ void RealEditor::UpdateRamp()
 		selectedRamp = nullptr;
 
 	if (selectedRamp != nullptr) {
+		//Change Ramp Height
 		if (IsKeyDown(KEY_UP))
 			selectedRamp->rampHeight += 1.0f;
 		else if (IsKeyDown(KEY_DOWN))
 			selectedRamp->rampHeight -= 1.0f;
+		//Change texture
+		if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			selectedRamp->textureName = *Shared::selectedTextureName;
 
 		selectedRamp->rampHeight = Clamp(selectedRamp->rampHeight, 0.0f, Shared::wallHeight);
 	}
@@ -426,7 +430,7 @@ void RealEditor::EditDoor()
 			break;
 		}
 		//Deselect
-		else if(!dCol.hit && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+		else if(!dCol.hit && !IsKeyDown(KEY_C))
 			selectedDoorSwitch = nullptr;
 	}
 
@@ -435,18 +439,18 @@ void RealEditor::EditDoor()
 		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr )
 			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
 
-		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+		if (IsKeyDown(KEY_C))
 		{
 			Vector2 mouseDelta = GetMouseDelta();
 
 			selectedDoorSwitch->pos = Vector3Add(
 				selectedDoorSwitch->pos,
-				Vector3Scale({ savedDir.x, 0, savedDir.y }, mouseDelta.x * 0.25f * sign)
+				Vector3Scale({ savedDir.x, 0, savedDir.y }, mouseDelta.x * 1.25f * sign)
 			);
 
 			selectedDoorSwitch->pos = Vector3Add(
 				selectedDoorSwitch->pos,
-				Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -0.25f)
+				Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f)
 			);
 
 		}
@@ -459,7 +463,7 @@ void RealEditor::EditDoor()
 		}
 
 		//Deselect Door Switch
-		if(IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+		if(IsKeyReleased(KEY_C))
 			selectedDoorSwitch = nullptr;
 	}
 
@@ -614,7 +618,7 @@ void RealEditor::DrawDoorSwitch()
 		float tileY = 2.0f;
 
 		rlBegin(RL_QUADS);
-		rlSetTexture(d.texture->id);
+		rlSetTexture(Shared::textures[d.textureName].id);
 
 		rlColor4ub(255, 255, 255, 255);
 
@@ -642,7 +646,7 @@ void RealEditor::DrawWall()
 
 		
 		rlBegin(RL_QUADS);
-		rlSetTexture(wall->texture->id);
+		rlSetTexture(Shared::textures[wall->textureName].id);
 
 		if (selectedWall == wall)
 			rlColor4ub(255, 0, 0, 150);
@@ -662,7 +666,6 @@ void RealEditor::DrawWall()
 
 void RealEditor::DrawSector()
 {
-	rlDisableDepthTest();
 
 	for (auto& sector : Shared::sectors)
 	{
@@ -670,14 +673,14 @@ void RealEditor::DrawSector()
 		if (sector.hasFloor)
 		{
 			rlBegin(RL_TRIANGLES);
-			rlSetTexture(sector.floorTexture->id);
+			rlSetTexture(Shared::textures[sector.floorTextureName].id);
 			
 			if (selectedFloor == &sector)
 				rlColor4ub(255, 0, 0, 150);
 			else
 				rlColor4ub(255, 255, 255, 255);
 
-			for (int i = 0; i + 2 < sector.indices.size(); i += 3)
+			for (int i = 0; i < sector.indices.size(); i += 3)
 			{
 				const Vector2& p0 = sector.floorPoints[sector.indices[i]];
 				const Vector2& p1 = sector.floorPoints[sector.indices[i + 2]];
@@ -701,14 +704,14 @@ void RealEditor::DrawSector()
 		if (sector.hasCeiling)
 		{
 			rlBegin(RL_TRIANGLES);
-			rlSetTexture(sector.ceilingTexture->id);
+			rlSetTexture(Shared::textures[sector.ceilingTextureName].id);
 			
 			if (selectedCeiling == &sector)
 				rlColor4ub(255, 0, 0, 150);
 			else
 				rlColor4ub(255, 255, 255, 255);
 
-			for (int i = 0; i + 2 < sector.indices.size(); i += 3)
+			for (int i = 0; i  < sector.indices.size(); i += 3)
 			{
 				const Vector2& p0 = sector.ceilingPoints[sector.indices[i]];
 				const Vector2& p1 = sector.ceilingPoints[sector.indices[i + 1]];
@@ -730,7 +733,6 @@ void RealEditor::DrawSector()
 		}
 	}
 
-	rlEnableDepthTest();
 }
 
 void RealEditor::DrawRamp()
@@ -756,7 +758,7 @@ void RealEditor::DrawRamp()
 			rlEnableWireMode();
 
 		rlBegin(RL_QUADS);
-		rlSetTexture(ramp.texture->id);
+		rlSetTexture(Shared::textures[ramp.textureName].id);
 
 		if (selectedRamp == &ramp)//Draw selected ramp in red
 			rlColor4ub(255, 0, 0, 255);
@@ -815,7 +817,7 @@ void RealEditor::UpdateEntity()
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 2.5f);
+		Vector3 move = Vector3Scale(delta, 10.0f);
 		
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
@@ -860,7 +862,7 @@ void RealEditor::UpdateEntity()
 			Shared::selectedEntity->scale = Vector3Subtract(Shared::selectedEntity->scale, {2,2,2});
 		}
 
-		Shared::selectedEntity->scale = Vector3Clamp(Shared::selectedEntity->scale, { 1, 1, 1 }, { 200,100, 100 });
+		Shared::selectedEntity->scale = Vector3Clamp(Shared::selectedEntity->scale, { 1, 1, 1 }, { 200,200, 200 });
 		Shared::selectedEntity->collider = GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
 
 

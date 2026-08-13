@@ -115,13 +115,6 @@ void SaveSystem::LoadWalls(const json& j)
 		wall->wallHeight = w["wallHeight"].get<float>();
 
 		wall->textureName = w["textureName"].get<std::string>();
-		if (Shared::textures.contains(wall->textureName))
-			wall->texture = &Shared::textures[wall->textureName];
-		else
-		{
-			TraceLog(LOG_WARNING,"WARNING::TEXTURE_NOT_FOUND: %s",wall->textureName.c_str());
-			wall->texture = nullptr;
-		}
 
 		wall->inSector = w["inSector"].get<bool>();
 		wall->isDoor = w["isDoor"].get<bool>();
@@ -184,16 +177,7 @@ void SaveSystem::LoadSectors(const json& j)
 		sector.hasCeiling = w["hasCeiling"].get<bool>();
 		sector.layer = w["layer"].get<int>();
 
-		if (Shared::textures.contains(sector.floorTextureName))
-			sector.floorTexture = &Shared::textures[sector.floorTextureName];
-		else
-			TraceLog(LOG_WARNING, "WARNING::TEXTURE_NOT_FOUND: %s", sector.floorTextureName.c_str());
 		
-		if (Shared::textures.contains(sector.ceilingTextureName))
-			sector.ceilingTexture = &Shared::textures[sector.ceilingTextureName];
-		else
-			TraceLog(LOG_WARNING, "WARNING::TEXTURE_NOT_FOUND: %s", sector.ceilingTextureName.c_str());
-
 		Shared::sectors.push_back(sector);
 	}
 }
@@ -227,12 +211,7 @@ void SaveSystem::LoadRamps(const json& j)
 		ramp.startPos = { r["startPos"][0].get<float>(),r["startPos"][1].get<float>() };
 		ramp.endPos = { r["endPos"][0].get<float>(),r["endPos"][1].get<float>() };
 		ramp.textureName = r["textureName"].get<std::string>();
-		if (Shared::textures.contains(ramp.textureName))
-			ramp.texture = &Shared::textures[ramp.textureName];
-		else {
-			TraceLog(LOG_WARNING, "WARNING::TEXTURE_NOT_FOUND: %s", ramp.textureName.c_str());
-			ramp.texture = nullptr;
-		}
+		
 		ramp.floor = r["floor"].get<int>();
 		ramp.layer = r["layer"].get<int>();
 		ramp.halfWidth = r["halfWidth"].get<int>();
@@ -268,12 +247,7 @@ void SaveSystem::LoadDoorSwitches(json& j)
 		ds.pos = { d["pos"][0].get<float>(), d["pos"][1].get<float>() , d["pos"][2].get<float>() };
 		ds.floor = d["floor"].get<int>();
 		ds.textureName = d["textureName"].get<std::string>();
-		if (Shared::textures.contains(ds.textureName))
-			ds.texture = &Shared::textures[ds.textureName];
-		else {
-			TraceLog(LOG_WARNING, "WARNING::TEXTURE_NOT_FOUND: %s", ds.textureName.c_str());
-			ds.texture = nullptr;
-		}
+		
 		ds.wallId = d["wallId"].get<int>();
 		
 		ds.linkedWall = nullptr;

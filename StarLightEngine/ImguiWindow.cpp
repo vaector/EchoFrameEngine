@@ -86,7 +86,6 @@ void ImguiWindow::UpdateImguiTileEditor()
 			(ImTextureID)(intptr_t)tex.id,
 			ImVec2(64, 64)))
 		{
-			Shared::selectedTexture = &tex;
 			selectedT = key;
 			Shared::selectedTextureName = &selectedT;
 		}
