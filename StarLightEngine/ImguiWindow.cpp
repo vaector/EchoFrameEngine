@@ -187,9 +187,15 @@ void ImguiWindow::UpdateImguiTileEditor()
 		//Add Track
 		static Track* newTrack = nullptr;
 		
-		if (ImGui::Button("Add Track")) {\
+		if (ImGui::Button("Add Track")) {
 			newTrack = new Track();
+			ImGui::OpenPopup("TrackName?");
 		}
+		if (newTrack != nullptr) {
+			TrackNamePopup(newTrack->name);
+		}
+
+
 		ImGui::NewLine();
 		//Add Keyframes
 		if (Shared::selectedEntity && newTrack) {
@@ -215,17 +221,39 @@ void ImguiWindow::UpdateImguiTileEditor()
 				newTrack = nullptr;
 			}
 		}
-		
-		//Display Tracks for each Entity
-		ImGui::NewLine();
-		for(auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
-			ImGui::Separator();
-			ImGui::Text(Shared::entities[id].modelName.c_str());
 
-			for(auto& track : tracks) {
-				ImGui::Text("Track with %d keyframes", track.keyframes.size());
+		ImGui::NewLine();
+		//Test a cutscene Track
+		if (Shared::selectedEntity) {
+			int i = 0;
+			for (auto& track : Shared::cutscenes.entityCutscene[Shared::selectedEntity->id]) {
+				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					Shared::cutscenes.playingTrack = &track.name;
+					Shared::cutscenes.SaveOriginalKeyFrame();
+				}
+				ImGui::SameLine();
+				if (ImGui::Button(("Delete Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					if (Shared::cutscenes.playingTrack == &track.name) {
+						Shared::cutscenes.playingTrack = nullptr;
+					}
+					Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].erase(Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].begin() + i);
+					Shared::cutscenes.Stop();
+				}
+				i++;
 			}
 		}
+		if (ImGui::Button("Stop playing track")) {
+			Shared::cutscenes.playingTrack = nullptr;
+
+			//Stop the cutscene and reset the entity to its original keyframe
+			Shared::cutscenes.Stop();
+		}
+
+		//A track is playing
+		if (Shared::cutscenes.playingTrack) {
+			Shared::cutscenes.Play(*Shared::cutscenes.playingTrack);
+		}
+			
 
 		ImGui::End();
 	}
@@ -259,6 +287,34 @@ void ImguiWindow::UpdateImguiExitPopup(bool& running)
 
 		if (ImGui::Button("Cancel"))
 			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+
+	}
+}
+
+void ImguiWindow::TrackNamePopup(std::string& name)
+{
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
+	if (ImGui::BeginPopupModal("TrackName?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Enter the Track Name: ");
+
+		ImGui::InputText("##TrackName", &Shared::trackName);
+
+		if (ImGui::Button("OK") && !Shared::trackName.empty())
+		{
+			name = Shared::trackName;
+			
+			std::cout << "New Track Name: " << name << "\n";
+			Shared::trackName.clear();
+			ImGui::CloseCurrentPopup();
+		}
 
 		ImGui::EndPopup();
 

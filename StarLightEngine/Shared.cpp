@@ -34,6 +34,7 @@ namespace Shared {
 
 	Entity* selectedEntity = nullptr;
 	Cutscene cutscenes;
+	std::string trackName;
 
 	std::unordered_map<std::string, Sound> sounds;
 	std::unordered_map<std::string, Music> music;

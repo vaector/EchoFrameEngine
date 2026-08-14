@@ -378,8 +378,9 @@ void SaveSystem::SaveCutscenes(json& j)
 			json track;
 			track["time"] = t.time;
 			track["currentFrame"] = t.currentFrame;
-			track["keyframes"] = json::array();
+			track["name"] = t.name;
 
+			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
 				json k;
 				k["frame"] = key.frame;
@@ -418,6 +419,7 @@ void SaveSystem::LoadCutscenes(json& j)
 
 			track.time = t["time"].get<float>();
 			track.currentFrame = t["currentFrame"].get<int>();
+			track.name = t["name"].get<std::string>();
 
 			for (auto& key : t["keyframes"]) {
 				KeyFrame k;

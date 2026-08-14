@@ -10,11 +10,12 @@ struct KeyFrame {
 	Vector3 scale;
 };
 
-class Track
+struct Track
 {
-public:
 	std::vector<KeyFrame> keyframes;
+	KeyFrame originalKeyFrame;
 	float time = 0.0f;
 	int currentFrame = 0;
+	std::string name;
 };
 

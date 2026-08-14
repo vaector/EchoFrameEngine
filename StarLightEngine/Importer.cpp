@@ -91,7 +91,7 @@ void Importer::InitMusic()
 			Shared::music[fileName] = LoadMusicStream(entry.path().string().c_str());
 			Shared::music[fileName].looping = true;
 
-			std::cout << fileName << std::endl;
+			//std::cout << fileName << std::endl;
 		}
 	}
 }

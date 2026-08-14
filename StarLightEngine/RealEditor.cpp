@@ -80,8 +80,6 @@ void RealEditor::Update(Camera3D* cam)
 	for (auto& [name, npc] : Shared::npcs)
 		npc.playAnim(c, loop);
 
-	if(IsKeyDown(KEY_B))
-		Shared::cutscenes.Play();
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -844,7 +842,7 @@ void RealEditor::UpdateEntity()
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 10.0f);
+		Vector3 move = Vector3Scale(delta, 8.0f);
 		
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
