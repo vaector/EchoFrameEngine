@@ -272,6 +272,7 @@ void SaveSystem::SaveEntities(json& j)
 		e["modelName"] = entity.modelName;
 		e["position"] = { entity.position.x, entity.position.y, entity.position.z };
 		e["scale"] = { entity.scale.x, entity.scale.y, entity.scale.z };
+		e["rotation"] = { entity.rotation.x, entity.rotation.y, entity.rotation.z };
 		e["collider"] = { { entity.collider.min.x, entity.collider.min.y, entity.collider.min.z },{ entity.collider.max.x, entity.collider.max.y, entity.collider.max.z } };
 		e["originalCollider"] = { { entity.originalCollider.min.x, entity.originalCollider.min.y, entity.originalCollider.min.z },{ entity.originalCollider.max.x, entity.originalCollider.max.y, entity.originalCollider.max.z } };
 
@@ -292,6 +293,7 @@ void SaveSystem::LoadEntities(json& j)
 		entity.modelName = e["modelName"].get<std::string>();
 		entity.position = { e["position"][0].get<float>(), e["position"][1].get<float>(), e["position"][2].get<float>() };
 		entity.scale = { e["scale"][0].get<float>(), e["scale"][1].get<float>(), e["scale"][2].get<float>() };
+		entity.rotation = { e["rotation"][0].get<float>(), e["rotation"][1].get<float>(), e["rotation"][2].get<float>() };
 		entity.collider = { {e["collider"][0][0], e["collider"][0][1], e["collider"][0][2]}, {e["collider"][1][0], e["collider"][1][1], e["collider"][1][2]} };
 		entity.originalCollider = { {e["originalCollider"][0][0], e["originalCollider"][0][1], e["originalCollider"][0][2]}, {e["originalCollider"][1][0], e["originalCollider"][1][1], e["originalCollider"][1][2]} };
 	
@@ -310,6 +312,7 @@ void SaveSystem::SaveNPCs(json& j)
 		n["modelName"] = npc.modelName;
 		n["position"] = { npc.position.x, npc.position.y, npc.position.z };
 		n["scale"] = { npc.scale.x, npc.scale.y, npc.scale.z };
+		n["rotation"] = { npc.rotation.x, npc.rotation.y, npc.rotation.z };
 		n["collider"] = { { npc.collider.min.x, npc.collider.min.y, npc.collider.min.z },{ npc.collider.max.x, npc.collider.max.y, npc.collider.max.z } };
 		n["originalCollider"] = { { npc.originalCollider.min.x, npc.originalCollider.min.y, npc.originalCollider.min.z },{ npc.originalCollider.max.x, npc.originalCollider.max.y, npc.originalCollider.max.z } };
 
@@ -341,6 +344,7 @@ void SaveSystem::LoadNPCs(json& j)
 		npc.modelName = n["modelName"].get<std::string>();
 		npc.position = { n["position"][0].get<float>(), n["position"][1].get<float>(), n["position"][2].get<float>() };
 		npc.scale = { n["scale"][0].get<float>(), n["scale"][1].get<float>(), n["scale"][2].get<float>() };
+		npc.rotation = { n["rotation"][0].get<float>(), n["rotation"][1].get<float>(), n["rotation"][2].get<float>() };
 		npc.collider = { {n["collider"][0][0], n["collider"][0][1], n["collider"][0][2]}, {n["collider"][1][0], n["collider"][1][1], n["collider"][1][2]} };
 		npc.originalCollider = { {n["originalCollider"][0][0], n["originalCollider"][0][1], n["originalCollider"][0][2]}, {n["originalCollider"][1][0], n["originalCollider"][1][1], n["originalCollider"][1][2]} };
 
@@ -379,6 +383,8 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["time"] = t.time;
 			track["currentFrame"] = t.currentFrame;
 			track["name"] = t.name;
+			track["entityId"] = t.entityId;
+			track["npcName"] = t.npcName;
 
 			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
@@ -420,6 +426,8 @@ void SaveSystem::LoadCutscenes(json& j)
 			track.time = t["time"].get<float>();
 			track.currentFrame = t["currentFrame"].get<int>();
 			track.name = t["name"].get<std::string>();
+			track.entityId = t["entityId"].get<int>();
+			track.npcName = t["npcName"].get<std::string>();
 
 			for (auto& key : t["keyframes"]) {
 				KeyFrame k;

@@ -36,15 +36,20 @@ namespace Shared {
 
 	extern bool npcMode;
 	extern std::unordered_map<std::string, NPC> npcs;
+	extern NPC* selectedNpc;
 	extern std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 	extern Entity* selectedEntity;
 	extern Cutscene cutscenes;
 	extern std::string trackName;
+	extern bool isCutscenePlaying;
 
 	extern std::unordered_map<std::string, Sound> sounds;
 	extern std::unordered_map<std::string, Music> music;
 
+
+
+	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale);
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

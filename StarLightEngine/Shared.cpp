@@ -30,12 +30,35 @@ namespace Shared {
 
 	bool npcMode = false;
 	std::unordered_map<std::string, NPC> npcs;
+	NPC* selectedNpc = nullptr;
 	std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 	Entity* selectedEntity = nullptr;
 	Cutscene cutscenes;
 	std::string trackName;
+	bool isCutscenePlaying = false;
 
 	std::unordered_map<std::string, Sound> sounds;
 	std::unordered_map<std::string, Music> music;
+
+	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale)
+	{
+		BoundingBox box;
+
+		box.min =
+		{
+			position.x + original.min.x * scale.x,
+			position.y + original.min.y * scale.y,
+			position.z + original.min.z * scale.z
+		};
+
+		box.max =
+		{
+			position.x + original.max.x * scale.x,
+			position.y + original.max.y * scale.y,
+			position.z + original.max.z * scale.z
+		};
+
+		return box;
+	}
 }

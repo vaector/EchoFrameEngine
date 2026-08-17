@@ -132,10 +132,49 @@ void ImguiWindow::UpdateImguiTileEditor()
 		ImVec2(600, 800)
 	);
 
-	//------3D Models Window------
 	if (!Shared::editorMode) {
+
+		//------3D Models Window------
 		ImGui::Begin("3D Models", nullptr, ImGuiChildFlags_AlwaysAutoResize);
 		ImGui::SetWindowPos({ (float)GetScreenWidth() - 600,0 });
+
+
+		//--PREOPERTIES SECTION
+		ImGui::SeparatorText("Entity/NPC Properties");
+		//Entity
+		if (Shared::selectedEntity) {
+			ImGui::Text("Entity Properties");
+			ImGui::NewLine();
+			ImGui::Text(("ID: " + std::to_string(Shared::selectedEntity->id)).c_str());
+			ImGui::Text(("Model Name: " + Shared::selectedEntity->modelName).c_str());
+			ImGui::NewLine();
+			ImGui::Text("Position");
+			ImGui::InputFloat3("##Position", &Shared::selectedEntity->position.x);
+			ImGui::NewLine();
+			ImGui::Text("Scale");
+			ImGui::InputFloat3("##Scale", &Shared::selectedEntity->scale.x);
+			ImGui::NewLine();
+			ImGui::Text("Rotation");
+			ImGui::InputFloat3("##Rotation", &Shared::selectedEntity->rotation.x);
+		}
+
+		//Npc
+		if (Shared::selectedNpc) {
+			ImGui::Text("NPC Properties");
+			ImGui::NewLine();
+			ImGui::Text(("Name: " + Shared::selectedNpc->name).c_str());
+			ImGui::NewLine();
+			ImGui::Text("Position");
+			ImGui::InputFloat3("##Position", &Shared::selectedNpc->position.x);
+			ImGui::NewLine();
+			ImGui::Text("Scale");
+			ImGui::InputFloat3("##Scale", &Shared::selectedNpc->scale.x);
+			ImGui::NewLine();
+			ImGui::Text("Rotation");
+			ImGui::InputFloat3("##Rotation", &Shared::selectedNpc->rotation.x);
+		}
+		
+		ImGui::SeparatorText("3D Models");
 
 		//Search for models
 		static std::string search;
@@ -187,75 +226,168 @@ void ImguiWindow::UpdateImguiTileEditor()
 		//Add Track
 		static Track* newTrack = nullptr;
 		
-		if (ImGui::Button("Add Track")) {
-			newTrack = new Track();
-			ImGui::OpenPopup("TrackName?");
+		if (Shared::selectedEntity || Shared::selectedNpc && !newTrack) {
+			if (ImGui::Button("Add Track")) {
+
+				newTrack = new Track();
+				//Add the entity id to the track
+				if (Shared::selectedEntity) {
+					newTrack->entityId = Shared::selectedEntity->id;
+				}
+				//Add the npc name to the track
+				if (Shared::selectedNpc) {
+					newTrack->npcName = Shared::selectedNpc->name;
+				}
+				ImGui::OpenPopup("TrackName?");
+			}
 		}
 		if (newTrack != nullptr) {
 			TrackNamePopup(newTrack->name);
 		}
-
-
 		ImGui::NewLine();
-		//Add Keyframes
-		if (Shared::selectedEntity && newTrack) {
 
+
+		//Add Keyframes
+		if ((Shared::selectedEntity || Shared::selectedNpc) && newTrack) {
 			if (ImGui::Button("Add KeyFrame")) {
 				KeyFrame k;
-				k.frame = 0;
-				k.position = Shared::selectedEntity->position;
-				k.scale = Shared::selectedEntity->scale;
+				//Add keyframes if entity.
+				if (Shared::selectedEntity) {
+					k.frame = 0;
+					k.position = Shared::selectedEntity->position;
+					k.scale = Shared::selectedEntity->scale;
+					k.rotation = Shared::selectedEntity->rotation;
+				}
+				//Add keyframes if npc.
+				else if (Shared::selectedNpc) {
+					k.frame = 0;
+					k.position = Shared::selectedNpc->position;
+					k.scale = Shared::selectedNpc->scale;
+					k.rotation = Shared::selectedNpc->rotation;
+				}
 
 				newTrack->keyframes.push_back(k);
-				
 			}
-
 		}
 
 		ImGui::NewLine();
 		//Save Track to cutscene
-		if (newTrack && Shared::selectedEntity) {
-			if (ImGui::Button("Save Track"))
+		if ((Shared::selectedEntity || Shared::selectedNpc) && newTrack) {
+			if (ImGui::Button("Save Track") )
 			{
-				Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].push_back(*newTrack);
+				//Save track to entity cutscene
+				if (Shared::selectedEntity) {
+					Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].push_back(*newTrack);
+				}
+				//Save track to npc cutscene
+				if (Shared::selectedNpc) {
+					Shared::cutscenes.npcCutscene[Shared::selectedNpc->name].push_back(*newTrack);
+				}
 				newTrack = nullptr;
 			}
 		}
-
 		ImGui::NewLine();
-		//Test a cutscene Track
-		if (Shared::selectedEntity) {
-			int i = 0;
-			for (auto& track : Shared::cutscenes.entityCutscene[Shared::selectedEntity->id]) {
+
+		//Display Tracks for the selected entity
+		for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+			ImGui::SeparatorText(("Entity Name: " + Shared::entities[id].modelName).c_str());
+			for (int i = 0; i < tracks.size(); i++) {
+				auto& track = tracks[i];
+				auto& entity = Shared::entities[track.entityId];
+
+				//Speed of the animation Track
+				ImGui::InputFloat("Seconds?", &track.animSpeed);
+				ImGui::NewLine();
+
+				//Play Track
 				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
 					Shared::cutscenes.playingTrack = &track.name;
 					Shared::cutscenes.SaveOriginalKeyFrame();
+
+					Shared::isCutscenePlaying = true;
 				}
 				ImGui::SameLine();
+
+				//Delete Track
 				if (ImGui::Button(("Delete Track: " + std::to_string(i) + " " + track.name).c_str())) {
 					if (Shared::cutscenes.playingTrack == &track.name) {
 						Shared::cutscenes.playingTrack = nullptr;
 					}
-					Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].erase(Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].begin() + i);
+					Shared::cutscenes.entityCutscene[track.entityId].erase(Shared::cutscenes.entityCutscene[track.entityId].begin() + i);
+
 					Shared::cutscenes.Stop();
 				}
-				i++;
 			}
 		}
-		if (ImGui::Button("Stop playing track")) {
-			Shared::cutscenes.playingTrack = nullptr;
+		
 
-			//Stop the cutscene and reset the entity to its original keyframe
-			Shared::cutscenes.Stop();
+		//Display Tracks for the selected NPC
+		for (auto& [name, tracks] : Shared::cutscenes.npcCutscene) {
+			ImGui::SeparatorText(("Npc Name: " + name).c_str());
+			for (int i = 0; i < tracks.size(); i++) {
+				auto& track = tracks[i];
+				auto& npc = Shared::npcs[track.npcName];
+
+				//Speed of the animation Track
+				ImGui::InputFloat("Seconds?", &track.animSpeed);
+				ImGui::NewLine();
+
+				//Play Track
+				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					Shared::cutscenes.playingTrack = &track.name;
+					Shared::cutscenes.SaveOriginalKeyFrame();
+
+					Shared::isCutscenePlaying = true;
+				}
+				ImGui::SameLine();
+				//Delete Track
+				if (ImGui::Button(("Delete Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					if (Shared::cutscenes.playingTrack == &track.name) {
+						Shared::cutscenes.playingTrack = nullptr;
+					}
+					Shared::cutscenes.npcCutscene[track.npcName].erase(Shared::cutscenes.npcCutscene[track.npcName].begin() + i);
+
+					Shared::cutscenes.Stop();
+				}
+			}
 		}
 
-		//A track is playing
+		//Stop playing a track
 		if (Shared::cutscenes.playingTrack) {
-			Shared::cutscenes.Play(*Shared::cutscenes.playingTrack);
-		}
-			
+			if (ImGui::Button("Stop playing track")) {
 
+				//Stop the cutscene and reset the entity/npc to its original keyframe. Then Update the collider
+				Shared::cutscenes.Stop();
+
+				Shared::cutscenes.playingTrack = nullptr;
+				Shared::isCutscenePlaying = false;
+			}
+		}
+
+
+		//Play a track
+		if (Shared::cutscenes.playingTrack) {
+
+			Shared::cutscenes.Play(*Shared::cutscenes.playingTrack);
+			for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+				for (int i = 0; i < tracks.size(); i++) {
+					auto& track = tracks[i];
+					auto& entity = Shared::entities[track.entityId];
+					entity.collider = Shared::GetUpdatedBoundingBox(entity.originalCollider, entity.position, entity.scale);
+				}
+			}
+			for (auto& [name, tracks] : Shared::cutscenes.npcCutscene) {
+				for (int i = 0; i < tracks.size(); i++) {
+					auto& track = tracks[i];
+					auto& npc = Shared::npcs[track.npcName];
+					npc.collider = Shared::GetUpdatedBoundingBox(npc.originalCollider, npc.position, npc.scale);
+				}
+			}
+		}
+		
+		
 		ImGui::End();
+
 	}
 
 	first = false;

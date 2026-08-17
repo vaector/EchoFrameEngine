@@ -15,7 +15,6 @@ private:
 	Wall* selectedWall = nullptr;
 	Sector* selectedFloor = nullptr;
 	Sector* selectedCeiling = nullptr;
-	NPC* selectedNpc = nullptr;
 
 public:
 
@@ -47,7 +46,6 @@ public:
 	void CreateNpc();
 	void DrawNpc();
 	void UpdateNpc();
-	void RemoveNpc();
 
 	//Helper
 	bool WallCloserThanSector();
@@ -58,7 +56,7 @@ public:
 	bool CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect);
 	bool CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos);
 	bool CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos);
-	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original,Vector3 position,Vector3 scale);
+
 };
 
 //Functions with "EDIT" are for the free Camera-> Editing

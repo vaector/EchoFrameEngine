@@ -39,8 +39,6 @@ void RealEditor::InitCam()
 
 void RealEditor::Update(Camera3D* cam)
 {
-	if(Shared::onImguiWindow) return;
-
 	//Update Cursor Lock
 	static bool cursorLocked = true;
 	if(IsKeyPressed(KEY_TAB))
@@ -50,7 +48,7 @@ void RealEditor::Update(Camera3D* cam)
 		else EnableCursor();
 	}
 
-	if(!cursorLocked) return;
+	if(!cursorLocked || Shared::onImguiWindow) return;
 	
 	//Update Camera
 	UpdateCam(cam);
@@ -74,7 +72,7 @@ void RealEditor::Update(Camera3D* cam)
 	UpdateEntity();
 
 	CreateNpc();
-	RemoveNpc();
+	UpdateNpc();
 
 	int c = 1; bool loop = true;
 	for (auto& [name, npc] : Shared::npcs)
@@ -824,16 +822,26 @@ void RealEditor::Draw()
 
 void RealEditor::UpdateEntity()
 {
-	if (camMode == false) return;//Player Cam
+	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
-	//Move entities
+	//select entities and stop camera from moving when an entity is selected.
 	for (auto& [id, entity] : Shared::entities) {
 		RayCollision hit = GetRayCollisionBox(ray, entity.collider);
 		if (hit.hit && IsKeyPressed(KEY_C)) {
 			Shared::selectedEntity = &entity;
 			freeCamToggle = false;
+		}
+		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			//Delet entity and its cutscene tracks.
+			if (Shared::cutscenes.entityCutscene.contains(id)) {
+				Shared::cutscenes.entityCutscene.erase(id);
+			}
+			Shared::entities.erase(id);
+			Shared::selectedEntity = nullptr;
+			freeCamToggle = true;
+			break;
 		}
 	}
 
@@ -853,13 +861,13 @@ void RealEditor::UpdateEntity()
 
 		//Updating Y
 		Shared::selectedEntity->position = Vector3Add(Shared::selectedEntity->position, {0,move.y, 0});
-		Shared::selectedEntity->collider = GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
 
 
 		//Updating XZ and check Wall collisons
 
 		Shared::selectedEntity->position = Vector3Add(Shared::selectedEntity->position, { move.x, 0, move.z});
-		Shared::selectedEntity->collider = GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
 
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
@@ -873,7 +881,7 @@ void RealEditor::UpdateEntity()
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
 			{
 				Shared::selectedEntity->position = Vector3Subtract(Shared::selectedEntity->position, { move.x, 0, move.z });
-				Shared::selectedEntity->collider = GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+				Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
 
 			}
 		}
@@ -888,7 +896,7 @@ void RealEditor::UpdateEntity()
 		}
 
 		Shared::selectedEntity->scale = Vector3Clamp(Shared::selectedEntity->scale, { 1, 1, 1 }, { 200,200, 200 });
-		Shared::selectedEntity->collider = GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
 
 
 	}
@@ -897,18 +905,6 @@ void RealEditor::UpdateEntity()
 	if (IsKeyReleased(KEY_C)) {
 		Shared::selectedEntity = nullptr;
 		freeCamToggle = true;
-	}
-
-	//Remove Entity
-	for (auto& [id, entity]: Shared::entities) {
-
-		RayCollision hit = GetRayCollisionBox(ray, entity.collider);
-		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-			Shared::entities.erase(id);
-			Shared::selectedEntity = nullptr;
-			freeCamToggle = true;
-			break;
-		}
 	}
 
 	//Deselect entity
@@ -981,8 +977,8 @@ void RealEditor::CreateNpc()
 		path += ".glb";
 
 
-		npc.scale = { 50,50,50 };
 		npc.model = Shared::models[npc.modelName];
+		npc.scale = { 0.5, 0.5, 0.5 };
 
 		//Position
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
@@ -991,7 +987,8 @@ void RealEditor::CreateNpc()
 
 		//Collider
 		BoundingBox box = GetModelBoundingBox(Shared::models[npc.modelName]);
-		npc.scale = Vector3Scale(npc.scale, 0.01);
+		npc.originalCollider = box;
+
 		box.min.x *= npc.scale.x;
 		box.min.y *= npc.scale.y;
 		box.min.z *= npc.scale.z;
@@ -1031,42 +1028,92 @@ void RealEditor::DrawNpc()
 
 void RealEditor::UpdateNpc()
 {
-	if (camMode == false) return;//Player Cam
+	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
-	//Remove npc
+	//select npc and stop camera from moving when an npc is selected.
 	for (auto& [name, npc] : Shared::npcs) {
-
 		RayCollision hit = GetRayCollisionBox(ray, npc.collider);
-		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			selectedNpc = &npc;
+		if (hit.hit && IsKeyPressed(KEY_C)) {
+			Shared::selectedNpc = &npc;
+			freeCamToggle = false;
+		}
+
+		//Remove
+		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+			//Delete NPC nad its tracks
+			if (Shared::cutscenes.npcCutscene.contains(name)) {
+				Shared::cutscenes.npcCutscene.erase(name);
+			}
+			Shared::npcs.erase(name);
+			Shared::selectedNpc = nullptr;
+
 			break;
 		}
+	}
+
+	//Update Npc translations
+	if (Shared::selectedNpc != nullptr) {
+		//Move the entity and its collider
+		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
+		Vector3 delta = Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
+		Vector3 move = Vector3Scale(delta, 8.0f);
+
+		if (IsKeyPressed(KEY_UP))
+			move.y = 4.0f;
+		else if (IsKeyPressed(KEY_DOWN))
+			move.y = -4.0f;
+		else
+			move.y = 0.0f;
+
+		//Updating Y
+		Shared::selectedNpc->position = Vector3Add(Shared::selectedNpc->position, { 0,move.y, 0 });
+		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
+
+
+		//Updating XZ and check Wall collisons
+
+		Shared::selectedNpc->position = Vector3Add(Shared::selectedNpc->position, { move.x, 0, move.z });
+		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
+
+		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
+		Rectangle rect;
+		rect.x = Shared::selectedNpc->collider.min.x;
+		rect.y = Shared::selectedNpc->collider.min.z;
+
+		rect.width = Shared::selectedNpc->collider.max.x - Shared::selectedNpc->collider.min.x;
+		rect.height = Shared::selectedNpc->collider.max.z - Shared::selectedNpc->collider.min.z;
+
+		for (auto& wall : Shared::walls) {
+			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+			{
+				Shared::selectedNpc->position = Vector3Subtract(Shared::selectedNpc->position, { move.x, 0, move.z });
+				Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
+
+			}
+		}
+
+
+		//Change Scale while pressing arrow keys
+		if (IsKeyPressed(KEY_RIGHT)) {
+			Shared::selectedNpc->scale = Vector3Add(Shared::selectedNpc->scale, { 2,2,2 });
+		}
+		else if (IsKeyPressed(KEY_LEFT)) {
+			Shared::selectedNpc->scale = Vector3Subtract(Shared::selectedNpc->scale, { 2,2,2 });
+		}
+
+		Shared::selectedNpc->scale = Vector3Clamp(Shared::selectedNpc->scale, { 0.5, 0.5, 0.5 }, { 200,200, 200 });
+		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
+
+
 	}
 
 	//Deselect
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		selectedNpc = nullptr;
+	if (IsKeyReleased(KEY_C)) {
+		Shared::selectedNpc = nullptr;
+		freeCamToggle = true;
 	}
-}
-
-void RealEditor::RemoveNpc()
-{
-	if (camMode == false) return;//Player Cam
-
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-
-	//Remove npc
-	for (auto& [name, npc]: Shared::npcs) {
-
-		RayCollision hit = GetRayCollisionBox(ray, npc.collider);
-		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-			Shared::npcs.erase(name);
-			break;
-		}
-	}
-
 }
 
 bool RealEditor::WallCloserThanSector()
@@ -1307,26 +1354,3 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 	}
 	return false;
 }
-
-BoundingBox RealEditor::GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale)
-{
-	BoundingBox box;
-
-	box.min =
-	{
-		position.x + original.min.x * scale.x,
-		position.y + original.min.y * scale.y,
-		position.z + original.min.z * scale.z
-	};
-
-	box.max =
-	{
-		position.x + original.max.x * scale.x,
-		position.y + original.max.y * scale.y,
-		position.z + original.max.z * scale.z
-	};
-
-	return box;
-}
-
-
