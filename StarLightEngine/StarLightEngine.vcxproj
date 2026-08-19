@@ -148,6 +148,7 @@
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="TileEditor.cpp" />
     <ClCompile Include="Track.cpp" />
+    <ClCompile Include="WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
@@ -174,14 +175,19 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Ramp.h" />
     <ClInclude Include="RealEditor.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="SaveSystem.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="TileEditor.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Wall.h" />
+    <ClInclude Include="WorldObject.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="StarLightEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

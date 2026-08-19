@@ -18,7 +18,7 @@ struct Track
 	int currentFrame = 0;
 	float animSpeed = 1.0f;//1 second default
 	std::string name;
-	int entityId = -1; // ID of the entity this track belongs to	
+	int worldObjectID = -1; // ID of the entity this track belongs to	
 	std::string npcName = ""; // Name of the NPC this track belongs to, if applicable
 };
 

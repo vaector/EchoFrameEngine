@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include "Ramp.h"
-#include "Entity.h"
+#include "WorldObject.h"
 #include "NPC.h"
 #include "Cutscene.h"
 #include "Player.h"
@@ -14,7 +14,7 @@ namespace Shared {
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;
 	extern std::unordered_map<std::string, Model> models;
-	extern std::unordered_map<int, Entity> entities;
+	extern std::unordered_map<int, WorldObject> worldObjects;
 	extern std::vector<Sector> sectors;
 	extern std::vector<Ramp> ramps;
 
@@ -39,7 +39,7 @@ namespace Shared {
 	extern NPC* selectedNpc;
 	extern std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
-	extern Entity* selectedEntity;
+	extern WorldObject* selectedWorldObject;
 	extern Cutscene cutscenes;
 	extern std::string trackName;
 	extern bool isCutscenePlaying;

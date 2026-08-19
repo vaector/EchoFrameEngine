@@ -68,8 +68,8 @@ void RealEditor::Update(Camera3D* cam)
 	EditDoor();
 	PlayerDoor();
 
-	CreateEntity();
-	UpdateEntity();
+	CreateWorldObject();
+	UpdateWorldObject();
 
 	CreateNpc();
 	UpdateNpc();
@@ -812,7 +812,7 @@ void RealEditor::Draw()
 
 	DrawDoorSwitch();
 
-	DrawEntity();
+	DrawWorldObject();
 
 	DrawNpc();
 	
@@ -820,33 +820,33 @@ void RealEditor::Draw()
 	DrawSector();
 }
 
-void RealEditor::UpdateEntity()
+void RealEditor::UpdateWorldObject()
 {
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
-	//select entities and stop camera from moving when an entity is selected.
-	for (auto& [id, entity] : Shared::entities) {
-		RayCollision hit = GetRayCollisionBox(ray, entity.collider);
+	//select world objects and stop camera from moving when an entity is selected.
+	for (auto& [id, worldObject] : Shared::worldObjects) {
+		RayCollision hit = GetRayCollisionBox(ray, worldObject.collider);
 		if (hit.hit && IsKeyPressed(KEY_C)) {
-			Shared::selectedEntity = &entity;
+			Shared::selectedWorldObject = &worldObject;
 			freeCamToggle = false;
 		}
 		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
 			//Delet entity and its cutscene tracks.
-			if (Shared::cutscenes.entityCutscene.contains(id)) {
-				Shared::cutscenes.entityCutscene.erase(id);
+			if (Shared::cutscenes.worldObjectCutscene.contains(id)) {
+				Shared::cutscenes.worldObjectCutscene.erase(id);
 			}
-			Shared::entities.erase(id);
-			Shared::selectedEntity = nullptr;
+			Shared::worldObjects.erase(id);
+			Shared::selectedWorldObject = nullptr;
 			freeCamToggle = true;
 			break;
 		}
 	}
 
 	//If an entity is selected
-	if (Shared::selectedEntity != nullptr) {
+	if (Shared::selectedWorldObject != nullptr) {
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
@@ -860,28 +860,28 @@ void RealEditor::UpdateEntity()
 			move.y = 0.0f;
 
 		//Updating Y
-		Shared::selectedEntity->position = Vector3Add(Shared::selectedEntity->position, {0,move.y, 0});
-		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, {0,move.y, 0});
+		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
 
 
 		//Updating XZ and check Wall collisons
 
-		Shared::selectedEntity->position = Vector3Add(Shared::selectedEntity->position, { move.x, 0, move.z});
-		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, { move.x, 0, move.z});
+		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
 
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
-		rect.x = Shared::selectedEntity->collider.min.x;
-		rect.y = Shared::selectedEntity->collider.min.z;
+		rect.x = Shared::selectedWorldObject->collider.min.x;
+		rect.y = Shared::selectedWorldObject->collider.min.z;
 
-		rect.width = Shared::selectedEntity->collider.max.x - Shared::selectedEntity->collider.min.x;
-		rect.height = Shared::selectedEntity->collider.max.z - Shared::selectedEntity->collider.min.z;
+		rect.width = Shared::selectedWorldObject->collider.max.x - Shared::selectedWorldObject->collider.min.x;
+		rect.height = Shared::selectedWorldObject->collider.max.z - Shared::selectedWorldObject->collider.min.z;
 
 		for (auto& wall : Shared::walls) {
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
 			{
-				Shared::selectedEntity->position = Vector3Subtract(Shared::selectedEntity->position, { move.x, 0, move.z });
-				Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+				Shared::selectedWorldObject->position = Vector3Subtract(Shared::selectedWorldObject->position, { move.x, 0, move.z });
+				Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
 
 			}
 		}
@@ -889,77 +889,77 @@ void RealEditor::UpdateEntity()
 
 		//Change Scale while pressing arrow keys
 		if (IsKeyPressed(KEY_RIGHT)) {
-			Shared::selectedEntity->scale = Vector3Add(Shared::selectedEntity->scale, {2,2,2});
+			Shared::selectedWorldObject->scale = Vector3Add(Shared::selectedWorldObject->scale, {2,2,2});
 		}
 		else if (IsKeyPressed(KEY_LEFT)) {
-			Shared::selectedEntity->scale = Vector3Subtract(Shared::selectedEntity->scale, {2,2,2});
+			Shared::selectedWorldObject->scale = Vector3Subtract(Shared::selectedWorldObject->scale, {2,2,2});
 		}
 
-		Shared::selectedEntity->scale = Vector3Clamp(Shared::selectedEntity->scale, { 1, 1, 1 }, { 200,200, 200 });
-		Shared::selectedEntity->collider = Shared::GetUpdatedBoundingBox(Shared::selectedEntity->originalCollider, Shared::selectedEntity->position, Shared::selectedEntity->scale);
+		Shared::selectedWorldObject->scale = Vector3Clamp(Shared::selectedWorldObject->scale, { 1, 1, 1 }, { 200,200, 200 });
+		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
 
 
 	}
 
 	//Deselect
 	if (IsKeyReleased(KEY_C)) {
-		Shared::selectedEntity = nullptr;
+		Shared::selectedWorldObject = nullptr;
 		freeCamToggle = true;
 	}
 
 	//Deselect entity
-	if (Shared::selectedEntity != nullptr && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		Shared::selectedEntity = nullptr;
+	if (Shared::selectedWorldObject != nullptr && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		Shared::selectedWorldObject = nullptr;
 		freeCamToggle = true;
 
 	}
 
 }
 
-void RealEditor::CreateEntity()
+void RealEditor::CreateWorldObject()
 {
 	if (Shared::selectedModelName == nullptr || selectedFloor == nullptr || Shared::npcMode) return;
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		Entity newEntity;
-		newEntity.id = Entity::currentId;
-		Entity::currentId++;
+		WorldObject worldObject;
+		worldObject.id = WorldObject::currentId;
+		WorldObject::currentId++;
 		
-		newEntity.modelName = *Shared::selectedModelName;
+		worldObject.modelName = *Shared::selectedModelName;
 
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
 		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
 
-		newEntity.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
-		BoundingBox box = GetModelBoundingBox(Shared::models[newEntity.modelName]);
-		newEntity.originalCollider = box;
+		BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
+		worldObject.originalCollider = box;
 
-		box.min.x *= newEntity.scale.x;
-		box.min.y *= newEntity.scale.y;
-		box.min.z *= newEntity.scale.z;
+		box.min.x *= worldObject.scale.x;
+		box.min.y *= worldObject.scale.y;
+		box.min.z *= worldObject.scale.z;
 
-		box.max.x *= newEntity.scale.x;
-		box.max.y *= newEntity.scale.y;
-		box.max.z *= newEntity.scale.z;
+		box.max.x *= worldObject.scale.x;
+		box.max.y *= worldObject.scale.y;
+		box.max.z *= worldObject.scale.z;
 
 
-		box.min = Vector3Add(box.min, newEntity.position);
-		box.max = Vector3Add(box.max, newEntity.position);
+		box.min = Vector3Add(box.min, worldObject.position);
+		box.max = Vector3Add(box.max, worldObject.position);
 
-		newEntity.collider = box;
+		worldObject.collider = box;
 
-		Shared::entities[newEntity.id] = newEntity;
+		Shared::worldObjects[worldObject.id] = worldObject;
 		Shared::selectedModelName = nullptr;
 	}
 	
 }
 
-void RealEditor::DrawEntity()
+void RealEditor::DrawWorldObject()
 {
-	for (auto& [id, entity] : Shared::entities) {
-		DrawModelEx(Shared::models[entity.modelName], entity.position, { 0,0,0 }, 0, entity.scale, WHITE);
-		DrawBoundingBox(entity.collider, RED);
+	for (auto& [id, worldObject] : Shared::worldObjects) {
+		DrawModelEx(Shared::models[worldObject.modelName], worldObject.position, { 0,0,0 }, 0, worldObject.scale, WHITE);
+		DrawBoundingBox(worldObject.collider, RED);
 	}
 }
 
@@ -1305,7 +1305,7 @@ bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
-	for (auto& [id, entity] : Shared::entities) {
+	for (auto& [id, entity] : Shared::worldObjects) {
 		if (CheckCollisionBoxes(entity.collider, Shared::player.collider)) {
 			return true;
 		}
@@ -1332,7 +1332,7 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
-	for (auto& [id, e] : Shared::entities) {
+	for (auto& [id, e] : Shared::worldObjects) {
 		if (CheckCollisionBoxes(e.collider, Shared::player.collider)) {
 
 			float eBottom = e.collider.min.y;

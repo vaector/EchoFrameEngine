@@ -142,20 +142,20 @@ void ImguiWindow::UpdateImguiTileEditor()
 		//--PREOPERTIES SECTION
 		ImGui::SeparatorText("Entity/NPC Properties");
 		//Entity
-		if (Shared::selectedEntity) {
+		if (Shared::selectedWorldObject) {
 			ImGui::Text("Entity Properties");
 			ImGui::NewLine();
-			ImGui::Text(("ID: " + std::to_string(Shared::selectedEntity->id)).c_str());
-			ImGui::Text(("Model Name: " + Shared::selectedEntity->modelName).c_str());
+			ImGui::Text(("ID: " + std::to_string(Shared::selectedWorldObject->id)).c_str());
+			ImGui::Text(("Model Name: " + Shared::selectedWorldObject->modelName).c_str());
 			ImGui::NewLine();
 			ImGui::Text("Position");
-			ImGui::InputFloat3("##Position", &Shared::selectedEntity->position.x);
+			ImGui::InputFloat3("##Position", &Shared::selectedWorldObject->position.x);
 			ImGui::NewLine();
 			ImGui::Text("Scale");
-			ImGui::InputFloat3("##Scale", &Shared::selectedEntity->scale.x);
+			ImGui::InputFloat3("##Scale", &Shared::selectedWorldObject->scale.x);
 			ImGui::NewLine();
 			ImGui::Text("Rotation");
-			ImGui::InputFloat3("##Rotation", &Shared::selectedEntity->rotation.x);
+			ImGui::InputFloat3("##Rotation", &Shared::selectedWorldObject->rotation.x);
 		}
 
 		//Npc
@@ -226,13 +226,13 @@ void ImguiWindow::UpdateImguiTileEditor()
 		//Add Track
 		static Track* newTrack = nullptr;
 		
-		if (Shared::selectedEntity || Shared::selectedNpc && !newTrack) {
+		if (Shared::selectedWorldObject || Shared::selectedNpc && !newTrack) {
 			if (ImGui::Button("Add Track")) {
 
 				newTrack = new Track();
 				//Add the entity id to the track
-				if (Shared::selectedEntity) {
-					newTrack->entityId = Shared::selectedEntity->id;
+				if (Shared::selectedWorldObject) {
+					newTrack->worldObjectID = Shared::selectedWorldObject->id;
 				}
 				//Add the npc name to the track
 				if (Shared::selectedNpc) {
@@ -248,15 +248,15 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 
 		//Add Keyframes
-		if ((Shared::selectedEntity || Shared::selectedNpc) && newTrack) {
+		if ((Shared::selectedWorldObject || Shared::selectedNpc) && newTrack) {
 			if (ImGui::Button("Add KeyFrame")) {
 				KeyFrame k;
 				//Add keyframes if entity.
-				if (Shared::selectedEntity) {
+				if (Shared::selectedWorldObject) {
 					k.frame = 0;
-					k.position = Shared::selectedEntity->position;
-					k.scale = Shared::selectedEntity->scale;
-					k.rotation = Shared::selectedEntity->rotation;
+					k.position = Shared::selectedWorldObject->position;
+					k.scale = Shared::selectedWorldObject->scale;
+					k.rotation = Shared::selectedWorldObject->rotation;
 				}
 				//Add keyframes if npc.
 				else if (Shared::selectedNpc) {
@@ -272,12 +272,12 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		ImGui::NewLine();
 		//Save Track to cutscene
-		if ((Shared::selectedEntity || Shared::selectedNpc) && newTrack) {
+		if ((Shared::selectedWorldObject || Shared::selectedNpc) && newTrack) {
 			if (ImGui::Button("Save Track") )
 			{
 				//Save track to entity cutscene
-				if (Shared::selectedEntity) {
-					Shared::cutscenes.entityCutscene[Shared::selectedEntity->id].push_back(*newTrack);
+				if (Shared::selectedWorldObject) {
+					Shared::cutscenes.worldObjectCutscene[Shared::selectedWorldObject->id].push_back(*newTrack);
 				}
 				//Save track to npc cutscene
 				if (Shared::selectedNpc) {
@@ -289,11 +289,11 @@ void ImguiWindow::UpdateImguiTileEditor()
 		ImGui::NewLine();
 
 		//Display Tracks for the selected entity
-		for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
-			ImGui::SeparatorText(("Entity Name: " + Shared::entities[id].modelName).c_str());
+		for (auto& [id, tracks] : Shared::cutscenes.worldObjectCutscene) {
+			ImGui::SeparatorText(("Entity Name: " + Shared::worldObjects[id].modelName).c_str());
 			for (int i = 0; i < tracks.size(); i++) {
 				auto& track = tracks[i];
-				auto& entity = Shared::entities[track.entityId];
+				auto& entity = Shared::worldObjects[track.worldObjectID];
 
 				//Speed of the animation Track
 				ImGui::InputFloat("Seconds?", &track.animSpeed);
@@ -313,7 +313,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 					if (Shared::cutscenes.playingTrack == &track.name) {
 						Shared::cutscenes.playingTrack = nullptr;
 					}
-					Shared::cutscenes.entityCutscene[track.entityId].erase(Shared::cutscenes.entityCutscene[track.entityId].begin() + i);
+					Shared::cutscenes.worldObjectCutscene[track.worldObjectID].erase(Shared::cutscenes.worldObjectCutscene[track.worldObjectID].begin() + i);
 
 					Shared::cutscenes.Stop();
 				}
@@ -369,10 +369,10 @@ void ImguiWindow::UpdateImguiTileEditor()
 		if (Shared::cutscenes.playingTrack) {
 
 			Shared::cutscenes.Play(*Shared::cutscenes.playingTrack);
-			for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+			for (auto& [id, tracks] : Shared::cutscenes.worldObjectCutscene) {
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];
-					auto& entity = Shared::entities[track.entityId];
+					auto& entity = Shared::worldObjects[track.worldObjectID];
 					entity.collider = Shared::GetUpdatedBoundingBox(entity.originalCollider, entity.position, entity.scale);
 				}
 			}

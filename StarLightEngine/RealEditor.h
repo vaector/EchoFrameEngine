@@ -38,9 +38,9 @@ public:
 	void Draw();
 	       
 	//Entities
-	void UpdateEntity();
-	void CreateEntity();
-	void DrawEntity();
+	void UpdateWorldObject();
+	void CreateWorldObject();
+	void DrawWorldObject();
 
 	//NPC
 	void CreateNpc();

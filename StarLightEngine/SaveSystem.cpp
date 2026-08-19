@@ -28,7 +28,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SaveSectors(data);
 	SaveRamps(data);
 	SaveDoorSwitches(data);
-	SaveEntities(data);
+	SaveWorldObjects(data);
 	SaveNPCs(data);
 	SaveCutscenes(data);
 	SavePlayer(data);
@@ -62,7 +62,7 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadSectors(data);
 	LoadRamps(data);
 	LoadDoorSwitches(data);
-	LoadEntities(data);
+	LoadWorldObjects(data);
 	LoadNPCs(data);
 	LoadCutscenes(data);
 	LoadPlayer(data);
@@ -262,42 +262,45 @@ void SaveSystem::LoadDoorSwitches(json& j)
 	}
 }
 
-void SaveSystem::SaveEntities(json& j)
+void SaveSystem::SaveWorldObjects(json& j)
 {
-	j["entities"] = json::array();
-	for(auto& [id, entity] : Shared::entities) {
-		json e;
-		e["id"] = id;
-		e["currentId"] = Entity::currentId;
-		e["modelName"] = entity.modelName;
-		e["position"] = { entity.position.x, entity.position.y, entity.position.z };
-		e["scale"] = { entity.scale.x, entity.scale.y, entity.scale.z };
-		e["rotation"] = { entity.rotation.x, entity.rotation.y, entity.rotation.z };
-		e["collider"] = { { entity.collider.min.x, entity.collider.min.y, entity.collider.min.z },{ entity.collider.max.x, entity.collider.max.y, entity.collider.max.z } };
-		e["originalCollider"] = { { entity.originalCollider.min.x, entity.originalCollider.min.y, entity.originalCollider.min.z },{ entity.originalCollider.max.x, entity.originalCollider.max.y, entity.originalCollider.max.z } };
+	j["worldObjects"] = json::array();
+	for(auto& [id, worldObject] : Shared::worldObjects) {
+		json w;
 
-		j["entities"].push_back(e);
+		w["id"] = id;
+		w["currentId"] = WorldObject::currentId;
+		w["modelName"] = worldObject.modelName;
+		w["position"] = { worldObject.position.x, worldObject.position.y, worldObject.position.z };
+		w["scale"] = { worldObject.scale.x, worldObject.scale.y, worldObject.scale.z };
+		w["rotation"] = { worldObject.rotation.x, worldObject.rotation.y, worldObject.rotation.z };
+		w["collider"] = { { worldObject.collider.min.x, worldObject.collider.min.y, worldObject.collider.min.z },{ worldObject.collider.max.x, worldObject.collider.max.y, worldObject.collider.max.z } };
+		w["originalCollider"] = { { worldObject.originalCollider.min.x, worldObject.originalCollider.min.y, worldObject.originalCollider.min.z },{ worldObject.originalCollider.max.x, worldObject.originalCollider.max.y, worldObject.originalCollider.max.z } };
+
+		j["entities"].push_back(w);
 	}
 }
 
-void SaveSystem::LoadEntities(json& j)
+void SaveSystem::LoadWorldObjects(json& j)
 {
-	Shared::entities.clear();
-	if (!j.contains("entities"))
+	Shared::worldObjects.clear();
+	if (!j.contains("worldObjects"))
 		return;
 	
-	for (auto& e : j["entities"]) {
-		Entity entity;
-		entity.id = e["id"].get<int>();
-		Entity::currentId = e["currentId"].get<int>();
-		entity.modelName = e["modelName"].get<std::string>();
-		entity.position = { e["position"][0].get<float>(), e["position"][1].get<float>(), e["position"][2].get<float>() };
-		entity.scale = { e["scale"][0].get<float>(), e["scale"][1].get<float>(), e["scale"][2].get<float>() };
-		entity.rotation = { e["rotation"][0].get<float>(), e["rotation"][1].get<float>(), e["rotation"][2].get<float>() };
-		entity.collider = { {e["collider"][0][0], e["collider"][0][1], e["collider"][0][2]}, {e["collider"][1][0], e["collider"][1][1], e["collider"][1][2]} };
-		entity.originalCollider = { {e["originalCollider"][0][0], e["originalCollider"][0][1], e["originalCollider"][0][2]}, {e["originalCollider"][1][0], e["originalCollider"][1][1], e["originalCollider"][1][2]} };
+	for (auto& w : j["worldObjects"]) {
+		WorldObject worldObject;
+
+		worldObject.id = w["id"].get<int>();
+		WorldObject::currentId = w["currentId"].get<int>();
+
+		worldObject.modelName = w["modelName"].get<std::string>();
+		worldObject.position = { w["position"][0].get<float>(), w["position"][1].get<float>(), w["position"][2].get<float>() };
+		worldObject.scale = { w["scale"][0].get<float>(), w["scale"][1].get<float>(), w["scale"][2].get<float>() };
+		worldObject.rotation = { w["rotation"][0].get<float>(), w["rotation"][1].get<float>(), w["rotation"][2].get<float>() };
+		worldObject.collider = { {w["collider"][0][0], w["collider"][0][1], w["collider"][0][2]}, {w["collider"][1][0], w["collider"][1][1], w["collider"][1][2]} };
+		worldObject.originalCollider = { {w["originalCollider"][0][0], w["originalCollider"][0][1], w["originalCollider"][0][2]}, {w["originalCollider"][1][0], w["originalCollider"][1][1], w["originalCollider"][1][2]} };
 	
-		Shared::entities[entity.id] = entity;
+		Shared::worldObjects[worldObject.id] = worldObject;
 	}
 }
 
@@ -306,9 +309,8 @@ void SaveSystem::SaveNPCs(json& j)
 	j["npcs"] = json::array();
 	for(auto& [name, npc] : Shared::npcs) {
 		json n;
+
 		//Entity Stuff
-		n["id"] = npc.id;
-		n["currentId"] = Entity::currentId;
 		n["modelName"] = npc.modelName;
 		n["position"] = { npc.position.x, npc.position.y, npc.position.z };
 		n["scale"] = { npc.scale.x, npc.scale.y, npc.scale.z };
@@ -337,10 +339,10 @@ void SaveSystem::LoadNPCs(json& j)
 		return;
 
 	for (auto& n : j["npcs"]) {
-		//Entity stuff
+		
 		NPC npc;
-		npc.id = n["id"].get<int>();
-		Entity::currentId = n["currentId"].get<int>();
+
+		//Entity stuff
 		npc.modelName = n["modelName"].get<std::string>();
 		npc.position = { n["position"][0].get<float>(), n["position"][1].get<float>(), n["position"][2].get<float>() };
 		npc.scale = { n["scale"][0].get<float>(), n["scale"][1].get<float>(), n["scale"][2].get<float>() };
@@ -372,10 +374,11 @@ void SaveSystem::SaveCutscenes(json& j)
 {
 	j["cutscenes"] = json::array();
 
-	//Entity
-	for (auto& [id, tracks] : Shared::cutscenes.entityCutscene) {
+	//World Object
+	for (auto& [id, tracks] : Shared::cutscenes.worldObjectCutscene) {
 		json c;
-		c["entityId"] = id;
+
+		c["worldObjectId"] = id;
 		c["tracks"] = json::array();
 
 		for (auto& t : tracks) {
@@ -383,7 +386,7 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["time"] = t.time;
 			track["currentFrame"] = t.currentFrame;
 			track["name"] = t.name;
-			track["entityId"] = t.entityId;
+			track["worldObjectId"] = t.worldObjectID;
 			track["npcName"] = t.npcName;
 
 			track["keyframes"] = json::array();
@@ -410,14 +413,14 @@ void SaveSystem::SaveCutscenes(json& j)
 
 void SaveSystem::LoadCutscenes(json& j)
 {
-	Shared::cutscenes.entityCutscene.clear();
+	Shared::cutscenes.worldObjectCutscene.clear();
 	Shared::cutscenes.npcCutscene.clear();
 
 	if (!j.contains("cutscenes"))
 		return;
 
 	for (auto& c : j["cutscenes"]) {
-		int entityId = c["entityId"].get<int>();
+		int worldObjectId = c["worldObjectId"].get<int>();
 		std::vector<Track> tracks;
 
 		for (auto& t : c["tracks"]) {
@@ -426,7 +429,7 @@ void SaveSystem::LoadCutscenes(json& j)
 			track.time = t["time"].get<float>();
 			track.currentFrame = t["currentFrame"].get<int>();
 			track.name = t["name"].get<std::string>();
-			track.entityId = t["entityId"].get<int>();
+			track.worldObjectID = t["worldObjectId"].get<int>();
 			track.npcName = t["npcName"].get<std::string>();
 
 			for (auto& key : t["keyframes"]) {
@@ -443,7 +446,7 @@ void SaveSystem::LoadCutscenes(json& j)
 			tracks.push_back(track);
 		}
 
-		Shared::cutscenes.entityCutscene[entityId] = tracks;
+		Shared::cutscenes.worldObjectCutscene[worldObjectId] = tracks;
 	}
 
 	// NPC cutscene loading goes here

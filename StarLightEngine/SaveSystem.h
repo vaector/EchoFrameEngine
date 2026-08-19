@@ -24,8 +24,8 @@ private:
 	static void SaveDoorSwitches(json& j);
 	static void LoadDoorSwitches(json& j);
 
-	static void SaveEntities(json& j);
-	static void LoadEntities(json& j);
+	static void SaveWorldObjects(json& j);
+	static void LoadWorldObjects(json& j);
 
 	static void SaveNPCs(json& j);
 	static void LoadNPCs(json& j);
