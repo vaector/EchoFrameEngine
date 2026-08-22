@@ -49,7 +49,7 @@ namespace Shared {
 
 
 
-	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale);
+	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

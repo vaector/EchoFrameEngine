@@ -4,6 +4,7 @@
 #include <iostream>
 #include "Cutscene.h"
 #include "Audio.h"
+#include "imgui/imgui.h"
 
 RealEditor::RealEditor()
 {
@@ -44,8 +45,14 @@ void RealEditor::Update(Camera3D* cam)
 	if(IsKeyPressed(KEY_TAB))
 	{
 		cursorLocked = !cursorLocked;
-		if(cursorLocked) DisableCursor();
-		else EnableCursor();
+		if (cursorLocked) {
+			DisableCursor();
+			ImGui::SetWindowFocus(NULL);//Disable the imgui windows when i am in the cursor locked mode.
+		}
+		else {
+			EnableCursor();
+		}
+
 	}
 
 	if(!cursorLocked || Shared::onImguiWindow) return;
@@ -105,20 +112,22 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 right = Vector3Normalize(Vector3CrossProduct(Shared::free.forward, { 0,1,0 }));
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::free.forward));
 
-		//Movement
-		if (IsKeyDown(KEY_W))
-			move = Vector3Add(move, Vector3Scale(Shared::free.forward, Shared::free.moveSpeed * dt));
-		if (IsKeyDown(KEY_S))
-			move = Vector3Add(move, Vector3Scale(Shared::free.forward, -Shared::free.moveSpeed * dt));
-		if (IsKeyDown(KEY_D))
-			move = Vector3Add(move, Vector3Scale(right, Shared::free.moveSpeed * dt));
-		if (IsKeyDown(KEY_A))
-			move = Vector3Add(move, Vector3Scale(right, -Shared::free.moveSpeed * dt));
-		if (IsKeyDown(KEY_E))
-			move = Vector3Add(move, Vector3Scale(up, Shared::free.moveSpeed * dt));
-		if (IsKeyDown(KEY_Q))
-			move = Vector3Add(move, Vector3Scale(up, -Shared::free.moveSpeed * dt));
+		if (freeCamToggle) {
+			//Movement
+			if (IsKeyDown(KEY_W))
+				move = Vector3Add(move, Vector3Scale(Shared::free.forward, Shared::free.moveSpeed * dt));
+			if (IsKeyDown(KEY_S))
+				move = Vector3Add(move, Vector3Scale(Shared::free.forward, -Shared::free.moveSpeed * dt));
+			if (IsKeyDown(KEY_D))
+				move = Vector3Add(move, Vector3Scale(right, Shared::free.moveSpeed * dt));
+			if (IsKeyDown(KEY_A))
+				move = Vector3Add(move, Vector3Scale(right, -Shared::free.moveSpeed * dt));
+			if (IsKeyDown(KEY_E))
+				move = Vector3Add(move, Vector3Scale(up, Shared::free.moveSpeed * dt));
+			if (IsKeyDown(KEY_Q))
+				move = Vector3Add(move, Vector3Scale(up, -Shared::free.moveSpeed * dt));
 
+		}
 
 		Shared::free.cam.position = Vector3Add(Shared::free.cam.position, move);
 		Shared::free.cam.target = Vector3Add(Shared::free.cam.position, Shared::free.forward);
@@ -850,7 +859,7 @@ void RealEditor::UpdateWorldObject()
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 8.0f);
+		Vector3 move = Vector3Scale(delta, 4.0f);
 		
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
@@ -861,13 +870,10 @@ void RealEditor::UpdateWorldObject()
 
 		//Updating Y
 		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, {0,move.y, 0});
-		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
-
 
 		//Updating XZ and check Wall collisons
 
 		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, { move.x, 0, move.z});
-		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
 
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
@@ -881,8 +887,7 @@ void RealEditor::UpdateWorldObject()
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
 			{
 				Shared::selectedWorldObject->position = Vector3Subtract(Shared::selectedWorldObject->position, { move.x, 0, move.z });
-				Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
-
+				
 			}
 		}
 
@@ -894,9 +899,21 @@ void RealEditor::UpdateWorldObject()
 		else if (IsKeyPressed(KEY_LEFT)) {
 			Shared::selectedWorldObject->scale = Vector3Subtract(Shared::selectedWorldObject->scale, {2,2,2});
 		}
-
 		Shared::selectedWorldObject->scale = Vector3Clamp(Shared::selectedWorldObject->scale, { 1, 1, 1 }, { 200,200, 200 });
-		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale);
+		
+		//Change the rotation of the entity while pressing Q and E
+		if(IsKeyPressed(KEY_Q))//Rotate left
+			Shared::selectedWorldObject->rotationAngle -= 15.0f;
+		else if (IsKeyPressed(KEY_E))//Rotate right
+			Shared::selectedWorldObject->rotationAngle += 15.0f;
+
+		//Update the rotation Axis
+		Shared::selectedWorldObject->rotationAxis = { 0, 1, 0 };
+
+
+		
+		//Update the collider
+		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale, Shared::selectedWorldObject->rotationAxis, Shared::selectedWorldObject->rotationAngle);
 
 
 	}
@@ -958,7 +975,8 @@ void RealEditor::CreateWorldObject()
 void RealEditor::DrawWorldObject()
 {
 	for (auto& [id, worldObject] : Shared::worldObjects) {
-		DrawModelEx(Shared::models[worldObject.modelName], worldObject.position, { 0,0,0 }, 0, worldObject.scale, WHITE);
+		
+		DrawModelEx(Shared::models[worldObject.modelName], worldObject.position, worldObject.rotationAxis, worldObject.rotationAngle, worldObject.scale, WHITE);
 		DrawBoundingBox(worldObject.collider, RED);
 	}
 }
@@ -1069,13 +1087,10 @@ void RealEditor::UpdateNpc()
 
 		//Updating Y
 		Shared::selectedNpc->position = Vector3Add(Shared::selectedNpc->position, { 0,move.y, 0 });
-		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
-
 
 		//Updating XZ and check Wall collisons
 
 		Shared::selectedNpc->position = Vector3Add(Shared::selectedNpc->position, { move.x, 0, move.z });
-		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
 
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
@@ -1089,8 +1104,7 @@ void RealEditor::UpdateNpc()
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
 			{
 				Shared::selectedNpc->position = Vector3Subtract(Shared::selectedNpc->position, { move.x, 0, move.z });
-				Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
-
+				
 			}
 		}
 
@@ -1102,9 +1116,10 @@ void RealEditor::UpdateNpc()
 		else if (IsKeyPressed(KEY_LEFT)) {
 			Shared::selectedNpc->scale = Vector3Subtract(Shared::selectedNpc->scale, { 2,2,2 });
 		}
-
 		Shared::selectedNpc->scale = Vector3Clamp(Shared::selectedNpc->scale, { 0.5, 0.5, 0.5 }, { 200,200, 200 });
-		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale);
+
+
+		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale, Shared::selectedNpc->rotationAxis, Shared::selectedNpc->rotationAngle);
 
 
 	}

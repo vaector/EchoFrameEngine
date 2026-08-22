@@ -6,7 +6,8 @@
 struct KeyFrame {
 	int frame;
 	Vector3 position;
-	Vector3 rotation;
+	Vector3 rotationAxis;
+	float rotationAngle;
 	Vector3 scale;
 };
 

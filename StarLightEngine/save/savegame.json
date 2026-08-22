@@ -18,16 +18,16 @@
     "ramps": [
         {
             "endPos": [
-                936.0,
-                776.0
+                920.0,
+                712.0
             ],
             "floor": 0,
-            "halfWidth": 82,
+            "halfWidth": 98,
             "layer": 0,
             "rampHeight": 200.0,
             "startPos": [
-                936.4083251953125,
-                904.0
+                920.0,
+                936.0
             ],
             "textureName": "tile1"
         }
@@ -36,80 +36,80 @@
         {
             "ceilingPoints": [
                 [
-                    840.0,
-                    776.0
+                    808.0,
+                    712.0
                 ],
                 [
-                    840.0,
-                    1192.0
+                    808.0,
+                    1272.0
                 ],
                 [
-                    1304.0,
-                    1192.0
+                    1592.0,
+                    1272.0
                 ],
                 [
-                    1304.0,
-                    776.0
-                ],
-                [
-                    1016.0,
-                    776.0
+                    1592.0,
+                    712.0
                 ],
                 [
                     1016.0,
-                    904.0
+                    712.0
                 ],
                 [
-                    856.0,
-                    904.0
+                    1016.0,
+                    936.0
                 ],
                 [
-                    856.0,
-                    776.0
+                    824.0,
+                    936.0
                 ],
                 [
-                    840.0,
-                    776.0
+                    824.0,
+                    712.0
+                ],
+                [
+                    808.0,
+                    712.0
                 ]
             ],
             "ceilingTextureName": "tile1",
             "floor": 0,
             "floorPoints": [
                 [
-                    840.0,
-                    776.0
+                    808.0,
+                    712.0
                 ],
                 [
-                    840.0,
-                    1192.0
+                    808.0,
+                    1272.0
                 ],
                 [
-                    1304.0,
-                    1192.0
+                    1592.0,
+                    1272.0
                 ],
                 [
-                    1304.0,
-                    776.0
-                ],
-                [
-                    1016.0,
-                    776.0
+                    1592.0,
+                    712.0
                 ],
                 [
                     1016.0,
-                    904.0
+                    712.0
                 ],
                 [
-                    856.0,
-                    904.0
+                    1016.0,
+                    936.0
                 ],
                 [
-                    856.0,
-                    776.0
+                    824.0,
+                    936.0
                 ],
                 [
-                    840.0,
-                    776.0
+                    824.0,
+                    712.0
+                ],
+                [
+                    808.0,
+                    712.0
                 ]
             ],
             "floorTextureName": "tile1",
@@ -140,124 +140,56 @@
         {
             "ceilingPoints": [
                 [
-                    856.0,
-                    904.0
+                    824.0,
+                    712.0
+                ],
+                [
+                    312.0,
+                    712.0
+                ],
+                [
+                    312.0,
+                    8.0
+                ],
+                [
+                    1720.0,
+                    8.0
+                ],
+                [
+                    1720.0,
+                    712.0
                 ],
                 [
                     1016.0,
-                    904.0
-                ],
-                [
-                    1016.0,
-                    776.0
-                ],
-                [
-                    856.0,
-                    776.0
-                ]
-            ],
-            "ceilingTextureName": "tile1",
-            "floor": 0,
-            "floorPoints": [
-                [
-                    856.0,
-                    904.0
-                ],
-                [
-                    1016.0,
-                    904.0
-                ],
-                [
-                    1016.0,
-                    776.0
-                ],
-                [
-                    856.0,
-                    776.0
-                ]
-            ],
-            "floorTextureName": "tile1",
-            "hasCeiling": false,
-            "hasFloor": true,
-            "indices": [
-                1,
-                0,
-                3,
-                1,
-                3,
-                2
-            ],
-            "layer": 0
-        },
-        {
-            "ceilingPoints": [
-                [
-                    856.0,
-                    776.0
-                ],
-                [
-                    600.0,
-                    776.0
-                ],
-                [
-                    600.0,
-                    456.0
-                ],
-                [
-                    648.0,
-                    424.0
-                ],
-                [
-                    1096.0,
-                    424.0
-                ],
-                [
-                    1128.0,
-                    472.0
-                ],
-                [
-                    1128.0,
-                    776.0
-                ],
-                [
-                    1016.0,
-                    776.0
+                    712.0
                 ]
             ],
             "ceilingTextureName": "tile1",
             "floor": 1,
             "floorPoints": [
                 [
-                    856.0,
-                    776.0
+                    824.0,
+                    712.0
                 ],
                 [
-                    600.0,
-                    776.0
+                    312.0,
+                    712.0
                 ],
                 [
-                    600.0,
-                    456.0
+                    312.0,
+                    8.0
                 ],
                 [
-                    648.0,
-                    424.0
+                    1720.0,
+                    8.0
                 ],
                 [
-                    1096.0,
-                    424.0
-                ],
-                [
-                    1128.0,
-                    472.0
-                ],
-                [
-                    1128.0,
-                    776.0
+                    1720.0,
+                    712.0
                 ],
                 [
                     1016.0,
-                    776.0
+                    712.0
                 ]
             ],
             "floorTextureName": "tile1",
@@ -270,17 +202,11 @@
                 0,
                 2,
                 3,
-                0,
                 3,
                 4,
-                0,
-                4,
                 5,
+                3,
                 5,
-                6,
-                7,
-                5,
-                7,
                 0
             ],
             "layer": 0
@@ -288,40 +214,40 @@
         {
             "ceilingPoints": [
                 [
-                    856.0,
-                    776.0
+                    824.0,
+                    712.0
                 ],
                 [
-                    856.0,
-                    904.0
-                ],
-                [
-                    1016.0,
-                    904.0
+                    824.0,
+                    936.0
                 ],
                 [
                     1016.0,
-                    776.0
+                    936.0
+                ],
+                [
+                    1016.0,
+                    712.0
                 ]
             ],
             "ceilingTextureName": "tile1",
             "floor": 1,
             "floorPoints": [
                 [
-                    856.0,
-                    776.0
+                    824.0,
+                    712.0
                 ],
                 [
-                    856.0,
-                    904.0
-                ],
-                [
-                    1016.0,
-                    904.0
+                    824.0,
+                    936.0
                 ],
                 [
                     1016.0,
-                    776.0
+                    936.0
+                ],
+                [
+                    1016.0,
+                    712.0
                 ]
             ],
             "floorTextureName": "tile1",
@@ -340,10 +266,10 @@
     ],
     "walls": [
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                840.0,
-                1192.0
+                808.0,
+                1272.0
             ],
             "floor": 0,
             "id": 0,
@@ -352,17 +278,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                840.0,
-                776.0
+                808.0,
+                712.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                1304.0,
-                1192.0
+                1592.0,
+                1272.0
             ],
             "floor": 0,
             "id": 1,
@@ -371,17 +297,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                840.0,
-                1192.0
+                808.0,
+                1272.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                1304.0,
-                776.0
+                1592.0,
+                712.0
             ],
             "floor": 0,
             "id": 2,
@@ -390,36 +316,55 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                1304.0,
-                1192.0
+                1592.0,
+                1272.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
                 1016.0,
-                776.0
+                712.0
             ],
             "floor": 0,
             "id": 3,
-            "inSector": true,
+            "inSector": false,
             "isDoor": false,
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                1304.0,
-                776.0
+                1592.0,
+                712.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                856.0,
-                776.0
+                1016.0,
+                712.0
+            ],
+            "floor": 0,
+            "id": 8,
+            "inSector": false,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                712.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                824.0,
+                712.0
             ],
             "floor": 0,
             "id": 6,
@@ -428,17 +373,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                856.0,
-                904.0
+                824.0,
+                936.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                840.0,
-                776.0
+                808.0,
+                712.0
             ],
             "floor": 0,
             "id": 7,
@@ -447,150 +392,93 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                856.0,
-                776.0
+                824.0,
+                712.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
                 1016.0,
-                776.0
+                936.0
             ],
             "floor": 0,
             "id": 9,
+            "inSector": false,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                712.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                808.0,
+                936.0
+            ],
+            "floor": 0,
+            "id": 10,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                936.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1032.0,
+                936.0
+            ],
+            "floor": 0,
+            "id": 11,
             "inSector": true,
             "isDoor": false,
             "isOpen": false,
             "layer": 0,
             "startPos": [
                 1016.0,
-                904.0
+                936.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                600.0,
-                776.0
+                1032.0,
+                712.0
             ],
-            "floor": 1,
+            "floor": 0,
             "id": 12,
             "inSector": true,
             "isDoor": false,
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                856.0,
-                776.0
+                1032.0,
+                936.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                600.0,
-                456.0
-            ],
-            "floor": 1,
-            "id": 13,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                600.0,
-                776.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 22,
-            "endPos": [
-                648.0,
-                424.0
-            ],
-            "floor": 1,
-            "id": 14,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                600.0,
-                456.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 22,
-            "endPos": [
-                1096.0,
-                424.0
-            ],
-            "floor": 1,
-            "id": 15,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                648.0,
-                424.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 22,
-            "endPos": [
-                1128.0,
-                472.0
-            ],
-            "floor": 1,
-            "id": 16,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                1096.0,
-                424.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 22,
-            "endPos": [
-                1128.0,
-                776.0
-            ],
-            "floor": 1,
-            "id": 17,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                1128.0,
-                472.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 22,
-            "endPos": [
-                1016.0,
-                776.0
+                312.0,
+                712.0
             ],
             "floor": 1,
             "id": 18,
@@ -599,17 +487,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                1128.0,
-                776.0
+                824.0,
+                712.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                856.0,
-                904.0
+                312.0,
+                8.0
             ],
             "floor": 1,
             "id": 19,
@@ -618,17 +506,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                856.0,
-                776.0
+                312.0,
+                712.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                1016.0,
-                904.0
+                1720.0,
+                8.0
             ],
             "floor": 1,
             "id": 20,
@@ -637,17 +525,17 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
-                856.0,
-                904.0
+                312.0,
+                8.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 22,
+            "currentWallId": 43,
             "endPos": [
-                1016.0,
-                776.0
+                1720.0,
+                712.0
             ],
             "floor": 1,
             "id": 21,
@@ -656,12 +544,134 @@
             "isOpen": false,
             "layer": 0,
             "startPos": [
+                1720.0,
+                8.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
                 1016.0,
-                904.0
+                712.0
+            ],
+            "floor": 1,
+            "id": 22,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1720.0,
+                712.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                824.0,
+                936.0
+            ],
+            "floor": 1,
+            "id": 40,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                712.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1016.0,
+                936.0
+            ],
+            "floor": 1,
+            "id": 41,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                936.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1016.0,
+                712.0
+            ],
+            "floor": 1,
+            "id": 42,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                936.0
             ],
             "textureName": "tile1",
             "wallHeight": 200.0
         }
     ],
-    "worldObjects": []
+    "worldObjects": [
+        {
+            "collider": [
+                [
+                    1094.4794921875,
+                    0.03691931068897247,
+                    1018.7691040039063
+                ],
+                [
+                    1116.1490478515625,
+                    17.11767578125,
+                    1046.6375732421875
+                ]
+            ],
+            "currentId": 1,
+            "id": 0,
+            "modelName": "green_crate1",
+            "originalCollider": [
+                [
+                    -0.48604315519332886,
+                    0.0007383861811831594,
+                    -0.637452244758606
+                ],
+                [
+                    -0.05265092849731445,
+                    0.3423535227775574,
+                    -0.08008413016796112
+                ]
+            ],
+            "position": [
+                1118.7816162109375,
+                0.0,
+                1050.6417236328125
+            ],
+            "rotationAngle": 0.0,
+            "rotationAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "scale": [
+                50.0,
+                50.0,
+                50.0
+            ]
+        }
+    ]
 }

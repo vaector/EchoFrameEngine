@@ -291,33 +291,8 @@ void TileEditor::UpdateRamp()
 	//Placing Ramp
 	if (IsKeyPressed(KEY_R)) {
 
-		float dist = FLT_MAX;
-		Vector2* closestFloorPointStart = nullptr;
-		Vector2* closestFloorPointEnd = nullptr;
-		for (auto& sector: Shared::sectors) {
-			if (sector.floor != Shared::floor) continue;
-
-			for (int i = 0; i < sector.floorPoints.size(); i++) {
-				Vector2& p0 = sector.floorPoints[i];
-				Vector2& p1 = sector.floorPoints[(i + 1) % sector.floorPoints.size()];
-
-				float d = Vector2Distance(mouse, ClosestPointOnLineSegment(mouse, p0, p1));
-				if (d < dist) {
-					dist = d;
-					closestFloorPointStart = &p0;
-					closestFloorPointEnd = &p1;
-				}
-			}
-		}
-		
-		//If there is a close wall then add the startPos of the  ramp to the closest point on the wall, otherwise add it to the tile.
-		if ((closestFloorPointStart != nullptr || closestFloorPointEnd != nullptr) && dist < 12) {
-			pendingRamp.startPos = ClosestPointOnLineSegment(mouse, *closestFloorPointStart, *closestFloorPointEnd);
-			placeHolderRamp.startPos = ClosestPointOnLineSegment(mouse, *closestFloorPointStart, *closestFloorPointEnd);
-		}
-		else {
-			
-		}
+		pendingRamp.startPos = tile;
+		placeHolderRamp.startPos = tile;
 
 	}
 	else if (IsKeyReleased(KEY_R)) {

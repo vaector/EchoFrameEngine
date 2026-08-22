@@ -270,14 +270,16 @@ void SaveSystem::SaveWorldObjects(json& j)
 
 		w["id"] = id;
 		w["currentId"] = WorldObject::currentId;
+
 		w["modelName"] = worldObject.modelName;
 		w["position"] = { worldObject.position.x, worldObject.position.y, worldObject.position.z };
 		w["scale"] = { worldObject.scale.x, worldObject.scale.y, worldObject.scale.z };
-		w["rotation"] = { worldObject.rotation.x, worldObject.rotation.y, worldObject.rotation.z };
+		w["rotationAxis"] = { worldObject.rotationAxis.x, worldObject.rotationAxis.y, worldObject.rotationAxis.z };
+		w["rotationAngle"] = worldObject.rotationAngle;
 		w["collider"] = { { worldObject.collider.min.x, worldObject.collider.min.y, worldObject.collider.min.z },{ worldObject.collider.max.x, worldObject.collider.max.y, worldObject.collider.max.z } };
 		w["originalCollider"] = { { worldObject.originalCollider.min.x, worldObject.originalCollider.min.y, worldObject.originalCollider.min.z },{ worldObject.originalCollider.max.x, worldObject.originalCollider.max.y, worldObject.originalCollider.max.z } };
 
-		j["entities"].push_back(w);
+		j["worldObjects"].push_back(w);
 	}
 }
 
@@ -296,7 +298,8 @@ void SaveSystem::LoadWorldObjects(json& j)
 		worldObject.modelName = w["modelName"].get<std::string>();
 		worldObject.position = { w["position"][0].get<float>(), w["position"][1].get<float>(), w["position"][2].get<float>() };
 		worldObject.scale = { w["scale"][0].get<float>(), w["scale"][1].get<float>(), w["scale"][2].get<float>() };
-		worldObject.rotation = { w["rotation"][0].get<float>(), w["rotation"][1].get<float>(), w["rotation"][2].get<float>() };
+		worldObject.rotationAxis = { w["rotationAxis"][0].get<float>(), w["rotationAxis"][1].get<float>(), w["rotationAxis"][2].get<float>() };
+		worldObject.rotationAngle = w["rotationAngle"].get<float>();
 		worldObject.collider = { {w["collider"][0][0], w["collider"][0][1], w["collider"][0][2]}, {w["collider"][1][0], w["collider"][1][1], w["collider"][1][2]} };
 		worldObject.originalCollider = { {w["originalCollider"][0][0], w["originalCollider"][0][1], w["originalCollider"][0][2]}, {w["originalCollider"][1][0], w["originalCollider"][1][1], w["originalCollider"][1][2]} };
 	
@@ -314,7 +317,8 @@ void SaveSystem::SaveNPCs(json& j)
 		n["modelName"] = npc.modelName;
 		n["position"] = { npc.position.x, npc.position.y, npc.position.z };
 		n["scale"] = { npc.scale.x, npc.scale.y, npc.scale.z };
-		n["rotation"] = { npc.rotation.x, npc.rotation.y, npc.rotation.z };
+		n["rotationAxis"] = { npc.rotationAxis.x, npc.rotationAxis.y, npc.rotationAxis.z };
+		n["rotationAngle"] = npc.rotationAngle;
 		n["collider"] = { { npc.collider.min.x, npc.collider.min.y, npc.collider.min.z },{ npc.collider.max.x, npc.collider.max.y, npc.collider.max.z } };
 		n["originalCollider"] = { { npc.originalCollider.min.x, npc.originalCollider.min.y, npc.originalCollider.min.z },{ npc.originalCollider.max.x, npc.originalCollider.max.y, npc.originalCollider.max.z } };
 
@@ -346,7 +350,8 @@ void SaveSystem::LoadNPCs(json& j)
 		npc.modelName = n["modelName"].get<std::string>();
 		npc.position = { n["position"][0].get<float>(), n["position"][1].get<float>(), n["position"][2].get<float>() };
 		npc.scale = { n["scale"][0].get<float>(), n["scale"][1].get<float>(), n["scale"][2].get<float>() };
-		npc.rotation = { n["rotation"][0].get<float>(), n["rotation"][1].get<float>(), n["rotation"][2].get<float>() };
+		npc.rotationAxis = { n["rotationAxis"][0].get<float>(), n["rotationAxis"][1].get<float>(), n["rotationAxis"][2].get<float>() };
+		npc.rotationAngle = n["rotationAngle"].get<float>();
 		npc.collider = { {n["collider"][0][0], n["collider"][0][1], n["collider"][0][2]}, {n["collider"][1][0], n["collider"][1][1], n["collider"][1][2]} };
 		npc.originalCollider = { {n["originalCollider"][0][0], n["originalCollider"][0][1], n["originalCollider"][0][2]}, {n["originalCollider"][1][0], n["originalCollider"][1][1], n["originalCollider"][1][2]} };
 
@@ -388,6 +393,7 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["name"] = t.name;
 			track["worldObjectId"] = t.worldObjectID;
 			track["npcName"] = t.npcName;
+			track["animSpeed"] = t.animSpeed;
 
 			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
@@ -395,10 +401,20 @@ void SaveSystem::SaveCutscenes(json& j)
 				k["frame"] = key.frame;
 				k["position"] = { key.position.x, key.position.y, key.position.z };
 				k["scale"] = { key.scale.x, key.scale.y, key.scale.z };
-				k["rotation"] = { key.rotation.x, key.rotation.y, key.rotation.z };
+				k["rotationAxis"] = { key.rotationAxis.x, key.rotationAxis.y, key.rotationAxis.z };
+				k["rotationAngle"] = key.rotationAngle;
 
 				track["keyframes"].push_back(k);
 			}
+
+			json okf;
+			okf["frame"] = t.originalKeyFrame.frame;
+			okf["position"] = { t.originalKeyFrame.position.x, t.originalKeyFrame.position.y, t.originalKeyFrame.position.z };
+			okf["scale"] = { t.originalKeyFrame.scale.x, t.originalKeyFrame.scale.y, t.originalKeyFrame.scale.z };
+			okf["rotationAxis"] = { t.originalKeyFrame.rotationAxis.x, t.originalKeyFrame.rotationAxis.y, t.originalKeyFrame.rotationAxis.z };
+			okf["rotationAngle"] = t.originalKeyFrame.rotationAngle;
+
+			track["originalKeyFrame"] = okf;
 
 			c["tracks"].push_back(track);
 		}
@@ -420,6 +436,7 @@ void SaveSystem::LoadCutscenes(json& j)
 		return;
 
 	for (auto& c : j["cutscenes"]) {
+
 		int worldObjectId = c["worldObjectId"].get<int>();
 		std::vector<Track> tracks;
 
@@ -431,6 +448,7 @@ void SaveSystem::LoadCutscenes(json& j)
 			track.name = t["name"].get<std::string>();
 			track.worldObjectID = t["worldObjectId"].get<int>();
 			track.npcName = t["npcName"].get<std::string>();
+			track.animSpeed = t["animSpeed"].get<float>();
 
 			for (auto& key : t["keyframes"]) {
 				KeyFrame k;
@@ -438,10 +456,18 @@ void SaveSystem::LoadCutscenes(json& j)
 				k.frame = key["frame"].get<int>();
 				k.position = { key["position"][0].get<float>(), key["position"][1].get<float>(), key["position"][2].get<float>() };
 				k.scale = { key["scale"][0].get<float>(), key["scale"][1].get<float>(), key["scale"][2].get<float>() };
-				k.rotation = { key["rotation"][0].get<float>(), key["rotation"][1].get<float>(), key["rotation"][2].get<float>() };
+				k.rotationAxis = { key["rotationAxis"][0].get<float>(), key["rotationAxis"][1].get<float>(), key["rotationAxis"][2].get<float>() };
+				k.rotationAngle = key["rotationAngle"].get<float>();
 
 				track.keyframes.push_back(k);
 			}
+
+			auto& okf = t["originalKeyFrame"];
+			track.originalKeyFrame.frame = okf["frame"].get<int>();
+			track.originalKeyFrame.position = { okf["position"][0].get<float>(), okf["position"][1].get<float>(), okf["position"][2].get<float>() };
+			track.originalKeyFrame.scale = { okf["scale"][0].get<float>(), okf["scale"][1].get<float>(), okf["scale"][2].get<float>() };
+			track.originalKeyFrame.rotationAxis = { okf["rotationAxis"][0].get<float>(), okf["rotationAxis"][1].get<float>(), okf["rotationAxis"][2].get<float>() };
+			track.originalKeyFrame.rotationAngle = okf["rotationAngle"].get<float>();
 
 			tracks.push_back(track);
 		}

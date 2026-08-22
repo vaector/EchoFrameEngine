@@ -1,4 +1,5 @@
 #include "Shared.h"
+#include "raymath.h"
 
 std::string tile1 = "tile1";//Default texture name
 
@@ -41,23 +42,38 @@ namespace Shared {
 	std::unordered_map<std::string, Sound> sounds;
 	std::unordered_map<std::string, Music> music;
 
-	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale)
+	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
+		Vector3 corners[8] =
+		{
+			{ original.min.x, original.min.y, original.min.z },
+			{ original.max.x, original.min.y, original.min.z },
+			{ original.min.x, original.max.y, original.min.z },
+			{ original.max.x, original.max.y, original.min.z },
+			{ original.min.x, original.min.y, original.max.z },
+			{ original.max.x, original.min.y, original.max.z },
+			{ original.min.x, original.max.y, original.max.z },
+			{ original.max.x, original.max.y, original.max.z },
+		};
+
 		BoundingBox box;
+		box.min = { FLT_MAX, FLT_MAX, FLT_MAX };
+		box.max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
 
-		box.min =
+		for (int i = 0; i < 8; i++)
 		{
-			position.x + original.min.x * scale.x,
-			position.y + original.min.y * scale.y,
-			position.z + original.min.z * scale.z
-		};
+			Vector3 scaled = { corners[i].x * scale.x, corners[i].y * scale.y, corners[i].z * scale.z };
+			Vector3 rotated = Vector3RotateByAxisAngle(scaled, rotationAxis, DEG2RAD * rotationAngle);
+			Vector3 world = Vector3Add(rotated, position);
 
-		box.max =
-		{
-			position.x + original.max.x * scale.x,
-			position.y + original.max.y * scale.y,
-			position.z + original.max.z * scale.z
-		};
+			box.min.x = fminf(box.min.x, world.x);
+			box.min.y = fminf(box.min.y, world.y);
+			box.min.z = fminf(box.min.z, world.z);
+
+			box.max.x = fmaxf(box.max.x, world.x);
+			box.max.y = fmaxf(box.max.y, world.y);
+			box.max.z = fmaxf(box.max.z, world.z);
+		}
 
 		return box;
 	}
