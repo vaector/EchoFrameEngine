@@ -42,6 +42,8 @@ namespace Shared {
 	std::unordered_map<std::string, Sound> sounds;
 	std::unordered_map<std::string, Music> music;
 
+	Vector3 rotationAxis = {0,1,0};
+
 	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
 		Vector3 corners[8] =

@@ -18,14 +18,14 @@ void Cutscene::Play(std::string trackName)
 			track.time += GetFrameTime();
 
 			size_t next = (track.currentFrame + 1) % k.size();
-			float t = track.time / track.animSpeed; // 0.0 -> 1.0 over the second
+			float t = track.time / track.animDuration; // 0.0 -> 1.0 over the second
 
 			worldObject.position = Vector3Lerp(k[track.currentFrame].position, k[next].position, t);
 			worldObject.scale = Vector3Lerp(k[track.currentFrame].scale, k[next].scale, t);
 			worldObject.rotationAxis = k[track.currentFrame].rotationAxis;
 			worldObject.rotationAngle = Lerp(k[track.currentFrame].rotationAngle, k[next].rotationAngle, t);
 
-			if (track.time >= track.animSpeed) { //1 second passes, advance to the next keyframe
+			if (track.time >= track.animDuration) { //1 second passes, advance to the next keyframe
 				track.currentFrame = next;
 				track.time = 0.0f;
 			}
@@ -44,7 +44,7 @@ void Cutscene::Play(std::string trackName)
 			track.time += GetFrameTime();
 
 			size_t next = (track.currentFrame + 1) % k.size();
-			float t = track.time / 1.0f; // 0.0 -> 1.0 over the second
+			float t = track.time / track.animDuration; // 0.0 -> 1.0 over the second
 
 			npc.position = Vector3Lerp(k[track.currentFrame].position, k[next].position, t);
 			npc.scale = Vector3Lerp(k[track.currentFrame].scale, k[next].scale, t);

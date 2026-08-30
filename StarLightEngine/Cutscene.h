@@ -9,7 +9,7 @@ public:
 	std::unordered_map<int, std::vector<Track>> worldObjectCutscene;//Key-> World Object ID
 	std::unordered_map<std::string, std::vector<Track>> npcCutscene;//Key-> NPC Name
 
-	std::string* playingTrack = nullptr;
+	std::string playingTrack = "";
 
 
 	void Play(std::string trackName);

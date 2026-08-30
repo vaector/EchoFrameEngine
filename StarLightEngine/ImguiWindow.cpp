@@ -174,6 +174,21 @@ void ImguiWindow::UpdateImguiTileEditor()
 			ImGui::InputFloat3("##Rotation", &Shared::selectedNpc->rotationAxis.x);
 		}
 		
+		//Rotation Axis
+		ImGui::SeparatorText("Rotation Axis");
+
+		static bool isAxisX = false;
+		static bool isAxisY = true;
+		static bool isAxisZ = false;
+
+		ImGui::Checkbox("X", &isAxisX);
+		ImGui::SameLine();
+		ImGui::Checkbox("Y", &isAxisY);
+		ImGui::SameLine();
+		ImGui::Checkbox("Z", &isAxisZ);
+
+		Shared::rotationAxis = { (float)isAxisX, (float)isAxisY, (float)isAxisZ };
+
 		ImGui::SeparatorText("3D Models");
 
 		//Search for models
@@ -300,12 +315,12 @@ void ImguiWindow::UpdateImguiTileEditor()
 				auto& track = tracks[i];
 
 				//Speed of the animation Track
-				ImGui::InputFloat("Seconds?", &track.animSpeed);
+				ImGui::InputFloat(("Seconds?##" + id + std::to_string(i)).c_str(), &track.animDuration);
 				ImGui::NewLine();
 
 				//Play Track
 				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
-					Shared::cutscenes.playingTrack = &track.name;
+					Shared::cutscenes.playingTrack = track.name;
 					Shared::cutscenes.SaveOriginalKeyFrame();
 
 					Shared::isCutscenePlaying = true;
@@ -314,7 +329,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 				//Delete Track
 				if (ImGui::Button(("Delete Track: " + std::to_string(i) + " " + track.name).c_str())) {
-					if (Shared::cutscenes.playingTrack == &track.name) {
+					if (Shared::cutscenes.playingTrack == track.name) {
 						Shared::cutscenes.playingTrack = nullptr;
 					}
 					Shared::cutscenes.worldObjectCutscene[track.worldObjectID].erase(Shared::cutscenes.worldObjectCutscene[track.worldObjectID].begin() + i);
@@ -332,12 +347,12 @@ void ImguiWindow::UpdateImguiTileEditor()
 				auto& track = tracks[i];
 
 				//Speed of the animation Track
-				ImGui::InputFloat("Seconds?", &track.animSpeed);
+				ImGui::InputFloat(("Seconds?##" + name + std::to_string(i)).c_str(), &track.animDuration);
 				ImGui::NewLine();
 
 				//Play Track
 				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
-					Shared::cutscenes.playingTrack = &track.name;
+					Shared::cutscenes.playingTrack = track.name;
 					Shared::cutscenes.SaveOriginalKeyFrame();
 
 					Shared::isCutscenePlaying = true;
@@ -345,7 +360,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 				ImGui::SameLine();
 				//Delete Track
 				if (ImGui::Button(("Delete Track: " + std::to_string(i) + " " + track.name).c_str())) {
-					if (Shared::cutscenes.playingTrack == &track.name) {
+					if (Shared::cutscenes.playingTrack == track.name) {
 						Shared::cutscenes.playingTrack = nullptr;
 					}
 					Shared::cutscenes.npcCutscene[track.npcName].erase(Shared::cutscenes.npcCutscene[track.npcName].begin() + i);
@@ -356,22 +371,22 @@ void ImguiWindow::UpdateImguiTileEditor()
 		}
 
 		//Stop playing a track
-		if (Shared::cutscenes.playingTrack) {
+		if (Shared::cutscenes.playingTrack != "") {
 			if (ImGui::Button("Stop playing track")) {
 
 				//Stop the cutscene and reset the entity/npc to its original keyframe. Then Update the collider
 				Shared::cutscenes.Stop();
 
-				Shared::cutscenes.playingTrack = nullptr;
+				Shared::cutscenes.playingTrack = "";
 				Shared::isCutscenePlaying = false;
 			}
 		}
 
 
 		//Play a track
-		if (Shared::cutscenes.playingTrack) {
+		if (Shared::cutscenes.playingTrack != "") {
 
-			Shared::cutscenes.Play(*Shared::cutscenes.playingTrack);
+			Shared::cutscenes.Play(Shared::cutscenes.playingTrack);
 			for (auto& [id, tracks] : Shared::cutscenes.worldObjectCutscene) {
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];

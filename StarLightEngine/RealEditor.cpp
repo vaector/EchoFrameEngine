@@ -85,6 +85,7 @@ void RealEditor::Update(Camera3D* cam)
 	for (auto& [name, npc] : Shared::npcs)
 		npc.playAnim(c, loop);
 
+
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -868,29 +869,33 @@ void RealEditor::UpdateWorldObject()
 		else
 			move.y = 0.0f;
 
-		//Updating Y
+		//----Updating Y-----
 		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, {0,move.y, 0});
 
-		//Updating XZ and check Wall collisons
-
-		Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, { move.x, 0, move.z});
-
+		
+		//----Updating XZ and check Wall collisons------
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
-		rect.x = Shared::selectedWorldObject->collider.min.x;
-		rect.y = Shared::selectedWorldObject->collider.min.z;
+		rect.x = Shared::selectedWorldObject->collider.min.x + move.x;
+		rect.y = Shared::selectedWorldObject->collider.min.z + move.z;
 
 		rect.width = Shared::selectedWorldObject->collider.max.x - Shared::selectedWorldObject->collider.min.x;
 		rect.height = Shared::selectedWorldObject->collider.max.z - Shared::selectedWorldObject->collider.min.z;
 
+		static bool collided = false;
 		for (auto& wall : Shared::walls) {
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
 			{
-				Shared::selectedWorldObject->position = Vector3Subtract(Shared::selectedWorldObject->position, { move.x, 0, move.z });
-				
+				collided = true;
 			}
 		}
 
+		if(!collided)
+			Shared::selectedWorldObject->position = Vector3Add(Shared::selectedWorldObject->position, { move.x, 0, move.z });
+		else {
+			Shared::selectedWorldObject->position = Vector3Subtract(Shared::selectedWorldObject->position, { move.x, 0, move.z });
+			collided = false;
+		}
 
 		//Change Scale while pressing arrow keys
 		if (IsKeyPressed(KEY_RIGHT)) {
@@ -908,7 +913,7 @@ void RealEditor::UpdateWorldObject()
 			Shared::selectedWorldObject->rotationAngle += 15.0f;
 
 		//Update the rotation Axis
-		Shared::selectedWorldObject->rotationAxis = { 0, 1, 0 };
+		Shared::selectedWorldObject->rotationAxis = Shared::rotationAxis;
 
 
 		
@@ -1038,7 +1043,7 @@ void RealEditor::CreateNpc()
 void RealEditor::DrawNpc()
 {
 	for (auto& [name, npc] : Shared::npcs) {
-		DrawModelEx(npc.model, npc.position, { 0, 0, 0 }, 0.0f, npc.scale, WHITE);
+		DrawModelEx(Shared::models[npc.modelName], npc.position, npc.rotationAxis, npc.rotationAngle, npc.scale, WHITE);
 		DrawBoundingBox(npc.collider, RED);
 	}
 
@@ -1118,9 +1123,17 @@ void RealEditor::UpdateNpc()
 		}
 		Shared::selectedNpc->scale = Vector3Clamp(Shared::selectedNpc->scale, { 0.5, 0.5, 0.5 }, { 200,200, 200 });
 
+		//Change the rotation of the Npc while pressing Q and E
+		if (IsKeyPressed(KEY_Q))//Rotate left
+			Shared::selectedNpc->rotationAngle -= 15.0f;
+		else if (IsKeyPressed(KEY_E))//Rotate right
+			Shared::selectedNpc->rotationAngle += 15.0f;
 
+		//Update the rotation Axis
+		Shared::selectedNpc->rotationAxis = Shared::rotationAxis;
+
+		//Update the collider
 		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale, Shared::selectedNpc->rotationAxis, Shared::selectedNpc->rotationAngle);
-
 
 	}
 

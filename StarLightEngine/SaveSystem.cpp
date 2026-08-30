@@ -58,6 +58,10 @@ void SaveSystem::LoadGame(const std::string& filename)
 
 	file.close();
 
+	//Clear pointers and vectors/arrays/maps
+	Shared::selectedWorldObject = nullptr;
+	Shared::selectedNpc = nullptr;
+
 	LoadWalls(data);
 	LoadSectors(data);
 	LoadRamps(data);
@@ -377,9 +381,10 @@ void SaveSystem::LoadNPCs(json& j)
 
 void SaveSystem::SaveCutscenes(json& j)
 {
-	j["cutscenes"] = json::array();
-
+	
 	//World Object
+	j["worldObjectCutscenes"] = json::array();
+
 	for (auto& [id, tracks] : Shared::cutscenes.worldObjectCutscene) {
 		json c;
 
@@ -393,7 +398,7 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["name"] = t.name;
 			track["worldObjectId"] = t.worldObjectID;
 			track["npcName"] = t.npcName;
-			track["animSpeed"] = t.animSpeed;
+			track["animSpeed"] = t.animDuration;
 
 			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
@@ -419,11 +424,60 @@ void SaveSystem::SaveCutscenes(json& j)
 			c["tracks"].push_back(track);
 		}
 
-		j["cutscenes"].push_back(c);
+		j["worldObjectCutscenes"].push_back(c);
 
 	}
 
+	//Playing Track/IsCutscenePlaying
+	j["playingTrack"] = Shared::cutscenes.playingTrack;
+	j["isCutscenePlaying"] = Shared::isCutscenePlaying;
+
+
 	//Npc
+	j["npcCutscenes"] = json::array();
+
+	for (auto& [name, tracks] : Shared::cutscenes.npcCutscene) {
+		json c;
+
+		c["npcName"] = name;
+		c["tracks"] = json::array();
+
+		for (auto& t : tracks) {
+			json track;
+			track["time"] = t.time;
+			track["currentFrame"] = t.currentFrame;
+			track["name"] = t.name;
+			track["worldObjectId"] = t.worldObjectID;
+			track["npcName"] = t.npcName;
+			track["animSpeed"] = t.animDuration;
+
+			track["keyframes"] = json::array();
+			for (auto& key : t.keyframes) {
+				json k;
+				k["frame"] = key.frame;
+				k["position"] = { key.position.x, key.position.y, key.position.z };
+				k["scale"] = { key.scale.x, key.scale.y, key.scale.z };
+				k["rotationAxis"] = { key.rotationAxis.x, key.rotationAxis.y, key.rotationAxis.z };
+				k["rotationAngle"] = key.rotationAngle;
+
+				track["keyframes"].push_back(k);
+			}
+
+			json okf;
+			okf["frame"] = t.originalKeyFrame.frame;
+			okf["position"] = { t.originalKeyFrame.position.x, t.originalKeyFrame.position.y, t.originalKeyFrame.position.z };
+			okf["scale"] = { t.originalKeyFrame.scale.x, t.originalKeyFrame.scale.y, t.originalKeyFrame.scale.z };
+			okf["rotationAxis"] = { t.originalKeyFrame.rotationAxis.x, t.originalKeyFrame.rotationAxis.y, t.originalKeyFrame.rotationAxis.z };
+			okf["rotationAngle"] = t.originalKeyFrame.rotationAngle;
+
+			track["originalKeyFrame"] = okf;
+
+			c["tracks"].push_back(track);
+		}
+
+		j["npcCutscenes"].push_back(c);
+
+	}
 
 }
 
@@ -432,50 +486,99 @@ void SaveSystem::LoadCutscenes(json& j)
 	Shared::cutscenes.worldObjectCutscene.clear();
 	Shared::cutscenes.npcCutscene.clear();
 
-	if (!j.contains("cutscenes"))
-		return;
+	if (j.contains("worldObjectCutscenes")) {
 
-	for (auto& c : j["cutscenes"]) {
+		//World Object
+		for (auto& c : j["worldObjectCutscenes"]) {
 
-		int worldObjectId = c["worldObjectId"].get<int>();
-		std::vector<Track> tracks;
+			int worldObjectId = c["worldObjectId"].get<int>();
+			std::vector<Track> tracks;
 
-		for (auto& t : c["tracks"]) {
-			Track track;
+			for (auto& t : c["tracks"]) {
+				Track track;
 
-			track.time = t["time"].get<float>();
-			track.currentFrame = t["currentFrame"].get<int>();
-			track.name = t["name"].get<std::string>();
-			track.worldObjectID = t["worldObjectId"].get<int>();
-			track.npcName = t["npcName"].get<std::string>();
-			track.animSpeed = t["animSpeed"].get<float>();
+				track.time = t["time"].get<float>();
+				track.currentFrame = t["currentFrame"].get<int>();
+				track.name = t["name"].get<std::string>();
+				track.worldObjectID = t["worldObjectId"].get<int>();
+				track.npcName = t["npcName"].get<std::string>();
+				track.animDuration = t["animSpeed"].get<float>();
 
-			for (auto& key : t["keyframes"]) {
-				KeyFrame k;
+				for (auto& key : t["keyframes"]) {
+					KeyFrame k;
 
-				k.frame = key["frame"].get<int>();
-				k.position = { key["position"][0].get<float>(), key["position"][1].get<float>(), key["position"][2].get<float>() };
-				k.scale = { key["scale"][0].get<float>(), key["scale"][1].get<float>(), key["scale"][2].get<float>() };
-				k.rotationAxis = { key["rotationAxis"][0].get<float>(), key["rotationAxis"][1].get<float>(), key["rotationAxis"][2].get<float>() };
-				k.rotationAngle = key["rotationAngle"].get<float>();
+					k.frame = key["frame"].get<int>();
+					k.position = { key["position"][0].get<float>(), key["position"][1].get<float>(), key["position"][2].get<float>() };
+					k.scale = { key["scale"][0].get<float>(), key["scale"][1].get<float>(), key["scale"][2].get<float>() };
+					k.rotationAxis = { key["rotationAxis"][0].get<float>(), key["rotationAxis"][1].get<float>(), key["rotationAxis"][2].get<float>() };
+					k.rotationAngle = key["rotationAngle"].get<float>();
 
-				track.keyframes.push_back(k);
+					track.keyframes.push_back(k);
+				}
+
+				auto& okf = t["originalKeyFrame"];
+				track.originalKeyFrame.frame = okf["frame"].get<int>();
+				track.originalKeyFrame.position = { okf["position"][0].get<float>(), okf["position"][1].get<float>(), okf["position"][2].get<float>() };
+				track.originalKeyFrame.scale = { okf["scale"][0].get<float>(), okf["scale"][1].get<float>(), okf["scale"][2].get<float>() };
+				track.originalKeyFrame.rotationAxis = { okf["rotationAxis"][0].get<float>(), okf["rotationAxis"][1].get<float>(), okf["rotationAxis"][2].get<float>() };
+				track.originalKeyFrame.rotationAngle = okf["rotationAngle"].get<float>();
+
+				tracks.push_back(track);
 			}
 
-			auto& okf = t["originalKeyFrame"];
-			track.originalKeyFrame.frame = okf["frame"].get<int>();
-			track.originalKeyFrame.position = { okf["position"][0].get<float>(), okf["position"][1].get<float>(), okf["position"][2].get<float>() };
-			track.originalKeyFrame.scale = { okf["scale"][0].get<float>(), okf["scale"][1].get<float>(), okf["scale"][2].get<float>() };
-			track.originalKeyFrame.rotationAxis = { okf["rotationAxis"][0].get<float>(), okf["rotationAxis"][1].get<float>(), okf["rotationAxis"][2].get<float>() };
-			track.originalKeyFrame.rotationAngle = okf["rotationAngle"].get<float>();
-
-			tracks.push_back(track);
+			Shared::cutscenes.worldObjectCutscene[worldObjectId] = tracks;
 		}
-
-		Shared::cutscenes.worldObjectCutscene[worldObjectId] = tracks;
 	}
 
+	//PLayingTrack/IsCutscenePlaying
+	if (j.contains("playingTrack")) 
+		Shared::cutscenes.playingTrack = j["playingTrack"].get<std::string>();
+	if (j.contains("isCutscenePlaying"))
+		Shared::isCutscenePlaying = j["isCutscenePlaying"].get<bool>();
+
 	// NPC cutscene loading goes here
+	if (j.contains("npcCutscenes")) {
+
+		for (auto& c : j["npcCutscenes"]) {
+
+			std::string npcName = c["npcName"].get<std::string>();
+			std::vector<Track> tracks;
+
+			for (auto& t : c["tracks"]) {
+				Track track;
+
+				track.time = t["time"].get<float>();
+				track.currentFrame = t["currentFrame"].get<int>();
+				track.name = t["name"].get<std::string>();
+				track.worldObjectID = t["worldObjectId"].get<int>();
+				track.npcName = t["npcName"].get<std::string>();
+				track.animDuration = t["animSpeed"].get<float>();
+
+				for (auto& key : t["keyframes"]) {
+					KeyFrame k;
+
+					k.frame = key["frame"].get<int>();
+					k.position = { key["position"][0].get<float>(), key["position"][1].get<float>(), key["position"][2].get<float>() };
+					k.scale = { key["scale"][0].get<float>(), key["scale"][1].get<float>(), key["scale"][2].get<float>() };
+					k.rotationAxis = { key["rotationAxis"][0].get<float>(), key["rotationAxis"][1].get<float>(), key["rotationAxis"][2].get<float>() };
+					k.rotationAngle = key["rotationAngle"].get<float>();
+
+					track.keyframes.push_back(k);
+				}
+
+				auto& okf = t["originalKeyFrame"];
+				track.originalKeyFrame.frame = okf["frame"].get<int>();
+				track.originalKeyFrame.position = { okf["position"][0].get<float>(), okf["position"][1].get<float>(), okf["position"][2].get<float>() };
+				track.originalKeyFrame.scale = { okf["scale"][0].get<float>(), okf["scale"][1].get<float>(), okf["scale"][2].get<float>() };
+				track.originalKeyFrame.rotationAxis = { okf["rotationAxis"][0].get<float>(), okf["rotationAxis"][1].get<float>(), okf["rotationAxis"][2].get<float>() };
+				track.originalKeyFrame.rotationAngle = okf["rotationAngle"].get<float>();
+
+				tracks.push_back(track);
+			}
+
+			Shared::cutscenes.npcCutscene[npcName] = tracks;
+		}
+	}
 }
 
 void SaveSystem::SavePlayer(json& j)

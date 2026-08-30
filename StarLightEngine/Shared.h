@@ -47,6 +47,8 @@ namespace Shared {
 	extern std::unordered_map<std::string, Sound> sounds;
 	extern std::unordered_map<std::string, Music> music;
 
+	extern Vector3 rotationAxis;
+
 
 
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
