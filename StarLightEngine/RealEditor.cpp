@@ -253,7 +253,6 @@ void RealEditor::UpdateSector()
 {
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
-
 	float closestFloorDist = FLT_MAX;
 	float closestCeilingDist = FLT_MAX;
 
@@ -710,6 +709,7 @@ void RealEditor::DrawSector()
 		// Floor
 		if (sector.hasFloor)
 		{
+			rlDrawRenderBatchActive();
 			rlBegin(RL_TRIANGLES);
 			rlSetTexture(Shared::textures[sector.floorTextureName].id);
 			
@@ -721,8 +721,8 @@ void RealEditor::DrawSector()
 			for (int i = 0; i < sector.indices.size(); i += 3)
 			{
 				const Vector2& p0 = sector.floorPoints[sector.indices[i]];
-				const Vector2& p1 = sector.floorPoints[sector.indices[i + 2]];
-				const Vector2& p2 = sector.floorPoints[sector.indices[i + 1]];
+				const Vector2& p1 = sector.floorPoints[sector.indices[i + 1]];
+				const Vector2& p2 = sector.floorPoints[sector.indices[i + 2]];
 
 				rlTexCoord2f(p0.x / 32.0f, p0.y / 32.0f);
 				rlVertex3f(p0.x, sector.floor * Shared::wallHeight, p0.y);
@@ -741,6 +741,7 @@ void RealEditor::DrawSector()
 		// Ceiling
 		if (sector.hasCeiling)
 		{
+			rlDrawRenderBatchActive();
 			rlBegin(RL_TRIANGLES);
 			rlSetTexture(Shared::textures[sector.ceilingTextureName].id);
 			

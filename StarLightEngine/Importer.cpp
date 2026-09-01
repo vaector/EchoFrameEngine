@@ -15,7 +15,7 @@ void Importer::InitTextures()
 	if (!fs::exists("images"))
 		TraceLog(LOG_FATAL, "ERROR::IMAGES_FOLDER_DOES_NOT_EXIST");
 	else {
-		for (auto& entry : fs::directory_iterator("images")) {
+		for (auto& entry : fs::recursive_directory_iterator("images")) {
 			std::string fileName = entry.path().stem().string(); //stem-> removes the extension.
 
 			Shared::textures[fileName] = LoadTexture(entry.path().string().c_str());
