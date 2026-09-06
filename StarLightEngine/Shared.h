@@ -7,6 +7,7 @@
 #include "NPC.h"
 #include "Cutscene.h"
 #include "Player.h"
+#include "LightSystem.h"
 
 namespace Shared {
 	extern bool editorMode;
@@ -49,7 +50,9 @@ namespace Shared {
 
 	extern Vector3 rotationAxis;
 
-
+	//Lights and Shaders
+	extern std::vector<Light> lights;
+	extern std::unordered_map<std::string, Shader> shaders;
 
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
 }

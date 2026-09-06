@@ -1,10 +1,12 @@
 #include "RealEditor.h"
 #include "raymath.h"
 #include "rlgl.h"
+#include "raylib.h"
 #include <iostream>
 #include "Cutscene.h"
 #include "Audio.h"
 #include "imgui/imgui.h"
+#include "LightSystem.h"
 
 RealEditor::RealEditor()
 {
@@ -85,7 +87,8 @@ void RealEditor::Update(Camera3D* cam)
 	for (auto& [name, npc] : Shared::npcs)
 		npc.playAnim(c, loop);
 
-
+	//Light
+	LightSystem::Update(camMode, freeCamToggle);
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -643,8 +646,8 @@ void RealEditor::DrawDoorSwitch()
 		}
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
+		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(normal, 2.0f));
 		
 		Vector3 startLeft = { pos };
 		Vector3 startRight = Vector3Add({ pos.x, pos.y, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
@@ -681,8 +684,11 @@ void RealEditor::DrawWall()
 		float tileX = wallLength / 32.0f;
 		float tileY = wall->wallHeight / 32.0f;
 
+		Vector3 dir = Vector3Normalize(Vector3Subtract({ wall->endPos.x, (wall->wallHeight * wall->floor), wall->endPos.y }, { wall->startPos.x, (wall->wallHeight * wall->floor), wall->startPos.y }));
+		Vector3 normal = Vector3CrossProduct(dir, {0,1,0});
 		
 		rlBegin(RL_QUADS);
+		rlNormal3f(normal.x, normal.y, normal.z);
 		rlSetTexture(Shared::textures[wall->textureName].id);
 
 		if (selectedWall == wall)
@@ -711,6 +717,7 @@ void RealEditor::DrawSector()
 		{
 			rlDrawRenderBatchActive();
 			rlBegin(RL_TRIANGLES);
+			rlNormal3f(0, -1, 0);
 			rlSetTexture(Shared::textures[sector.floorTextureName].id);
 			
 			if (selectedFloor == &sector)
@@ -743,6 +750,7 @@ void RealEditor::DrawSector()
 		{
 			rlDrawRenderBatchActive();
 			rlBegin(RL_TRIANGLES);
+			rlNormal3f(0, 1, 0);
 			rlSetTexture(Shared::textures[sector.ceilingTextureName].id);
 			
 			if (selectedCeiling == &sector)
@@ -779,21 +787,22 @@ void RealEditor::DrawRamp()
 	for (auto& ramp : Shared::ramps) {
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
-		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
 
 		float lowY = (float)ramp.rampHeight * ramp.floor;
 		float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight; 
 
-		Vector3 startLeft = Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 startRight = Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 endLeft = Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 endRight = Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
+		Vector3 startLeft = Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth));
+		Vector3 startRight = Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth));
+		Vector3 endLeft = Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth));
+		Vector3 endRight = Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth));
 
 		float wallLength = Vector2Distance(ramp.startPos, ramp.endPos);
 		float tileX = 12;
 		float tileY = 12;
 
 		rlBegin(RL_QUADS);
+		rlNormal3f(normal.x, normal.y, normal.z);
 		rlSetTexture(Shared::textures[ramp.textureName].id);
 
 		if (selectedRamp == &ramp)//Draw selected ramp in red
@@ -813,22 +822,54 @@ void RealEditor::DrawRamp()
 
 void RealEditor::Draw()
 {
-	//Disable back face culling
 	rlDisableBackfaceCulling();
 
-	//Draw Walls
-	DrawWall();
+	if (Shared::lights.empty()) {
+		//No lights - draw once, unlit, so the scene isn't blank
+		DrawWall();
+		DrawRamp();
+		DrawDoorSwitch();
+		DrawSector();
+		DrawWorldObject(LightSystem::pointShader.shader);
+		DrawNpc(LightSystem::pointShader.shader);
+	}
+	else {
+		for (size_t i = 0; i < Shared::lights.size(); i++) {
+			Light& light = Shared::lights[i];
 
-	DrawRamp();
+			if(!light.enabled)
+				continue;
 
-	DrawDoorSwitch();
+			LightShader* activeLightShader = &LightSystem::pointShader;//Default shader to use
+			switch (light.type) {
+			case POINT_LIGHT:       activeLightShader = &LightSystem::pointShader; break;
+			case SPOT_LIGHT:        activeLightShader = &LightSystem::spotShader; break;
+			case DIRECTIONAL_LIGHT: activeLightShader = &LightSystem::directionalShader; break;
+			}
 
-	DrawWorldObject();
+			LightSystem::UpdateShaderValues(*activeLightShader, light);
 
-	DrawNpc();
-	
+			if (i > 0)
+				BeginBlendMode(BLEND_ADDITIVE); // stack this light's contribution on top of previous passes
 
-	DrawSector();
+			BeginShaderMode(activeLightShader->shader);
+
+			DrawWall();
+			DrawRamp();
+			DrawDoorSwitch();
+			DrawSector();
+			DrawWorldObject(activeLightShader->shader);
+			DrawNpc(activeLightShader->shader);
+
+			EndShaderMode();
+
+			if (i > 0)
+				EndBlendMode();
+		}
+	}
+
+	//Lights
+	LightSystem::DrawLightEX();
 }
 
 void RealEditor::UpdateWorldObject()
@@ -978,11 +1019,15 @@ void RealEditor::CreateWorldObject()
 	
 }
 
-void RealEditor::DrawWorldObject()
+void RealEditor::DrawWorldObject(Shader activeShader)
 {
 	for (auto& [id, worldObject] : Shared::worldObjects) {
-		
-		DrawModelEx(Shared::models[worldObject.modelName], worldObject.position, worldObject.rotationAxis, worldObject.rotationAngle, worldObject.scale, WHITE);
+
+		Model& model = Shared::models[worldObject.modelName];
+		for (int i = 0; i < model.materialCount; i++)
+			model.materials[i].shader = activeShader;
+
+		DrawModelEx(model, worldObject.position, worldObject.rotationAxis, worldObject.rotationAngle, worldObject.scale, WHITE);
 		DrawBoundingBox(worldObject.collider, RED);
 	}
 }
@@ -1041,10 +1086,14 @@ void RealEditor::CreateNpc()
 	}
 }
 
-void RealEditor::DrawNpc()
+void RealEditor::DrawNpc(Shader activeShader)
 {
 	for (auto& [name, npc] : Shared::npcs) {
-		DrawModelEx(Shared::models[npc.modelName], npc.position, npc.rotationAxis, npc.rotationAngle, npc.scale, WHITE);
+		Model& model = Shared::models[npc.modelName];
+		for (int i = 0; i < model.materialCount; i++)
+			model.materials[i].shader = activeShader;
+
+		DrawModelEx(model, npc.position, npc.rotationAxis, npc.rotationAngle, npc.scale, WHITE);
 		DrawBoundingBox(npc.collider, RED);
 	}
 

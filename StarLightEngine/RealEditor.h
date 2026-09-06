@@ -40,11 +40,11 @@ public:
 	//Entities
 	void UpdateWorldObject();
 	void CreateWorldObject();
-	void DrawWorldObject();
+	void DrawWorldObject(Shader activeShader);
 
 	//NPC
 	void CreateNpc();
-	void DrawNpc();
+	void DrawNpc(Shader activeShader);
 	void UpdateNpc();
 
 	//Helper

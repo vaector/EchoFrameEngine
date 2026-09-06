@@ -36,5 +36,8 @@ private:
 	static void SavePlayer(json& j);
 	static void LoadPlayer(json& j);
 
+	static void SaveLights(json& j);
+	static void LoadLights(const json& j);
+
 };
 

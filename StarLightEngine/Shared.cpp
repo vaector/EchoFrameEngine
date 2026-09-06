@@ -44,6 +44,10 @@ namespace Shared {
 
 	Vector3 rotationAxis = {0,1,0};
 
+	//Lights and shaders
+	std::vector<Light> lights;
+	std::unordered_map<std::string, Shader> shaders;
+
 	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
 		Vector3 corners[8] =

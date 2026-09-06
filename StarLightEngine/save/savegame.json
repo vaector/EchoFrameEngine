@@ -13,6 +13,7 @@
         }
     ],
     "isCutscenePlaying": false,
+    "lights": null,
     "npcCutscenes": [],
     "npcs": [],
     "player": {

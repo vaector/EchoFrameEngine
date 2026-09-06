@@ -141,6 +141,7 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="imgui\rlImGui.cpp" />
     <ClCompile Include="Importer.cpp" />
+    <ClCompile Include="LightSystem.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="NPC.cpp" />
     <ClCompile Include="RealEditor.cpp" />
@@ -171,6 +172,7 @@
     <ClInclude Include="imgui\rlImGuiColors.h" />
     <ClInclude Include="Importer.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="LightSystem.h" />
     <ClInclude Include="NPC.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Ramp.h" />

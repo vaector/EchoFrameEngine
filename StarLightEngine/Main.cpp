@@ -5,6 +5,7 @@
 #include "Importer.h"
 #include "imgui/rlImGui.h"
 #include "ImguiWindow.h"
+#include "LightSystem.h"
 
 int main() {
     
@@ -32,6 +33,10 @@ int main() {
     //Init Sounds and Music
     Importer::InitSounds();
     Importer::InitMusic();
+
+    //Init Light
+    Importer::InitShaders();
+    LightSystem::InitLights();
 
     Engine engine;
 
@@ -126,6 +131,8 @@ int main() {
     Importer::UnloadModels();
     Importer::UnloadSounds();
     Importer::UnloadMusic();
+    Importer::UnloadShaders();
+
 
     rlImGuiShutdown();
 	CloseAudioDevice();

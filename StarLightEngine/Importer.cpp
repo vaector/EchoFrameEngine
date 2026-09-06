@@ -96,6 +96,41 @@ void Importer::InitMusic()
 	}
 }
 
+void Importer::InitShaders()
+{
+
+	if (!fs::exists("shaders"))
+	{
+		TraceLog(LOG_FATAL, "ERROR::SHADER_LIGHTS_FOLDER_DOES_NOT_EXIST");
+	}
+	else
+	{
+		for (auto& entry : fs::recursive_directory_iterator("shaders"))
+		{
+			// Only process vertex shaders
+			if (entry.path().extension() != ".vs")
+				continue;
+
+			std::string shaderName = entry.path().stem().string();
+
+			fs::path vertexPath = entry.path();
+			fs::path fragmentPath = entry.path().parent_path() / (shaderName + ".fs"); // the / is std::filesystem's way of joining paths.
+
+			// Make sure the fragment shader exists
+			if (!fs::exists(fragmentPath))
+			{
+				TraceLog(LOG_ERROR,"Missing fragment shader for: %s",shaderName.c_str());
+				continue;
+			}
+
+			Shader shader = LoadShader(vertexPath.string().c_str(),fragmentPath.string().c_str());
+			Shared::shaders[shaderName] = shader;
+
+			std::cout << "Loaded shader: " << shaderName << std::endl;
+		}
+	}
+}
+
 void Importer::UnloadTextures()
 {
 	for(auto& [name, texture] : Shared::textures)
@@ -122,6 +157,14 @@ void Importer::UnloadMusic()
 	for(auto& [name, music] : Shared::music)
 		UnloadMusicStream(music);
 	Shared::music.clear();
+}
+
+void Importer::UnloadShaders()
+{
+	for (auto& [name, shader]: Shared::shaders) {
+		UnloadShader(shader);
+	}
+	Shared::shaders.clear();
 }
 
 

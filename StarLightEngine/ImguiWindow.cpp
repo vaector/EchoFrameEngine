@@ -7,6 +7,7 @@
 #include "Entity.h"
 #include <iostream>
 #include "SaveSystem.h"
+#include "LightSystem.h"
 
 void ImguiWindow::UpdateImguiTileEditor()
 {
@@ -402,7 +403,79 @@ void ImguiWindow::UpdateImguiTileEditor()
 				}
 			}
 		}
+
+
+		//---LIGHTS----
+		ImGui::SeparatorText("LIGHTS");
+
+		static int selectedLightType = 0;//Point Light by default
+		static const char* lightTypeNames[] = { "Point", "Spot", "Directional" };
+
+		if (ImGui::BeginCombo("Select Light Type", lightTypeNames[selectedLightType])) {
+
+			if (ImGui::Button("Point"))
+				selectedLightType = 0;
+			if (ImGui::Button("Spot"))
+				selectedLightType = 1;
+			if (ImGui::Button("Directional"))
+				selectedLightType = 2;
+
+			ImGui::EndCombo();
+		}
 		
+		if (ImGui::Button("Add Light"))
+			LightSystem::Create(Shared::free.cam.position, (LIGHT_TYPE)selectedLightType);
+
+		ImGui::NewLine();
+
+		//Edit the details of the selected light
+		if (LightSystem::selectedLight != nullptr) {
+
+			
+			ImGui::Checkbox("Enabled", &LightSystem::selectedLight->enabled);
+			ImGui::NewLine();
+
+
+			if (LightSystem::selectedLight->type == DIRECTIONAL_LIGHT) {
+				ImGui::Text("Sun Position");
+				ImGui::NewLine();
+
+				ImGui::InputFloat("Pos_X", &LightSystem::selectedLight->position.x);
+				ImGui::SameLine();
+				ImGui::InputFloat("Pos_Y", &LightSystem::selectedLight->position.y);
+				ImGui::SameLine();
+				ImGui::InputFloat("Pos_Z", &LightSystem::selectedLight->position.z);
+			}
+
+			ImGui::NewLine();
+			ImGui::InputFloat("Intensity", &LightSystem::selectedLight->intensity);
+
+			ImGui::NewLine();
+			ImGui::InputFloat("Range", &LightSystem::selectedLight->range);
+
+			ImGui::NewLine();
+			float col[4] = {
+				LightSystem::selectedLight->color.r / 255.0f,
+				LightSystem::selectedLight->color.g / 255.0f,
+				LightSystem::selectedLight->color.b / 255.0f,
+				LightSystem::selectedLight->color.a / 255.0f
+			};
+
+			ImGui::NewLine();
+			if (ImGui::ColorEdit4("Color", col)) {
+				LightSystem::selectedLight->color.r = (unsigned char)(col[0] * 255.0f);
+				LightSystem::selectedLight->color.g = (unsigned char)(col[1] * 255.0f);
+				LightSystem::selectedLight->color.b = (unsigned char)(col[2] * 255.0f);
+				LightSystem::selectedLight->color.a = (unsigned char)(col[3] * 255.0f);
+			}
+
+			if (LightSystem::selectedLight->type == SPOT_LIGHT) {
+				ImGui::NewLine();
+				ImGui::InputFloat("Spot Angle", &LightSystem::selectedLight->spotAngle);
+			}
+
+			
+		}
 		
 		ImGui::End();
 

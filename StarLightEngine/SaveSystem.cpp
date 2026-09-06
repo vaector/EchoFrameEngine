@@ -32,6 +32,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SaveNPCs(data);
 	SaveCutscenes(data);
 	SavePlayer(data);
+	SaveLights(data);
 
 	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
@@ -70,6 +71,7 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadNPCs(data);
 	LoadCutscenes(data);
 	LoadPlayer(data);
+	LoadLights(data);
 }
 
 void SaveSystem::SaveWalls(json& j)
@@ -615,3 +617,44 @@ void SaveSystem::LoadPlayer(json& j)
 
 }
 
+void SaveSystem::SaveLights(json& j)
+{
+	j["lights"] = json::object();
+	json lights;
+
+	for (const auto& light : Shared::lights) {
+		json lightJson;
+		lightJson["position"] = { light.position.x, light.position.y, light.position.z };
+		lightJson["dir"] = { light.dir.x, light.dir.y, light.dir.z };
+		lightJson["color"] = { light.color.r, light.color.g, light.color.b, light.color.a };
+		lightJson["intensity"] = light.intensity;
+		lightJson["enabled"] = light.enabled;
+		lightJson["type"] = light.type;
+		lightJson["range"] = light.range;	
+		lightJson["spotAngle"] = light.spotAngle;
+	}
+
+	j["lights"] = lights;
+}
+
+void SaveSystem::LoadLights(const json& j)
+{
+	if (!j.contains("lights"))
+		return;
+
+	auto& l = j["lights"];
+
+	for(auto& light : l)
+	{
+		Light light;
+		light.position = { l["position"][0].get<float>(), l["position"][1].get<float>(),l["position"] [2] .get<float>() };
+		light.dir = { l["dir"][0].get<float>(), l["dir"][1].get<float>(),l["dir"][2].get<float>() };
+		light.color = { l["color"][0].get<unsigned char>(), l["color"][1].get<unsigned char>(),l["color"][2].get<unsigned char>(),l["color"][3].get<unsigned char>() };
+		light.type = static_cast<LIGHT_TYPE>(l["type"].get<int>());
+		light.intensity = l["intensity"].get<float>();
+		light.range = l["range"].get<float>();
+		light.spotAngle = l["spotAngle"].get<float>();
+		light.enabled = l["enabled"].get<bool>();
+		Shared::lights.push_back(light);
+	}
+}
