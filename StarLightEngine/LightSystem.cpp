@@ -76,8 +76,10 @@ void LightSystem::Create(Vector3 pos, LIGHT_TYPE type)
 	Shared::lights.push_back(l);
 }
 
-void LightSystem::DrawLightEX()
+void LightSystem::DrawLightEX(bool& camMode)
 {
+	if (camMode == false) return;//PLayer cam
+
 	for (auto& light : Shared::lights) {
 		if(light.enabled)
 			DrawSphereWires(light.position, 5.0f,8,8, BLUE);

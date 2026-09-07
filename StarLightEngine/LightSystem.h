@@ -49,7 +49,7 @@ public:
 
 	static void InitLights();//Init Lights
 	static void Create(Vector3 pos, LIGHT_TYPE type);//Create Lights (position, lightType).
-	static void DrawLightEX();
+	static void DrawLightEX(bool& camMode);
 
 	static void Update(bool& camMode, bool& freeCamToggle);//camMode -> bool in realEditor if false then we are using the free Cam(Editor Camera).
 	static void UpdateShaderValues(LightShader& lightShader, Light& light);

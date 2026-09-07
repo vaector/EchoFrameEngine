@@ -1,0 +1,1230 @@
+{
+    "doorSwitches": [
+        {
+            "floor": 1,
+            "layer": 0,
+            "pos": [
+                1009.271240234375,
+                72.5,
+                254.5086669921875
+            ],
+            "textureName": "tile2",
+            "wallId": 66
+        },
+        {
+            "floor": 1,
+            "layer": 0,
+            "pos": [
+                513.6981201171875,
+                100.0,
+                851.2559814453125
+            ],
+            "textureName": "tile2",
+            "wallId": 71
+        }
+    ],
+    "isCutscenePlaying": false,
+    "lights": [
+        {
+            "color": [
+                255,
+                255,
+                255,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 1.0,
+            "position": [
+                1326.60546875,
+                184.4654541015625,
+                1035.246337890625
+            ],
+            "range": 1000.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                211,
+                5,
+                5,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 2.0,
+            "position": [
+                725.0281982421875,
+                180.4072265625,
+                392.2927551269531
+            ],
+            "range": 300.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                255,
+                255,
+                255,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 2.0,
+            "position": [
+                297.25323486328125,
+                393.23492431640625,
+                466.14813232421875
+            ],
+            "range": 450.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                255,
+                255,
+                255,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 2.0,
+            "position": [
+                670.3982543945313,
+                300.4908142089844,
+                693.84521484375
+            ],
+            "range": 200.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                255,
+                255,
+                255,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 1.0,
+            "position": [
+                858.88623046875,
+                358.4532775878906,
+                114.61087036132813
+            ],
+            "range": 600.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                31,
+                31,
+                218,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 3.0,
+            "position": [
+                309.78753662109375,
+                390.5046081542969,
+                1044.6221923828125
+            ],
+            "range": 600.0,
+            "spotAngle": 45.0,
+            "type": 0
+        }
+    ],
+    "npcCutscenes": [],
+    "npcs": [],
+    "player": {
+        "gravity": 512.0,
+        "height": 150.0,
+        "jump": 250.0,
+        "moveSpeed": 150,
+        "playerPos": [
+            1024.0,
+            0.0,
+            1024.0
+        ],
+        "radius": 8.0,
+        "setPlayerPos": true
+    },
+    "playingTrack": "",
+    "ramps": [
+        {
+            "endPos": [
+                568.0,
+                456.0
+            ],
+            "floor": 0,
+            "halfWidth": 82,
+            "layer": 0,
+            "rampHeight": 200.0,
+            "startPos": [
+                824.0,
+                456.0
+            ],
+            "textureName": "tile1"
+        }
+    ],
+    "sectors": [
+        {
+            "ceilingPoints": [
+                [
+                    792.0,
+                    648.0
+                ],
+                [
+                    792.0,
+                    1336.0
+                ],
+                [
+                    2088.0,
+                    1336.0
+                ],
+                [
+                    2088.0,
+                    648.0
+                ],
+                [
+                    792.0,
+                    648.0
+                ]
+            ],
+            "ceilingTextureName": "Horror_Misc_05-128x128",
+            "floor": 0,
+            "floorPoints": [
+                [
+                    792.0,
+                    648.0
+                ],
+                [
+                    792.0,
+                    1336.0
+                ],
+                [
+                    2088.0,
+                    1336.0
+                ],
+                [
+                    2088.0,
+                    648.0
+                ],
+                [
+                    792.0,
+                    648.0
+                ]
+            ],
+            "floorTextureName": "Horror_Floor_12-128x128",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                1,
+                4,
+                3,
+                1,
+                3,
+                2
+            ],
+            "layer": 0
+        },
+        {
+            "ceilingPoints": [
+                [
+                    920.0,
+                    648.0
+                ],
+                [
+                    920.0,
+                    536.0
+                ],
+                [
+                    824.0,
+                    536.0
+                ],
+                [
+                    824.0,
+                    376.0
+                ],
+                [
+                    1144.0,
+                    376.0
+                ],
+                [
+                    1144.0,
+                    648.0
+                ]
+            ],
+            "ceilingTextureName": "Horror_Misc_05-128x128",
+            "floor": 0,
+            "floorPoints": [
+                [
+                    920.0,
+                    648.0
+                ],
+                [
+                    920.0,
+                    536.0
+                ],
+                [
+                    824.0,
+                    536.0
+                ],
+                [
+                    824.0,
+                    376.0
+                ],
+                [
+                    1144.0,
+                    376.0
+                ],
+                [
+                    1144.0,
+                    648.0
+                ]
+            ],
+            "floorTextureName": "Horror_Stone_01-128x128",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                4,
+                5,
+                0,
+                4,
+                0,
+                1,
+                4,
+                1,
+                2,
+                4,
+                2,
+                3
+            ],
+            "layer": 0
+        },
+        {
+            "ceilingPoints": [
+                [
+                    824.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    376.0
+                ],
+                [
+                    824.0,
+                    376.0
+                ],
+                [
+                    824.0,
+                    536.0
+                ]
+            ],
+            "ceilingTextureName": "tile1",
+            "floor": 1,
+            "floorPoints": [
+                [
+                    824.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    376.0
+                ],
+                [
+                    824.0,
+                    376.0
+                ],
+                [
+                    824.0,
+                    536.0
+                ]
+            ],
+            "floorTextureName": "Horror_Metal_14-128x128",
+            "hasCeiling": true,
+            "hasFloor": false,
+            "indices": [
+                3,
+                0,
+                1,
+                3,
+                1,
+                2
+            ],
+            "layer": 0
+        },
+        {
+            "ceilingPoints": [
+                [
+                    568.0,
+                    376.0
+                ],
+                [
+                    568.0,
+                    280.0
+                ],
+                [
+                    1016.0,
+                    280.0
+                ],
+                [
+                    1016.0,
+                    8.0
+                ],
+                [
+                    120.0,
+                    8.0
+                ],
+                [
+                    120.0,
+                    856.0
+                ],
+                [
+                    776.0,
+                    856.0
+                ],
+                [
+                    776.0,
+                    568.0
+                ],
+                [
+                    552.0,
+                    568.0
+                ],
+                [
+                    552.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    536.0
+                ]
+            ],
+            "ceilingTextureName": "Horror_Metal_14-128x128",
+            "floor": 1,
+            "floorPoints": [
+                [
+                    568.0,
+                    376.0
+                ],
+                [
+                    568.0,
+                    280.0
+                ],
+                [
+                    1016.0,
+                    280.0
+                ],
+                [
+                    1016.0,
+                    8.0
+                ],
+                [
+                    120.0,
+                    8.0
+                ],
+                [
+                    120.0,
+                    856.0
+                ],
+                [
+                    776.0,
+                    856.0
+                ],
+                [
+                    776.0,
+                    568.0
+                ],
+                [
+                    552.0,
+                    568.0
+                ],
+                [
+                    552.0,
+                    536.0
+                ],
+                [
+                    568.0,
+                    536.0
+                ]
+            ],
+            "floorTextureName": "Horror_Floor_12-128x128",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                0,
+                10,
+                9,
+                8,
+                7,
+                6,
+                8,
+                6,
+                5,
+                8,
+                5,
+                4,
+                4,
+                3,
+                2,
+                4,
+                2,
+                1,
+                4,
+                1,
+                0,
+                4,
+                0,
+                9,
+                4,
+                9,
+                8
+            ],
+            "layer": 0
+        },
+        {
+            "ceilingPoints": [
+                [
+                    248.0,
+                    856.0
+                ],
+                [
+                    40.0,
+                    936.0
+                ],
+                [
+                    40.0,
+                    1400.0
+                ],
+                [
+                    776.0,
+                    1400.0
+                ],
+                [
+                    776.0,
+                    936.0
+                ],
+                [
+                    488.0,
+                    856.0
+                ]
+            ],
+            "ceilingTextureName": "Horror_Brick_11-128x128",
+            "floor": 1,
+            "floorPoints": [
+                [
+                    248.0,
+                    856.0
+                ],
+                [
+                    40.0,
+                    936.0
+                ],
+                [
+                    40.0,
+                    1400.0
+                ],
+                [
+                    776.0,
+                    1400.0
+                ],
+                [
+                    776.0,
+                    936.0
+                ],
+                [
+                    488.0,
+                    856.0
+                ]
+            ],
+            "floorTextureName": "Horror_Brick_11-128x128",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                1,
+                0,
+                5,
+                1,
+                5,
+                4,
+                1,
+                4,
+                3,
+                1,
+                3,
+                2
+            ],
+            "layer": 0
+        }
+    ],
+    "walls": [
+        {
+            "currentWallId": 72,
+            "endPos": [
+                792.0,
+                1336.0
+            ],
+            "floor": 0,
+            "id": 1,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                792.0,
+                648.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                2088.0,
+                1336.0
+            ],
+            "floor": 0,
+            "id": 2,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                792.0,
+                1336.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                2088.0,
+                648.0
+            ],
+            "floor": 0,
+            "id": 3,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                2088.0,
+                1336.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1144.0,
+                648.0
+            ],
+            "floor": 0,
+            "id": 4,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                2088.0,
+                648.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                920.0,
+                648.0
+            ],
+            "floor": 0,
+            "id": 12,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                792.0,
+                648.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                920.0,
+                536.0
+            ],
+            "floor": 0,
+            "id": 13,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                920.0,
+                648.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                824.0,
+                536.0
+            ],
+            "floor": 0,
+            "id": 14,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                920.0,
+                536.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1144.0,
+                376.0
+            ],
+            "floor": 0,
+            "id": 16,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                376.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1144.0,
+                648.0
+            ],
+            "floor": 0,
+            "id": 17,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1144.0,
+                376.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                568.0,
+                536.0
+            ],
+            "floor": 0,
+            "id": 18,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                536.0
+            ],
+            "textureName": "Horror_Metal_14-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                568.0,
+                536.0
+            ],
+            "floor": 1,
+            "id": 20,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                536.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                824.0,
+                376.0
+            ],
+            "floor": 1,
+            "id": 22,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                568.0,
+                376.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                824.0,
+                536.0
+            ],
+            "floor": 1,
+            "id": 23,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                376.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                568.0,
+                280.0
+            ],
+            "floor": 1,
+            "id": 24,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                568.0,
+                376.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1016.0,
+                280.0
+            ],
+            "floor": 1,
+            "id": 25,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                568.0,
+                280.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                120.0,
+                8.0
+            ],
+            "floor": 1,
+            "id": 27,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                8.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                120.0,
+                856.0
+            ],
+            "floor": 1,
+            "id": 28,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                120.0,
+                8.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                776.0,
+                568.0
+            ],
+            "floor": 1,
+            "id": 30,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                776.0,
+                856.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                552.0,
+                568.0
+            ],
+            "floor": 1,
+            "id": 31,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                776.0,
+                568.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                552.0,
+                536.0
+            ],
+            "floor": 1,
+            "id": 32,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                552.0,
+                568.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                568.0,
+                536.0
+            ],
+            "floor": 1,
+            "id": 33,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                552.0,
+                536.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                248.0,
+                856.0
+            ],
+            "floor": 1,
+            "id": 54,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                120.0,
+                856.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                488.0,
+                856.0
+            ],
+            "floor": 1,
+            "id": 55,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                776.0,
+                856.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                40.0,
+                936.0
+            ],
+            "floor": 1,
+            "id": 56,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                248.0,
+                856.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                40.0,
+                1400.0
+            ],
+            "floor": 1,
+            "id": 57,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                40.0,
+                936.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                776.0,
+                1400.0
+            ],
+            "floor": 1,
+            "id": 58,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                40.0,
+                1400.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                776.0,
+                936.0
+            ],
+            "floor": 1,
+            "id": 59,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                776.0,
+                1400.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                488.0,
+                856.0
+            ],
+            "floor": 1,
+            "id": 60,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                776.0,
+                936.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1016.0,
+                216.0
+            ],
+            "floor": 1,
+            "id": 64,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                280.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1016.0,
+                104.0
+            ],
+            "floor": 1,
+            "id": 65,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                8.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                1016.0,
+                216.0
+            ],
+            "floor": 1,
+            "id": 66,
+            "inSector": true,
+            "isDoor": true,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                104.0
+            ],
+            "textureName": "Horror_Brick_11-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                568.0,
+                376.0
+            ],
+            "floor": 0,
+            "id": 70,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                824.0,
+                376.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 72,
+            "endPos": [
+                488.0,
+                856.0
+            ],
+            "floor": 1,
+            "id": 71,
+            "inSector": true,
+            "isDoor": true,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                248.0,
+                856.0
+            ],
+            "textureName": "tile2",
+            "wallHeight": 200.0
+        }
+    ],
+    "worldObjectCutscenes": [],
+    "worldObjects": []
+}

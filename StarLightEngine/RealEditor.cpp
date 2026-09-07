@@ -337,6 +337,8 @@ void RealEditor::UpdateSector()
 }
 void RealEditor::UpdateWall()
 {
+
+	if (camMode == false) return;//Player Cam Mode.
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	Wall* closestWall = nullptr;
@@ -375,6 +377,8 @@ void RealEditor::UpdateWall()
 }
 void RealEditor::UpdateRamp()
 {
+	if (camMode == false) return;//Player Cam Mode.
+
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	for (auto& ramp: Shared::ramps) {
@@ -414,6 +418,8 @@ void RealEditor::UpdateRamp()
 }
 void RealEditor::UpdateWallFeatures()
 {
+	if (camMode == false) return;//Player Cam Mode.
+
 	//Select Wall(selectedWall)
 	if (selectedWall != nullptr) {
 		if (IsKeyDown(KEY_UP))
@@ -869,7 +875,7 @@ void RealEditor::Draw()
 	}
 
 	//Lights
-	LightSystem::DrawLightEX();
+	LightSystem::DrawLightEX(camMode);
 }
 
 void RealEditor::UpdateWorldObject()

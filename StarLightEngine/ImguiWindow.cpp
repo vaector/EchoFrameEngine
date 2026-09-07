@@ -30,6 +30,11 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 
 	ImGui::NewLine();
+
+	static std::string fileName = "savegame";
+	ImGui::InputText("File Name", &fileName);
+
+	ImGui::NewLine();
 	// Save
 	if (ImGui::Button("Save"))
 		ImGui::OpenPopup("Save?");
@@ -40,7 +45,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		if (ImGui::Button("Yes"))
 		{
-			SaveSystem::SaveGame("savegame.json");
+			SaveSystem::SaveGame(fileName + ".json");
 			ImGui::CloseCurrentPopup();
 		}
 
@@ -62,7 +67,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		if (ImGui::Button("Yes"))
 		{
-			SaveSystem::LoadGame("savegame.json");
+			SaveSystem::LoadGame(fileName + ".json");
 			ImGui::CloseCurrentPopup();
 		}
 

@@ -619,8 +619,7 @@ void SaveSystem::LoadPlayer(json& j)
 
 void SaveSystem::SaveLights(json& j)
 {
-	j["lights"] = json::object();
-	json lights;
+	json lights = json::array();
 
 	for (const auto& light : Shared::lights) {
 		json lightJson;
@@ -632,6 +631,8 @@ void SaveSystem::SaveLights(json& j)
 		lightJson["type"] = light.type;
 		lightJson["range"] = light.range;	
 		lightJson["spotAngle"] = light.spotAngle;
+
+		lights.push_back(lightJson);
 	}
 
 	j["lights"] = lights;
@@ -642,9 +643,9 @@ void SaveSystem::LoadLights(const json& j)
 	if (!j.contains("lights"))
 		return;
 
-	auto& l = j["lights"];
+	Shared::lights.clear();
 
-	for(auto& light : l)
+	for(auto& l : j["lights"])
 	{
 		Light light;
 		light.position = { l["position"][0].get<float>(), l["position"][1].get<float>(),l["position"] [2] .get<float>() };
@@ -655,6 +656,7 @@ void SaveSystem::LoadLights(const json& j)
 		light.range = l["range"].get<float>();
 		light.spotAngle = l["spotAngle"].get<float>();
 		light.enabled = l["enabled"].get<bool>();
+
 		Shared::lights.push_back(light);
 	}
 }

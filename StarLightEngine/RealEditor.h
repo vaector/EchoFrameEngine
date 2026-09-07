@@ -19,6 +19,8 @@ private:
 public:
 
 	RealEditor();
+
+	//Initialization/Create
 	void InitCam();
 
 	void Update(Camera3D* cam);
