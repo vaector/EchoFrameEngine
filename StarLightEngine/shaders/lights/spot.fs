@@ -21,6 +21,10 @@ void main()
 {
     vec4 texColor = texture(texture0, fragTexCoord);
 
+    // Ignore transparent parts of the decal.
+    if (texColor.a < 0.01)
+        discard;
+
     vec3 toLight = lightPosition - fragPosition;
 
     float distance = length(toLight);
@@ -29,19 +33,35 @@ void main()
     vec3 normal = gl_FrontFacing ? fragNormal : -fragNormal;
     float diffuse = max(dot(normal, lightDir), 0.0);
 
-    float spot = dot(normalize(lightDirection), normalize(-lightDir));
+    float spot = dot(
+        normalize(lightDirection),
+        normalize(-lightDir)
+    );
+
     float cutoff = cos(radians(spotAngle));
 
     if (spot < cutoff)
     {
-        finalColor = vec4(0.0);
-        return;
+        // Outside the spotlight.
+        discard;
     }
 
-    float attenuation = 1.0 - clamp(distance / lightRange, 0.0, 1.0);
+    float attenuation =
+        1.0 - clamp(distance / lightRange, 0.0, 1.0);
 
-    vec3 lighting = lightColor.rgb * diffuse * lightIntensity * attenuation;
-    vec3 color = texColor.rgb * baseColor.rgb * lighting;
+    vec3 lighting =
+        lightColor.rgb *
+        diffuse *
+        lightIntensity *
+        attenuation;
 
-    finalColor = vec4(color, texColor.a * baseColor.a);
+    vec3 color =
+        texColor.rgb *
+        baseColor.rgb *
+        lighting;
+
+    finalColor = vec4(
+        color,
+        texColor.a * baseColor.a
+    );
 }

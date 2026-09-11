@@ -115,6 +115,8 @@ int main() {
             DrawCircle(GetScreenWidth()/2, GetScreenHeight()/2, 1, WHITE);
         }
 
+        DrawFPS(100, 100);
+
         //Imgui
         rlImGuiBegin();
         imgui.UpdateImguiTileEditor();

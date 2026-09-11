@@ -481,6 +481,9 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 			
 		}
+
+		//Decal Settings
+
 		
 		ImGui::End();
 

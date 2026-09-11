@@ -10,6 +10,8 @@ private:
 
 	bool freeCamToggle = true;//If true then free cam can be moved with mouse, otherwise if false then the free cam does not move(Camera Rotation wise).
 	bool camMode = true;//True = FreeCam
+	bool decalMode = false;
+
 	//---------------
 	Ramp* selectedRamp = nullptr;
 	Wall* selectedWall = nullptr;
@@ -22,6 +24,7 @@ public:
 
 	//Initialization/Create
 	void InitCam();
+	
 
 	void Update(Camera3D* cam);
 	void UpdateCam(Camera3D* cam);
@@ -32,6 +35,7 @@ public:
 	void UpdateWallFeatures();
 	void EditDoor();
 	void PlayerDoor();
+	
 
 	void DrawDoorSwitch();
 	void DrawWall();
@@ -49,6 +53,11 @@ public:
 	void DrawNpc(Shader activeShader);
 	void UpdateNpc();
 
+	//Decals
+	void CreateDecal();
+	void UpdateDecal();
+	void DrawDecals();
+
 	//Helper
 	bool WallCloserThanSector();
 	bool CheckCollisionWall(Camera3D* cam, Vector3* nextPos);
@@ -58,6 +67,8 @@ public:
 	bool CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect);
 	bool CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos);
 	bool CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos);
+
+	Wall* GetRayWall(Ray ray);
 
 };
 
@@ -71,3 +82,5 @@ public:
 //Hold "C" to move Entities and editable objects(Also to apply other editing featueres like scaling)
 //Press "Up/Down Arrow" to change the y Position of Entities and editable objects.
 //Press "Left/Right Arrow" to change scale.
+//Press "Q/E" to rotate the selected Entity or editable object.
+//Press "CTRL" to enter the Decal Mode, then click on a wall to create a decal on it.

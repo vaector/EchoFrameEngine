@@ -77,15 +77,25 @@ void RealEditor::Update(Camera3D* cam)
 	EditDoor();
 	PlayerDoor();
 
+	//World Objects
 	CreateWorldObject();
 	UpdateWorldObject();
 
+	//NPC
 	CreateNpc();
 	UpdateNpc();
 
 	int c = 1; bool loop = true;
 	for (auto& [name, npc] : Shared::npcs)
 		npc.playAnim(c, loop);
+
+	//Decals
+	if (IsKeyPressed(KEY_LEFT_CONTROL))
+		decalMode = true;
+	else if (IsKeyReleased(KEY_LEFT_CONTROL))
+		decalMode = false;
+	CreateDecal();
+	UpdateDecal();
 
 	//Light
 	LightSystem::Update(camMode, freeCamToggle);
@@ -338,32 +348,12 @@ void RealEditor::UpdateSector()
 void RealEditor::UpdateWall()
 {
 
-	if (camMode == false) return;//Player Cam Mode.
+	if (decalMode || camMode == false) return;//Player Cam Mode.
+	
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
-	Wall* closestWall = nullptr;
-	float closestDist = FLT_MAX;
-
-	for (auto& wall : Shared::walls)
-	{
-		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
-		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
-		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
-		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                     wall->endPos.y };
-
-		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
-
-		if (wallCol.hit && wallCol.distance < closestDist)
-		{
-			closestDist = wallCol.distance;
-			closestWall = wall;
-
-			//Select Wall
-			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-				selectedWall = wall;
-		}
-		
-	}
+	//Get the closest wall to the ray.
+	Wall* closestWall = GetRayWall(ray);
 
 	//Deselect Wall
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
@@ -838,6 +828,7 @@ void RealEditor::Draw()
 		DrawSector();
 		DrawWorldObject(LightSystem::pointShader.shader);
 		DrawNpc(LightSystem::pointShader.shader);
+		DrawDecals();
 	}
 	else {
 		for (size_t i = 0; i < Shared::lights.size(); i++) {
@@ -866,6 +857,7 @@ void RealEditor::Draw()
 			DrawSector();
 			DrawWorldObject(activeLightShader->shader);
 			DrawNpc(activeLightShader->shader);
+			DrawDecals();
 
 			EndShaderMode();
 
@@ -873,6 +865,8 @@ void RealEditor::Draw()
 				EndBlendMode();
 		}
 	}
+
+	//----Draw things without the light shader on it---
 
 	//Lights
 	LightSystem::DrawLightEX(camMode);
@@ -1200,6 +1194,156 @@ void RealEditor::UpdateNpc()
 	}
 }
 
+void RealEditor::CreateDecal()
+{
+	if (camMode == false || !IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return;//Player Cam Mode.
+
+	if (decalMode) {
+		Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
+		Wall* closestWall = GetRayWall(ray);
+		if(!closestWall)
+			return;
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		if (Vector3DotProduct(ray.direction, normal) > 0.0f)
+			normal = Vector3Scale(normal, -1.0f);
+
+		Vector3 bottomLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight), closestWall->startPos.y };
+		Vector3 bottomRight = { closestWall->endPos.x, (closestWall->floor * Shared::wallHeight), closestWall->endPos.y };
+		Vector3 topLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->startPos.y };
+		Vector3 topRight = { closestWall->endPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->endPos.y };
+
+		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
+
+		if (dCol.hit) {
+			Decal decal;
+
+			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 2.f));
+			decal.textureName = *Shared::selectedTextureName;
+			decal.floor = closestWall->floor;
+			decal.wallID = closestWall->id;
+			Shared::decals.push_back(decal);
+		}
+	}
+
+}
+
+void RealEditor::UpdateDecal()
+{
+	if (camMode == false) return;//Player Cam Mode.
+
+	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
+	int index = -1;
+
+	Wall* closestWall = nullptr;
+
+	Shared::selectedDecal = nullptr;
+
+	for (int i = 0; i < Shared::decals.size(); i++) {
+		auto& d = Shared::decals[i];
+
+		for (auto& wall : Shared::walls) {
+			if (wall->id != d.wallID) continue;
+			closestWall = wall;
+			break;
+		}
+
+		if (!closestWall) continue;
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+
+		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+
+		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
+		
+		//Select
+		if (dCol.hit)
+		{
+			Shared::selectedDecal = &d;
+			index = i;
+			break;
+		}
+
+	}
+
+
+	if (Shared::selectedDecal) {
+
+		//Move the decal
+		if (closestWall && IsKeyDown(KEY_C)) {
+			Vector2 mouseDelta = GetMouseDelta();
+
+			Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+			Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+			float sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? 1.0f : -1.0f;
+
+
+			Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ dir.x, 0, dir.y }, mouseDelta.x * 1.25f * sign));
+			Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f));
+		}
+
+		//Delete Decal
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		{
+			Shared::selectedDecal = nullptr;
+			closestWall = nullptr;
+			Shared::decals.erase(Shared::decals.begin() + index);
+			index = -1;
+		}
+	}
+
+
+
+}
+
+void RealEditor::DrawDecals()
+{
+	for (auto& d : Shared::decals) {
+
+		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
+		Wall* closestWall = nullptr;
+
+		for (auto& wall : Shared::walls) {
+			if (wall->id != d.wallID) continue;
+
+			closestWall = wall;
+			break;
+				
+		}
+
+		if(!closestWall) continue;
+
+		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+
+		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+
+		float tileX = 1.0f;
+		float tileY = 1.0f;
+
+		rlBegin(RL_QUADS);
+		rlNormal3f(-normal.x, -normal.y, -normal.z);
+		rlSetTexture(Shared::textures[d.textureName].id);
+
+		rlColor4ub(255, 255, 255, 255);
+
+		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+		rlTexCoord2f(0.0f, tileY); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+		rlTexCoord2f(tileX, tileY); rlVertex3f(topRight.x, topRight.y, topRight.z);
+		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+
+		rlEnd();
+		rlSetTexture(0);
+	}
+}
+
 bool RealEditor::WallCloserThanSector()
 {
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
@@ -1437,4 +1581,34 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 		}
 	}
 	return false;
+}
+
+Wall* RealEditor::GetRayWall(Ray ray)
+{
+
+	Wall* closestWall = nullptr;
+	float closestDist = FLT_MAX;
+
+	for (auto& wall : Shared::walls)
+	{
+		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
+		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
+		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
+		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                     wall->endPos.y };
+
+		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
+
+		if (wallCol.hit && wallCol.distance < closestDist)
+		{
+			closestDist = wallCol.distance;
+			closestWall = wall;
+
+			//Select Wall
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+				selectedWall = wall;
+		}
+
+	}
+
+	return closestWall;
 }

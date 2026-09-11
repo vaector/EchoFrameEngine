@@ -8,6 +8,7 @@
 #include "Cutscene.h"
 #include "Player.h"
 #include "LightSystem.h"
+#include "Decal.h"
 
 namespace Shared {
 	extern bool editorMode;
@@ -53,6 +54,10 @@ namespace Shared {
 	//Lights and Shaders
 	extern std::vector<Light> lights;
 	extern std::unordered_map<std::string, Shader> shaders;
+
+	//Decals
+	extern std::vector<Decal> decals;
+	extern Decal* selectedDecal;
 
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
 }

@@ -48,6 +48,10 @@ namespace Shared {
 	std::vector<Light> lights;
 	std::unordered_map<std::string, Shader> shaders;
 
+	//Decals
+	std::vector<Decal> decals;
+	Decal* selectedDecal = nullptr;
+
 	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
 		Vector3 corners[8] =
