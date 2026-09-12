@@ -30,7 +30,12 @@ void main()
 
     vec3 normal = gl_FrontFacing ? fragNormal : -fragNormal;
 
-    float diffuse = max(dot(normal, lightDirection), 0.0);
+    // Flat ambient floor - keeps back/grazing-angle surfaces (e.g. a limb
+    // facing away from the light) from going fully black, without being
+    // distance-dependent like the earlier proximity fix was.
+    const float ambient = 0.15;
+
+    float diffuse = max(dot(normal, lightDirection), ambient);
 
     float attenuation =
         1.0 - clamp(distance / lightRange, 0.0, 1.0);

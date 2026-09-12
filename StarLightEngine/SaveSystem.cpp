@@ -33,6 +33,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SaveCutscenes(data);
 	SavePlayer(data);
 	SaveLights(data);
+	SaveDecals(data);
 
 	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
@@ -72,6 +73,7 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadCutscenes(data);
 	LoadPlayer(data);
 	LoadLights(data);
+	LoadDecals(data);
 }
 
 void SaveSystem::SaveWalls(json& j)
@@ -658,5 +660,43 @@ void SaveSystem::LoadLights(const json& j)
 		light.enabled = l["enabled"].get<bool>();
 
 		Shared::lights.push_back(light);
+	}
+}
+
+void SaveSystem::SaveDecals(json& j)
+{
+	json decals = json::array();
+
+	for (const auto& d : Shared::decals) {
+		json decalJson;
+		decalJson["position"] = { d.pos.x, d.pos.y, d.pos.z };
+		decalJson["scale"] = d.scale;
+		decalJson["floor"] = d.floor;
+		decalJson["textureName"] = d.textureName;
+		decalJson["wallID"] = d.wallID;
+
+		decals.push_back(decalJson);
+	}
+
+	j["decals"] = decals;
+}
+
+void SaveSystem::LoadDecals(const json& j)
+{
+	if (!j.contains("decals"))
+		return;
+
+	Shared::decals.clear();
+
+	for (auto& d : j["decals"])
+	{
+		Decal decal;
+		decal.pos = { d["position"][0].get<float>(), d["position"][1].get<float>(), d["position"][2].get<float>() };
+		decal.scale = d["scale"].get<float>();
+		decal.floor = d["floor"].get<int>();
+		decal.textureName = d["textureName"].get<std::string>();
+		decal.wallID = d["wallID"].get<int>();
+
+		Shared::decals.push_back(decal);
 	}
 }

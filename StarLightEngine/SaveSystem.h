@@ -39,5 +39,8 @@ private:
 	static void SaveLights(json& j);
 	static void LoadLights(const json& j);
 
+	static void SaveDecals(json& j);
+	static void LoadDecals(const json& j);
+
 };
 
