@@ -673,7 +673,7 @@ void SaveSystem::SaveDecals(json& j)
 		decalJson["scale"] = d.scale;
 		decalJson["floor"] = d.floor;
 		decalJson["textureName"] = d.textureName;
-		decalJson["wallID"] = d.wallID;
+		decalJson["wallDir"] = { d.wallDir.x, d.wallDir.y };
 
 		decals.push_back(decalJson);
 	}
@@ -695,7 +695,7 @@ void SaveSystem::LoadDecals(const json& j)
 		decal.scale = d["scale"].get<float>();
 		decal.floor = d["floor"].get<int>();
 		decal.textureName = d["textureName"].get<std::string>();
-		decal.wallID = d["wallID"].get<int>();
+		decal.wallDir = { d["wallDir"][0].get<float>(), d["wallDir"][1].get<float>() };
 
 		Shared::decals.push_back(decal);
 	}

@@ -9,6 +9,6 @@ public:
 	float scale = 1.f;
 	int floor = 0;
 	std::string  textureName = "";
-	int wallID = -1;
+	Vector2 wallDir = {0};
 };
 

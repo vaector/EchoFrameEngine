@@ -1222,7 +1222,7 @@ void RealEditor::CreateDecal()
 			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 2.f));
 			decal.textureName = *Shared::selectedTextureName;
 			decal.floor = closestWall->floor;
-			decal.wallID = closestWall->id;
+			decal.wallDir = dir;
 			Shared::decals.push_back(decal);
 		}
 	}
@@ -1236,27 +1236,14 @@ void RealEditor::UpdateDecal()
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 	int index = -1;
 
-	Wall* closestWall = nullptr;
-
-	Shared::selectedDecal = nullptr;
-
 	for (int i = 0; i < Shared::decals.size(); i++) {
 		auto& d = Shared::decals[i];
 
-		for (auto& wall : Shared::walls) {
-			if (wall->id != d.wallID) continue;
-			closestWall = wall;
-			break;
-		}
 
-		if (!closestWall) continue;
-
-		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-
-		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
-		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16));
+		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16));
+		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16));
+		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16));
 
 		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
 		
@@ -1274,15 +1261,14 @@ void RealEditor::UpdateDecal()
 	if (Shared::selectedDecal) {
 
 		//Move the decal
-		if (closestWall && IsKeyDown(KEY_C)) {
+		if (IsKeyDown(KEY_C)) {
 			Vector2 mouseDelta = GetMouseDelta();
 
-			Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-			Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+			Vector3 normal = Vector3CrossProduct({ Shared::selectedDecal->wallDir.x, 0, Shared::selectedDecal->wallDir.y }, { 0, 1, 0 });
 			float sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? 1.0f : -1.0f;
 
 
-			Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ dir.x, 0, dir.y }, mouseDelta.x * 1.25f * sign));
+			Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ Shared::selectedDecal->wallDir.x, 0, Shared::selectedDecal->wallDir.y }, mouseDelta.x * 1.25f * sign));
 			Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f));
 		}
 
@@ -1290,7 +1276,6 @@ void RealEditor::UpdateDecal()
 		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
 			Shared::selectedDecal = nullptr;
-			closestWall = nullptr;
 			Shared::decals.erase(Shared::decals.begin() + index);
 			index = -1;
 		}
@@ -1304,26 +1289,12 @@ void RealEditor::DrawDecals()
 {
 	for (auto& d : Shared::decals) {
 
-		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
-		Wall* closestWall = nullptr;
+		Vector3 normal = Vector3CrossProduct({ d.wallDir.x, 0, d.wallDir.y }, { 0, 1, 0 });
 
-		for (auto& wall : Shared::walls) {
-			if (wall->id != d.wallID) continue;
-
-			closestWall = wall;
-			break;
-				
-		}
-
-		if(!closestWall) continue;
-
-		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-
-		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
-		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16));
+		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16));
+		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16));
+		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16));
 
 		float tileX = 1.0f;
 		float tileY = 1.0f;

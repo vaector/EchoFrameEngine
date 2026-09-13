@@ -1,39 +1,5 @@
 {
-    "decals": [
-        {
-            "floor": 0,
-            "position": [
-                794.0,
-                87.27699279785156,
-                999.3338012695313
-            ],
-            "scale": 1.0,
-            "textureName": "tile1",
-            "wallID": 1
-        },
-        {
-            "floor": 0,
-            "position": [
-                794.0,
-                108.93768310546875,
-                885.5648803710938
-            ],
-            "scale": 1.0,
-            "textureName": "Horror_Brick_09-128x128",
-            "wallID": 1
-        },
-        {
-            "floor": 0,
-            "position": [
-                794.0,
-                118.53694915771484,
-                837.349609375
-            ],
-            "scale": 1.0,
-            "textureName": "Horror_Brick_09-128x128",
-            "wallID": 1
-        }
-    ],
+    "decals": [],
     "doorSwitches": [
         {
             "floor": 1,
