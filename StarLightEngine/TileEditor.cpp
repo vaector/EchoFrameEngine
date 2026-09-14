@@ -383,6 +383,7 @@ void TileEditor::UpdateDoor()
 						newSwitch.wallId = selectedWall->id;
 						//Pos
 						Vector3 wallCenter = { (selectedWall->startPos.x + selectedWall->endPos.x) / 2, selectedWall->wallHeight / 2 ,(selectedWall->startPos.y + selectedWall->endPos.y) / 2 };
+
 						newSwitch.pos = wallCenter;
 						newSwitch.layer = newSwitch.linkedWall->layer;
 						Shared::doorSwitches.push_back(newSwitch);

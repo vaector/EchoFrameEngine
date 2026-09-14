@@ -1,29 +1,6 @@
 {
     "decals": [],
-    "doorSwitches": [
-        {
-            "floor": 1,
-            "layer": 0,
-            "pos": [
-                1009.271240234375,
-                72.5,
-                254.5086669921875
-            ],
-            "textureName": "tile2",
-            "wallId": 66
-        },
-        {
-            "floor": 1,
-            "layer": 0,
-            "pos": [
-                513.6981201171875,
-                100.0,
-                851.2559814453125
-            ],
-            "textureName": "tile2",
-            "wallId": 71
-        }
-    ],
+    "doorSwitches": [],
     "isCutscenePlaying": false,
     "lights": [
         {

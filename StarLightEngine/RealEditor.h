@@ -17,6 +17,7 @@ private:
 	Wall* selectedWall = nullptr;
 	Sector* selectedFloor = nullptr;
 	Sector* selectedCeiling = nullptr;
+	DoorSwitch* selectedDoorSwitch = nullptr;
 
 public:
 

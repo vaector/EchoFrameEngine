@@ -75,7 +75,6 @@ void RealEditor::Update(Camera3D* cam)
 	UpdateRamp();
 
 	EditDoor();
-	PlayerDoor();
 
 	//World Objects
 	CreateWorldObject();
@@ -422,11 +421,14 @@ void RealEditor::UpdateWallFeatures()
 }
 void RealEditor::EditDoor()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
+	Ray ray;
+	if(camMode)
+		ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
+	else
+		ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::player.cam);
 
-	static DoorSwitch* selectedDoorSwitch = nullptr;
 	static Vector2 savedDir = { 0 };
-	static Vector3 savedPerp = { 0 };
+	static Vector3 savedNormal = { 0 };
 	static float sign = 1.0f;
 	
 	for (auto& d : Shared::doorSwitches)
@@ -445,178 +447,68 @@ void RealEditor::EditDoor()
 		}
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
+		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		if (Vector3DotProduct(ray.direction, normal) > 0.0f)
+			normal = Vector3Scale(normal, -1.0f);
 
-		Vector3 startLeft = { pos };
-		Vector3 startRight = Vector3Add(pos, Vector3Scale({ dir.x, 0, dir.y }, 25));
-		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
-		Vector3 endRight = Vector3Add(endLeft, Vector3Scale({ dir.x, 0, dir.y }, 25));
+		Vector3 bottomLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight), closestWall->startPos.y };
+		Vector3 bottomRight = { closestWall->endPos.x, (closestWall->floor * Shared::wallHeight), closestWall->endPos.y };
+		Vector3 topLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->startPos.y };
+		Vector3 topRight = { closestWall->endPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->endPos.y };
 
-		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
+		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
 
 		//Select
-		if (dCol.hit)
+		if (dCol.hit && (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_R)))
 		{
 			selectedDoorSwitch = &d;
 			savedDir = dir;
-			sign = (Vector3DotProduct(Shared::free.forward, perp) < 0.0f) ? 1.0f : -1.0f;
-			savedPerp = perp;
+			sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? -1.0f : 1.0f;
+			savedNormal = normal;
 
 			break;
 		}
-		//Deselect
-		else if(!dCol.hit && !IsKeyDown(KEY_C))
-			selectedDoorSwitch = nullptr;
+		
 	}
+
+	//Deselect
+	if(IsKeyReleased(KEY_C))
+		selectedDoorSwitch = nullptr;
 
 	if (selectedDoorSwitch != nullptr)
 	{
 		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr )
 			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
 
-		if (IsKeyDown(KEY_C))
-		{
-			Vector2 mouseDelta = GetMouseDelta();
+		if (camMode) {
+			if (IsKeyDown(KEY_C))
+			{
+				Vector2 mouseDelta = GetMouseDelta();
 
-			selectedDoorSwitch->pos = Vector3Add(
-				selectedDoorSwitch->pos,
-				Vector3Scale({ savedDir.x, 0, savedDir.y }, mouseDelta.x * 1.25f * sign)
-			);
+				selectedDoorSwitch->pos = Vector3Add(selectedDoorSwitch->pos, Vector3Scale({ savedDir.x, 0, savedDir.y }, mouseDelta.x * 1.25f * sign));
+				selectedDoorSwitch->pos = Vector3Add(selectedDoorSwitch->pos, Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f));
 
-			selectedDoorSwitch->pos = Vector3Add(
-				selectedDoorSwitch->pos,
-				Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f)
-			);
+			}
 
-		}
-		
-		if (GetMouseWheelMove() != 0)
-		{
-			float wheelMove = GetMouseWheelMove();
-			selectedDoorSwitch->pos = Vector3Add({ selectedDoorSwitch->pos.x, (selectedDoorSwitch->floor * Shared::wallHeight) + selectedDoorSwitch->pos.y, selectedDoorSwitch->pos.z }, Vector3Scale(savedPerp, wheelMove * sign));
+			if (GetMouseWheelMove() != 0)
+			{
+				float wheelMove = GetMouseWheelMove();
+				selectedDoorSwitch->pos = Vector3Add({ selectedDoorSwitch->pos.x, (selectedDoorSwitch->floor * Shared::wallHeight) + selectedDoorSwitch->pos.y, selectedDoorSwitch->pos.z }, Vector3Scale(savedNormal, wheelMove * sign));
 
+			}
 		}
 
-		//Deselect Door Switch
-		if(IsKeyReleased(KEY_C))
-			selectedDoorSwitch = nullptr;
 	}
 
-	float speed = 150.0f * GetFrameTime();
-
+	float speed = 100.0f * GetFrameTime();
 	for (auto& d : Shared::doorSwitches)
 	{
-
 		if(d.linkedWall == nullptr) continue;
 
 		if (d.linkedWall->isOpen) {
 			d.linkedWall->wallHeight -= speed;
 		}
 		else if(!d.linkedWall->isOpen){
-			d.linkedWall->wallHeight += speed;
-		}
-
-		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::wallHeight);
-	}
-
-}
-void RealEditor::PlayerDoor()
-{
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::player.cam);
-
-	static DoorSwitch* selectedDoorSwitch = nullptr;
-	static Vector2 savedDir = { 0 };
-	static Vector3 savedPerp = { 0 };
-	static float sign = 1.0f;
-
-
-	Wall* closestPlayerWall = nullptr;
-	float closestPlayerDist = FLT_MAX;
-	for (auto& wall : Shared::walls)
-	{
-		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
-		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
-		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
-		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                     wall->endPos.y };
-
-		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
-
-		if (wallCol.hit && wallCol.distance < closestPlayerDist)
-		{
-			closestPlayerDist = wallCol.distance;
-			closestPlayerWall = wall;
-		}
-
-	}
-
-
-	for (auto& d : Shared::doorSwitches)
-	{
-
-		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
-		static Wall* closestWall = nullptr;
-		float clostseDist = FLT_MAX;
-		for (auto& wall : Shared::walls) {
-			if (wall->floor != d.floor) continue;
-
-			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
-			if (dist < clostseDist) {
-				clostseDist = dist;
-				closestWall = wall;
-			}
-		}
-
-		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
-		Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(perp, 2.0f));
-
-		Vector3 startLeft = { pos };
-		Vector3 startRight = Vector3Add(pos, Vector3Scale({ dir.x, 0, dir.y }, 25));
-		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
-		Vector3 endRight = Vector3Add(endLeft, Vector3Scale({ dir.x, 0, dir.y }, 25));
-
-		RayCollision dCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
-
-		//Select
-		if (dCol.hit)
-		{
-			if (closestPlayerWall && closestPlayerDist < dCol.distance)
-				continue;
-
-			selectedDoorSwitch = &d;
-			savedDir = dir;
-			sign = (Vector3DotProduct(Shared::free.forward, perp) < 0.0f) ? 1.0f : -1.0f;
-			savedPerp = perp;
-
-			break;
-		}
-		//Deselect
-		else if (!dCol.hit && !IsMouseButtonDown(MOUSE_BUTTON_LEFT))
-			selectedDoorSwitch = nullptr;
-	}
-
-	if (selectedDoorSwitch != nullptr)
-	{
-		if (IsKeyPressed(KEY_R) && selectedDoorSwitch->linkedWall != nullptr)
-			selectedDoorSwitch->linkedWall->isOpen = !selectedDoorSwitch->linkedWall->isOpen;
-
-		//Deselect Door Switch
-		if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-			selectedDoorSwitch = nullptr;
-	}
-
-	float speed = 150.0f * GetFrameTime();
-
-	for (auto& d : Shared::doorSwitches)
-	{
-
-		if (d.linkedWall == nullptr) continue;
-
-		if (d.linkedWall->isOpen) {
-			d.linkedWall->wallHeight -= speed;
-		}
-		else if (!d.linkedWall->isOpen) {
 			d.linkedWall->wallHeight += speed;
 		}
 
@@ -643,25 +535,25 @@ void RealEditor::DrawDoorSwitch()
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		Vector3 pos = Vector3Add({ d.pos.x, (d.floor * Shared::wallHeight) + d.pos.y, d.pos.z }, Vector3Scale(normal, 2.0f));
 		
-		Vector3 startLeft = { pos };
-		Vector3 startRight = Vector3Add({ pos.x, pos.y, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
-		Vector3 endLeft = { pos.x, pos.y + 25, pos.z };
-		Vector3 endRight = Vector3Add({ pos.x, pos.y + 25, pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 25));
+		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
+		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
 
-		float tileX = 2.0f;
-		float tileY = 2.0f;
+		float tileX = 1.0f;
+		float tileY = 1.0f;
 
 		rlBegin(RL_QUADS);
+		rlNormal3f(-normal.x, -normal.y, -normal.z);
 		rlSetTexture(Shared::textures[d.textureName].id);
 
 		rlColor4ub(255, 255, 255, 255);
 
-		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(startLeft.x, startLeft.y, startLeft.z);
-		rlTexCoord2f(0.0f, tileY); rlVertex3f(endLeft.x, endLeft.y, endLeft.z);
-		rlTexCoord2f(tileX, tileY); rlVertex3f(endRight.x, endRight.y, endRight.z);
-		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(startRight.x, startRight.y, startRight.z);
+		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+		rlTexCoord2f(0.0f, tileY); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+		rlTexCoord2f(tileX, tileY); rlVertex3f(topRight.x, topRight.y, topRight.z);
+		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
 
 		rlEnd();
 		rlSetTexture(0);

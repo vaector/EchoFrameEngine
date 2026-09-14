@@ -17,16 +17,6 @@ struct Wall{ //Wall|Door(A wall can be a door)
 	static int currentWallId;
 };
 
-
-struct DoorSwitch {
-	Vector3 pos = { 0 };
-	int floor = 0;
-	std::string  textureName = "";
-	Wall* linkedWall = nullptr;
-	int wallId = -1;
-	int layer = 0;
-};
-
 struct Sector{
 	std::vector<Vector2> floorPoints;
 	std::vector<Vector2> ceilingPoints;

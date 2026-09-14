@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "LightSystem.h"
 #include "Decal.h"
+#include "DoorSwitch.h"
 
 namespace Shared {
 	extern bool editorMode;

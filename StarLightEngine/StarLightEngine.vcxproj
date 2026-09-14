@@ -156,6 +156,7 @@
     <ClInclude Include="Audio.h" />
     <ClInclude Include="Cutscene.h" />
     <ClInclude Include="Decal.h" />
+    <ClInclude Include="DoorSwitch.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="external\earcut.hpp" />
