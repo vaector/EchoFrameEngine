@@ -403,6 +403,7 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["worldObjectId"] = t.worldObjectID;
 			track["npcName"] = t.npcName;
 			track["animSpeed"] = t.animDuration;
+			track["finished"] = t.finished;
 
 			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
@@ -454,6 +455,7 @@ void SaveSystem::SaveCutscenes(json& j)
 			track["worldObjectId"] = t.worldObjectID;
 			track["npcName"] = t.npcName;
 			track["animSpeed"] = t.animDuration;
+			track["finished"] = t.finished;
 
 			track["keyframes"] = json::array();
 			for (auto& key : t.keyframes) {
@@ -507,6 +509,7 @@ void SaveSystem::LoadCutscenes(json& j)
 				track.worldObjectID = t["worldObjectId"].get<int>();
 				track.npcName = t["npcName"].get<std::string>();
 				track.animDuration = t["animSpeed"].get<float>();
+				track.finished = t["finished"].get<bool>();
 
 				for (auto& key : t["keyframes"]) {
 					KeyFrame k;
@@ -557,6 +560,7 @@ void SaveSystem::LoadCutscenes(json& j)
 				track.worldObjectID = t["worldObjectId"].get<int>();
 				track.npcName = t["npcName"].get<std::string>();
 				track.animDuration = t["animSpeed"].get<float>();
+				track.finished = t["finished"].get<bool>();
 
 				for (auto& key : t["keyframes"]) {
 					KeyFrame k;

@@ -58,18 +58,18 @@ int main() {
 
 
 		//Press F to switch between Editor Mode and Real Mode
-        if (IsKeyPressed(KEY_F) && Shared::editorMode) {
+        if (IsKeyPressed(KEY_F) && Shared::editorMode && !Shared::popupOpen){
             Shared::editorMode = false;//RealEditor
             Shared::setPlayerPos = true;
             DisableCursor();
         }
-        else if (IsKeyPressed(KEY_F) && !Shared::editorMode) {
+        else if (IsKeyPressed(KEY_F) && !Shared::editorMode && !Shared::popupOpen) {
             Shared::editorMode = true;
             EnableCursor();
         }
 
         //Press P to switch from freecam to playerCam in real Editor Mode
-        if(IsKeyPressed(KEY_P) && !Shared::editorMode){
+        if(IsKeyPressed(KEY_P) && !Shared::editorMode && !Shared::popupOpen){
             freeCamMode = !freeCamMode;
             DisableCursor();
         }

@@ -13,6 +13,7 @@ public:
 
 
 	void Play(std::string trackName);
+	void Reset(std::string trackName);
 	void SaveOriginalKeyFrame();
 	void Stop();
 

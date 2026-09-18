@@ -20,6 +20,7 @@ void Importer::InitTextures()
 
 			Shared::textures[fileName] = LoadTexture(entry.path().string().c_str());
 
+			
 			rlTextureParameters(Shared::textures[fileName].id, RL_TEXTURE_WRAP_S, RL_TEXTURE_WRAP_REPEAT);
 			rlTextureParameters(Shared::textures[fileName].id, RL_TEXTURE_WRAP_T, RL_TEXTURE_WRAP_REPEAT);
 				
@@ -126,7 +127,7 @@ void Importer::InitShaders()
 			Shader shader = LoadShader(vertexPath.string().c_str(),fragmentPath.string().c_str());
 			Shared::shaders[shaderName] = shader;
 
-			std::cout << "Loaded shader: " << shaderName << std::endl;
+			//std::cout << "Loaded shader: " << shaderName << std::endl;
 		}
 	}
 }

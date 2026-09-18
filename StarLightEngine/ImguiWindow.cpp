@@ -241,7 +241,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 		}
 
-		//--------CUTSCENES FOR ENTITIES-----------
+		//--------CUTSCENES-----------
 		ImGui::SeparatorText("Cutscenes Section");
 
 		//Add Track
@@ -260,13 +260,14 @@ void ImguiWindow::UpdateImguiTileEditor()
 					newTrack->npcName = Shared::selectedNpc->name;
 				}
 				ImGui::OpenPopup("TrackName?");
+				Shared::popupOpen = true;
 			}
 		}
 		if (newTrack != nullptr) {
 			TrackNamePopup(newTrack->name);
+			
 		}
 		ImGui::NewLine();
-
 
 		//Add Keyframes
 		if ((Shared::selectedWorldObject || Shared::selectedNpc) && newTrack) {
@@ -326,6 +327,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 				//Play Track
 				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					Shared::cutscenes.Reset(track.name);
 					Shared::cutscenes.playingTrack = track.name;
 					Shared::cutscenes.SaveOriginalKeyFrame();
 
@@ -358,6 +360,7 @@ void ImguiWindow::UpdateImguiTileEditor()
 
 				//Play Track
 				if (ImGui::Button(("Play Track: " + std::to_string(i) + " " + track.name).c_str())) {
+					Shared::cutscenes.Reset(track.name);
 					Shared::cutscenes.playingTrack = track.name;
 					Shared::cutscenes.SaveOriginalKeyFrame();
 
@@ -497,6 +500,7 @@ void ImguiWindow::UpdateImguiExitPopup(bool& running)
 
 	if (IsKeyPressed(KEY_ESCAPE)) {
 		ImGui::OpenPopup("Exit?");
+		Shared::popupOpen = true;
 	}
 
 	if (ImGui::BeginPopupModal("Exit?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
@@ -516,8 +520,10 @@ void ImguiWindow::UpdateImguiExitPopup(bool& running)
 
 		ImGui::SameLine();
 
-		if (ImGui::Button("Cancel"))
+		if (ImGui::Button("Cancel")) {
+			Shared::popupOpen = false;
 			ImGui::CloseCurrentPopup();
+		}
 
 		ImGui::EndPopup();
 
@@ -543,6 +549,7 @@ void ImguiWindow::TrackNamePopup(std::string& name)
 			name = Shared::trackName;
 			
 			std::cout << "New Track Name: " << name << "\n";
+			Shared::popupOpen = false;
 			Shared::trackName.clear();
 			ImGui::CloseCurrentPopup();
 		}

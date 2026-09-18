@@ -223,7 +223,7 @@
                     648.0
                 ]
             ],
-            "floorTextureName": "Horror_Floor_12-128x128",
+            "floorTextureName": "tile1",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -1203,6 +1203,164 @@
             "wallHeight": 200.0
         }
     ],
-    "worldObjectCutscenes": [],
-    "worldObjects": []
+    "worldObjectCutscenes": [
+        {
+            "tracks": [
+                {
+                    "animSpeed": 1.0,
+                    "currentFrame": 3,
+                    "finished": true,
+                    "keyframes": [
+                        {
+                            "frame": 0,
+                            "position": [
+                                1034.2528076171875,
+                                12.0,
+                                957.572021484375
+                            ],
+                            "rotationAngle": 0.0,
+                            "rotationAxis": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "scale": [
+                                50.0,
+                                50.0,
+                                50.0
+                            ]
+                        },
+                        {
+                            "frame": 0,
+                            "position": [
+                                1052.4512939453125,
+                                12.0,
+                                922.6704711914063
+                            ],
+                            "rotationAngle": 0.0,
+                            "rotationAxis": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "scale": [
+                                50.0,
+                                50.0,
+                                50.0
+                            ]
+                        },
+                        {
+                            "frame": 0,
+                            "position": [
+                                1108.1990966796875,
+                                12.0,
+                                957.3192138671875
+                            ],
+                            "rotationAngle": 0.0,
+                            "rotationAxis": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "scale": [
+                                50.0,
+                                50.0,
+                                50.0
+                            ]
+                        },
+                        {
+                            "frame": 0,
+                            "position": [
+                                1108.1990966796875,
+                                12.0,
+                                957.3192138671875
+                            ],
+                            "rotationAngle": 0.0,
+                            "rotationAxis": [
+                                0.0,
+                                1.0,
+                                0.0
+                            ],
+                            "scale": [
+                                26.0,
+                                26.0,
+                                26.0
+                            ]
+                        }
+                    ],
+                    "name": "one",
+                    "npcName": "",
+                    "originalKeyFrame": {
+                        "frame": 0,
+                        "position": [
+                            1108.1990966796875,
+                            12.0,
+                            957.3192138671875
+                        ],
+                        "rotationAngle": 0.0,
+                        "rotationAxis": [
+                            0.0,
+                            1.0,
+                            0.0
+                        ],
+                        "scale": [
+                            25.896949768066406,
+                            25.896949768066406,
+                            25.896949768066406
+                        ]
+                    },
+                    "time": 0.0,
+                    "worldObjectId": 0
+                }
+            ],
+            "worldObjectId": 0
+        }
+    ],
+    "worldObjects": [
+        {
+            "collider": [
+                [
+                    1102.5872802734375,
+                    5.222568988800049,
+                    950.1021728515625
+                ],
+                [
+                    1113.8109130859375,
+                    14.069358825683594,
+                    964.5362548828125
+                ]
+            ],
+            "currentId": 1,
+            "id": 0,
+            "modelName": "green_crate1",
+            "originalCollider": [
+                [
+                    -0.21669608354568481,
+                    -0.26170769333839417,
+                    -0.27868399024009705
+                ],
+                [
+                    0.2166961431503296,
+                    0.07990744709968567,
+                    0.278684139251709
+                ]
+            ],
+            "position": [
+                1108.1990966796875,
+                12.0,
+                957.3192138671875
+            ],
+            "rotationAngle": 0.0,
+            "rotationAxis": [
+                0.0,
+                1.0,
+                0.0
+            ],
+            "scale": [
+                25.896949768066406,
+                25.896949768066406,
+                25.896949768066406
+            ]
+        }
+    ]
 }

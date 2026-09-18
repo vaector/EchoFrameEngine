@@ -13,6 +13,7 @@
 
 namespace Shared {
 	extern bool editorMode;
+	extern bool popupOpen;
 	extern std::vector<Wall*> walls;
 	extern int wallHeight;
 	extern std::unordered_map<std::string, Texture2D> textures;

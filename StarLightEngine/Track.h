@@ -17,6 +17,7 @@ struct Track
 	KeyFrame originalKeyFrame;
 	float time = 0.0f;
 	int currentFrame = 0;
+	bool finished = false;
 	float animDuration = 1.0f;//1 second default
 	std::string name;
 	int worldObjectID = -1; // ID of the entity this track belongs to	
