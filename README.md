@@ -302,6 +302,8 @@ https://github.com/user-attachments/assets/a4a64d3c-77a2-4ede-956e-295777f18ef8
 
 https://github.com/user-attachments/assets/3084f3e3-5887-4ee3-9db9-666e2671de07
 
+<img width="1674" height="1016" alt="Lights" src="https://github.com/user-attachments/assets/bfd68a9f-3d78-4944-8ab8-2bd58b65ade2" />
+<img width="1668" height="1016" alt="TexturesAndLights" src="https://github.com/user-attachments/assets/28b8b566-8837-4e63-b979-02f908113b71" />
 
 
 ---
