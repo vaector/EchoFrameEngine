@@ -74,9 +74,9 @@ int main() {
             DisableCursor();
         }
 
-        // Update
+        //----Update------
         if (Shared::editorMode)//TileEditor Updates
-            engine.UpdateGui();
+            engine.UpdateEditor();
         else if (!Shared::editorMode) {//Real Editor Updates
             if(freeCamMode)
                 engine.UpdateReal(&Shared::free.cam);
@@ -86,7 +86,7 @@ int main() {
             }
         }
 
-        // Draw
+        //----Draw------
         BeginDrawing();
         ClearBackground(BLACK);
 
@@ -95,7 +95,7 @@ int main() {
             //GUI(2d Stuff)
             BeginMode2D(engine.tileEditor.cam);
 
-            engine.DrawGui();
+            engine.DrawEditor();
 
             EndMode2D();
         }
@@ -111,11 +111,11 @@ int main() {
             EndMode3D();
 
             //GUI FOR 3D
-                //Crosshair
-            DrawCircle(GetScreenWidth()/2, GetScreenHeight()/2, 1, WHITE);
+                
+            DrawCircle(GetScreenWidth()/2, GetScreenHeight()/2, 1, WHITE); //Crosshair
         }
 
-        DrawFPS(100, 100);
+        engine.DrawGUI();
 
         //Imgui
         rlImGuiBegin();

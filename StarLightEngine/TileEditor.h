@@ -38,7 +38,7 @@ public:
 
 	TileEditor();
 	void InitCamera();
-	void Update();
+	void UpdateEditor();
 	void UpdateCam();
 	void UpdateWall();
 	bool UpdateWallVertices();

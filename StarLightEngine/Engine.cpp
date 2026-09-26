@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "Importer.h"
+#include "DialougeSystem.h"
 
 Engine::Engine()
 {
@@ -14,11 +15,11 @@ Engine::~Engine()
 	this->is_running = false;
 }
 
-void Engine::UpdateGui()
+void Engine::UpdateEditor()
 {
 
 	//Update Engine Entities
-	tileEditor.Update();
+	tileEditor.UpdateEditor();
 }
 
 void Engine::UpdateReal(Camera3D* cam)
@@ -31,8 +32,15 @@ void Engine::DrawReal()
 	realEditor.Draw();
 }
 
-void Engine::DrawGui()
+void Engine::DrawEditor()
 {
 	//Draw Engine Entities
 	tileEditor.Draw();
+}
+
+void Engine::DrawGUI()
+{
+	DrawFPS(200, 0);//FPS
+
+	DialougeSystem::DrawDialouge();//Dialouge System Draw
 }

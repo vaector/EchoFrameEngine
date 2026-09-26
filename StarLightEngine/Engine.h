@@ -19,10 +19,11 @@ public:
 
 	Engine();
 	~Engine();
-	void UpdateGui();
+	void UpdateEditor();
 	void UpdateReal(Camera3D* cam);
 	void DrawReal();
-	void DrawGui();
+	void DrawEditor();
+	void DrawGUI();
 
 
 };

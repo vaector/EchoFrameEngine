@@ -53,6 +53,9 @@ namespace Shared {
 	std::vector<Decal> decals;
 	Decal* selectedDecal = nullptr;
 
+	//Dialouge System
+	bool dialougeMode = false;
+
 	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
 		Vector3 corners[8] =

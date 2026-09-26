@@ -51,7 +51,7 @@ void TileEditor::InitCamera()
 	cam.zoom = 1;
 }
 
-void TileEditor::Update()
+void TileEditor::UpdateEditor()
 {
 	mouse = GetScreenToWorld2D(GetMousePosition(), cam);
 	Shared::onImguiWindow = (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered());

@@ -61,6 +61,9 @@ namespace Shared {
 	extern std::vector<Decal> decals;
 	extern Decal* selectedDecal;
 
+	//Dialouge System
+	extern bool dialougeMode;
+
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
 }
 

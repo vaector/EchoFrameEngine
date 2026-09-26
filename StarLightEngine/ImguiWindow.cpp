@@ -8,6 +8,7 @@
 #include <iostream>
 #include "SaveSystem.h"
 #include "LightSystem.h"
+#include "DialougeSystem.h"
 
 void ImguiWindow::UpdateImguiTileEditor()
 {
@@ -485,9 +486,29 @@ void ImguiWindow::UpdateImguiTileEditor()
 			
 		}
 
-		//Decal Settings
-
 		
+		//Decal Settings
+		ImGui::SeparatorText("DECALS");
+
+		//Dialouges
+		ImGui::SeparatorText("DIALOGUES");
+
+		static std::string selectedDialougeText;
+		static std::string selectedDialougeName;
+		static std::string selectedDialougeNpc;
+		ImGui::InputTextMultiline("Dialouge Text", &selectedDialougeText);
+		ImGui::InputText("Dialouge Name", &selectedDialougeName);
+		ImGui::InputText("Dialouge NPC", &selectedDialougeNpc);
+
+		if(ImGui::Button("Add Dialouge"))
+		{
+			DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, { selectedDialougeText });
+			std::cout<< "Dialouge Text: " << selectedDialougeText << std::endl;
+			selectedDialougeText.clear();
+			selectedDialougeName.clear();
+			selectedDialougeNpc.clear();
+		}
+
 		ImGui::End();
 
 	}
