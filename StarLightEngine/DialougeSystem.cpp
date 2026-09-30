@@ -1,30 +1,66 @@
 #pragma once
 #include "DialougeSystem.h"
 #include "Shared.h"
+#include <iostream>
 
 
 std::unordered_map<std::string, std::unordered_map<std::string, std::vector<DialougeText>>> DialougeSystem::dialouges;
+int DialougeSystem::index = 0;
+bool DialougeSystem::isFinished = false;
+bool DialougeSystem::isPlaying = false;
+std::string DialougeSystem::selectedDialougeNpcName = "";
+std::string DialougeSystem::selectedDialougeName = "";
 
 void DialougeSystem::DrawDialouge()
 {
-	if (!Shared::dialougeMode) return;
 	DrawRectangle(GetScreenWidth() / 4, GetScreenHeight()/1.5, GetScreenWidth()/2, GetScreenHeight()/4, {130, 130, 130, 150});
 }
 
-void DialougeSystem::AddDialouge(const std::string& npcName, const std::string& dialougeName, const DialougeText& dialougeText)
+void DialougeSystem::AddDialouge(std::string& npcName, std::string& dialougeName,DialougeText& dialougeText)
 {
 	DialougeSystem::dialouges[npcName][dialougeName].push_back(dialougeText);
 }
 
-void DialougeSystem::RenderDialouge(const std::string& npcName, const std::string& dialougeName, int index)
+void DialougeSystem::RenderDialougeTexts(std::string& npcName, std::string& dialougeName)
 {
-	for (int i =0; i < DialougeSystem::dialouges[npcName][dialougeName].size(); i++) {
-		if (i != index) continue;
-		DialougeText& dialougeText = DialougeSystem::dialouges[npcName][dialougeName][i];
+	if (!Shared::dialougeMode) return;
 
-		dialougeText.position.x = GetScreenWidth() / 4 + 20;
-		dialougeText.position.y = GetScreenHeight() / 2 + 20 + (i * (dialougeText.fontSize + 10));
-		DrawText(dialougeText.text.c_str(), dialougeText.position.x, dialougeText.position.y, dialougeText.fontSize, dialougeText.textColor);
-		
+	auto& texts = DialougeSystem::dialouges[npcName][dialougeName];
+
+	//Increment the index
+	if (IsKeyPressed(KEY_SPACE))
+		DialougeSystem::index++;
+
+	//Reset
+	if (DialougeSystem::index >= texts.size()) {
+		DialougeSystem::index = 0;
+		DialougeSystem::isFinished = true;
+		DialougeSystem::isPlaying = false;
+		DialougeSystem::selectedDialougeName = "";
+		DialougeSystem::selectedDialougeNpcName = "";
+
+		Shared::dialougeMode = false;
+
+		return;
 	}
+
+	//Draw the text on the dialouge box
+	DialougeText& dialougeText = texts[DialougeSystem::index];
+	dialougeText.position.x = GetScreenWidth() / 4 + 20;
+	dialougeText.position.y = GetScreenHeight() / 1.5 + 20;
+	DrawText(dialougeText.text.c_str(), dialougeText.position.x, dialougeText.position.y, dialougeText.fontSize, dialougeText.textColor);
+	
+	
+	std::cout << DialougeSystem::index << std::endl;
+}
+void DialougeSystem::StartDialouge(const std::string& npcName, const std::string& dialougeName)
+{
+		DialougeSystem::index = 0;
+		DialougeSystem::isPlaying = true;
+		DialougeSystem::isFinished = false;
+		DialougeSystem::selectedDialougeNpcName = npcName;
+		DialougeSystem::selectedDialougeName = dialougeName;
+
+		Shared::dialougeMode = true;
+
 }

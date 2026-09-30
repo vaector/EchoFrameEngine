@@ -14,9 +14,15 @@ class DialougeSystem
 {
 public:
 	static std::unordered_map<std::string, std::unordered_map<std::string, std::vector<DialougeText>>> dialouges;//unordered_map<NPC Name, unordered_map<Dialouge Name, vector<DialougeText>>>
+	static int index;//Current index(Line) of the dialouge
+	static bool isFinished;//Is the dialouge finished playing?
+	static bool isPlaying;//Is the dialouge playing?
+	static std::string selectedDialougeNpcName;
+	static std::string selectedDialougeName;
 
 	static void DrawDialouge();
-	static  void AddDialouge(const std::string& npcName, const std::string& dialougeName, const DialougeText& dialougeText);
-	static void RenderDialouge(const std::string& npcName, const std::string& dialougeName, int index);
+	static  void AddDialouge( std::string& npcName,  std::string& dialougeName,  DialougeText& dialougeText);
+	static void RenderDialougeTexts( std::string& npcName,  std::string& dialougeName);
+	static void StartDialouge(const std::string& npcName, const std::string& dialougeName);
 };
 

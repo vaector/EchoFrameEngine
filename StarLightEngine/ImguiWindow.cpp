@@ -493,18 +493,18 @@ void ImguiWindow::UpdateImguiTileEditor()
 		//Dialouges
 		ImGui::SeparatorText("DIALOGUES");
 
-		static std::string selectedDialougeText;
-		static std::string selectedDialougeName;
-		static std::string selectedDialougeNpc;
-		ImGui::InputTextMultiline("Dialouge Text", &selectedDialougeText);
+		static DialougeText selectedDialougeText;
+		static std::string selectedDialougeName = "";
+		static std::string selectedDialougeNpc = "";
+		ImGui::InputTextMultiline("Dialouge Text", &selectedDialougeText.text);
 		ImGui::InputText("Dialouge Name", &selectedDialougeName);
 		ImGui::InputText("Dialouge NPC", &selectedDialougeNpc);
 
 		if(ImGui::Button("Add Dialouge"))
 		{
-			DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, { selectedDialougeText });
-			std::cout<< "Dialouge Text: " << selectedDialougeText << std::endl;
-			selectedDialougeText.clear();
+			DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, selectedDialougeText );
+			std::cout<< "Dialouge Text: " << selectedDialougeText.text << std::endl;
+			selectedDialougeText.text.clear();
 			selectedDialougeName.clear();
 			selectedDialougeNpc.clear();
 		}

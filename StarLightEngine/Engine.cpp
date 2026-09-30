@@ -42,5 +42,13 @@ void Engine::DrawGUI()
 {
 	DrawFPS(200, 0);//FPS
 
-	DialougeSystem::DrawDialouge();//Dialouge System Draw
+	//TEMPORARY FOR testing dialouge system
+	if (IsKeyPressed(KEY_RIGHT))
+		DialougeSystem::StartDialouge("m", "m");
+
+	if (Shared::dialougeMode) {
+		DialougeSystem::DrawDialouge();//Dialouge Box Draw
+		DialougeSystem::RenderDialougeTexts(DialougeSystem::selectedDialougeNpcName, DialougeSystem::selectedDialougeName);//Dialouge Text
+	}
+
 }
