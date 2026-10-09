@@ -9,8 +9,9 @@
 #include "SaveSystem.h"
 #include "LightSystem.h"
 #include "DialougeSystem.h"
+#include "BoxTrigger.h"
 
-void ImguiWindow::UpdateImguiTileEditor()
+void ImguiWindow::UpdateImguiEditor()
 {
 
 	//Set initial values of the LayerNameMap
@@ -180,7 +181,18 @@ void ImguiWindow::UpdateImguiTileEditor()
 			ImGui::Text("Rotation");
 			ImGui::InputFloat3("##Rotation", &Shared::selectedNpc->rotationAxis.x);
 		}
-		
+
+		//Collision Type
+		if (Shared::selectedWorldObject || Shared::selectedNpc) {
+			ImGui::SeparatorText("Collision Type");
+			if (ImGui::Button("NONE"))
+				Shared::selectedCollisionType = CollisionType::NONE;
+			if (ImGui::Button("BOX"))
+				Shared::selectedCollisionType = CollisionType::BOX;
+			if (ImGui::Button("MESH"))
+				Shared::selectedCollisionType = CollisionType::MESH;
+		}
+
 		//Rotation Axis
 		ImGui::SeparatorText("Rotation Axis");
 
@@ -401,14 +413,17 @@ void ImguiWindow::UpdateImguiTileEditor()
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];
 					auto& worldObject = Shared::worldObjects[track.worldObjectID];
-					worldObject.collider = Shared::GetUpdatedBoundingBox(worldObject.originalCollider, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle);
+					//Update the collider (always rebuilt from the local-space boxes)
+					for (int i = 0; i < worldObject.collisionBoxes.size(); i++)
+						worldObject.collisionBoxes[i] = Shared::GetUpdatedBoundingBox(worldObject.originalBoxes[i], worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle);
 				}
 			}
 			for (auto& [name, tracks] : Shared::cutscenes.npcCutscene) {
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];
 					auto& npc = Shared::npcs[track.npcName];
-					npc.collider = Shared::GetUpdatedBoundingBox(npc.originalCollider, npc.position, npc.scale, npc.rotationAxis, npc.rotationAngle);
+					//Update the collider
+					npc.collisionBoxes[0] = Shared::GetUpdatedBoundingBox(npc.originalBoxes[0], npc.position, npc.scale, npc.rotationAxis, npc.rotationAngle);
 				}
 			}
 		}
@@ -505,9 +520,66 @@ void ImguiWindow::UpdateImguiTileEditor()
 			DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, selectedDialougeText );
 			std::cout<< "Dialouge Text: " << selectedDialougeText.text << std::endl;
 			selectedDialougeText.text.clear();
-			selectedDialougeName.clear();
-			selectedDialougeNpc.clear();
 		}
+
+		//Trigger Settings
+		ImGui::SeparatorText("TRIGGERS");
+
+		static std::string triggerName = "";
+		ImGui::InputText("Trigger Name", &triggerName);
+
+		if(ImGui::Button("Add Trigger"))
+		{
+			BoxTrigger trigger;
+			//Position
+			trigger.pos = Shared::free.cam.position;
+			
+			//Bounding Box
+			trigger.box.min = Vector3Subtract(trigger.pos, Vector3Scale(trigger.size, 0.5f));
+			trigger.box.max = Vector3Add(trigger.pos, Vector3Scale(trigger.size, 0.5f));
+
+			//Name
+			trigger.name = triggerName;
+
+			Shared::boxTriggers[trigger.name] = trigger;
+		}
+
+		//Selected Trigger Details
+		if (Shared::selectedBoxTrigger) {
+			ImGui::SeparatorText("Trigger Details");
+
+			//Size
+			ImGui::Text("Size");
+			ImGui::SliderFloat("X##TriggerSizeX", &Shared::selectedBoxTrigger->size.x, 10, 1000);
+			ImGui::SliderFloat("Y##TriggerSizeY", &Shared::selectedBoxTrigger->size.y, 10, 1000);
+			ImGui::SliderFloat("Z##TriggerSizeZ", &Shared::selectedBoxTrigger->size.z, 10, 1000);
+
+			//X axis of the Size
+			if (IsKeyDown(KEY_X)) {
+				if (IsKeyPressed(KEY_RIGHT))
+					Shared::selectedBoxTrigger->size.x += 10;
+				else if (IsKeyPressed(KEY_LEFT))
+					Shared::selectedBoxTrigger->size.x -= 10;
+			}
+			//Y axis of the Size
+			else if (IsKeyDown(KEY_Y)) {
+				if (IsKeyPressed(KEY_RIGHT))
+					Shared::selectedBoxTrigger->size.y += 10;
+				else if (IsKeyPressed(KEY_LEFT))
+					Shared::selectedBoxTrigger->size.y -= 10;
+			}
+			//Z axis of the Size
+			else if (IsKeyDown(KEY_Z)) {
+				if (IsKeyPressed(KEY_RIGHT))
+					Shared::selectedBoxTrigger->size.z += 10;
+				else if (IsKeyPressed(KEY_LEFT))
+					Shared::selectedBoxTrigger->size.z -= 10;
+			}
+
+			Shared::selectedBoxTrigger->size = Vector3Clamp(Shared::selectedBoxTrigger->size, { 10,10,10 }, { 1000,1000,1000 });
+		}
+
+
 
 		ImGui::End();
 

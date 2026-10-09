@@ -6,6 +6,7 @@
 #include "imgui/rlImGui.h"
 #include "ImguiWindow.h"
 #include "LightSystem.h"
+#include "imgui/imgui.h"
 
 int main() {
     
@@ -56,14 +57,13 @@ int main() {
         if (WindowShouldClose())
             running = false;
 
-
 		//Press F to switch between Editor Mode and Real Mode
-        if (IsKeyPressed(KEY_F) && Shared::editorMode && !Shared::popupOpen){
+        if (IsKeyPressed(KEY_F) && Shared::editorMode && !Shared::popupOpen && !ImGui::GetIO().WantCaptureKeyboard){
             Shared::editorMode = false;//RealEditor
             Shared::setPlayerPos = true;
             DisableCursor();
         }
-        else if (IsKeyPressed(KEY_F) && !Shared::editorMode && !Shared::popupOpen) {
+        else if (IsKeyPressed(KEY_F) && !Shared::editorMode && !Shared::popupOpen && !ImGui::GetIO().WantCaptureKeyboard) {
             Shared::editorMode = true;
             EnableCursor();
         }
@@ -119,7 +119,7 @@ int main() {
 
         //Imgui
         rlImGuiBegin();
-        imgui.UpdateImguiTileEditor();
+        imgui.UpdateImguiEditor();
         imgui.UpdateImguiExitPopup(running);
 
         rlImGuiEnd();

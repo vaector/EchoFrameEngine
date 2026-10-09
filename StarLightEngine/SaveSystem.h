@@ -42,5 +42,8 @@ private:
 	static void SaveDecals(json& j);
 	static void LoadDecals(const json& j);
 
+	static void SaveTriggers(json& j);
+	static void LoadTriggers(const json& j);
+
 };
 

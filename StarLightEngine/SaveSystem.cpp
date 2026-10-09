@@ -34,6 +34,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SavePlayer(data);
 	SaveLights(data);
 	SaveDecals(data);
+	SaveTriggers(data);
 
 	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
@@ -74,6 +75,7 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadPlayer(data);
 	LoadLights(data);
 	LoadDecals(data);
+	LoadTriggers(data);
 }
 
 void SaveSystem::SaveWalls(json& j)
@@ -276,16 +278,30 @@ void SaveSystem::SaveWorldObjects(json& j)
 	for(auto& [id, worldObject] : Shared::worldObjects) {
 		json w;
 
-		w["id"] = id;
-		w["currentId"] = WorldObject::currentId;
-
+		//Entity stuff
 		w["modelName"] = worldObject.modelName;
 		w["position"] = { worldObject.position.x, worldObject.position.y, worldObject.position.z };
 		w["scale"] = { worldObject.scale.x, worldObject.scale.y, worldObject.scale.z };
 		w["rotationAxis"] = { worldObject.rotationAxis.x, worldObject.rotationAxis.y, worldObject.rotationAxis.z };
 		w["rotationAngle"] = worldObject.rotationAngle;
-		w["collider"] = { { worldObject.collider.min.x, worldObject.collider.min.y, worldObject.collider.min.z },{ worldObject.collider.max.x, worldObject.collider.max.y, worldObject.collider.max.z } };
-		w["originalCollider"] = { { worldObject.originalCollider.min.x, worldObject.originalCollider.min.y, worldObject.originalCollider.min.z },{ worldObject.originalCollider.max.x, worldObject.originalCollider.max.y, worldObject.originalCollider.max.z } };
+
+		w["collisionBox"] = json::array();
+		for (int i = 0; i < worldObject.collisionBoxes.size(); i++) {
+			auto& box = worldObject.collisionBoxes[i];
+			w["collisionBox"].push_back({ { box.min.x, box.min.y, box.min.z }, {box.max.x, box.max.y, box.max.z} });
+		}
+
+		w["originalBox"] = json::array();
+		for (int i = 0; i < worldObject.originalBoxes.size(); i++) {
+			auto& box = worldObject.originalBoxes[i];
+			w["originalBox"].push_back({ { box.min.x, box.min.y, box.min.z }, {box.max.x, box.max.y, box.max.z} });
+		}
+
+		//World Object Stuff
+
+		w["id"] = id;
+		w["currentId"] = WorldObject::currentId;
+
 
 		j["worldObjects"].push_back(w);
 	}
@@ -308,9 +324,19 @@ void SaveSystem::LoadWorldObjects(json& j)
 		worldObject.scale = { w["scale"][0].get<float>(), w["scale"][1].get<float>(), w["scale"][2].get<float>() };
 		worldObject.rotationAxis = { w["rotationAxis"][0].get<float>(), w["rotationAxis"][1].get<float>(), w["rotationAxis"][2].get<float>() };
 		worldObject.rotationAngle = w["rotationAngle"].get<float>();
-		worldObject.collider = { {w["collider"][0][0], w["collider"][0][1], w["collider"][0][2]}, {w["collider"][1][0], w["collider"][1][1], w["collider"][1][2]} };
-		worldObject.originalCollider = { {w["originalCollider"][0][0], w["originalCollider"][0][1], w["originalCollider"][0][2]}, {w["originalCollider"][1][0], w["originalCollider"][1][1], w["originalCollider"][1][2]} };
-	
+
+		//Collision Boxes
+		for (auto& box : w["collisionBox"]) {
+			worldObject.collisionBoxes.push_back({ { box[0][0].get<float>(), box[0][1].get<float>(), box[0][2].get<float>() }, 
+				{ box[1][0].get<float>(), box[1][1].get<float>(), box[1][2].get<float>() } });
+		}
+
+		//Original Boxes
+		for (auto& box : w["originalBox"]) {
+			worldObject.originalBoxes.push_back({ { box[0][0].get<float>(), box[0][1].get<float>(), box[0][2].get<float>() },
+				{ box[1][0].get<float>(), box[1][1].get<float>(), box[1][2].get<float>() } });
+		}
+
 		Shared::worldObjects[worldObject.id] = worldObject;
 	}
 }
@@ -327,9 +353,21 @@ void SaveSystem::SaveNPCs(json& j)
 		n["scale"] = { npc.scale.x, npc.scale.y, npc.scale.z };
 		n["rotationAxis"] = { npc.rotationAxis.x, npc.rotationAxis.y, npc.rotationAxis.z };
 		n["rotationAngle"] = npc.rotationAngle;
-		n["collider"] = { { npc.collider.min.x, npc.collider.min.y, npc.collider.min.z },{ npc.collider.max.x, npc.collider.max.y, npc.collider.max.z } };
-		n["originalCollider"] = { { npc.originalCollider.min.x, npc.originalCollider.min.y, npc.originalCollider.min.z },{ npc.originalCollider.max.x, npc.originalCollider.max.y, npc.originalCollider.max.z } };
+		
+		n["collisionBox"] = json::array();
+		for (int i = 0; i < npc.collisionBoxes.size(); i++) {
+			auto& box = npc.collisionBoxes[i];
+			n["collisionBox"].push_back({ { box.min.x, box.min.y, box.min.z }, {box.max.x, box.max.y, box.max.z} });
+		}
 
+		n["originalBox"] = json::array();
+		for (int i = 0; i < npc.originalBoxes.size(); i++) {
+			auto& box = npc.originalBoxes[i];
+			n["originalBox"].push_back({ { box.min.x, box.min.y, box.min.z }, {box.max.x, box.max.y, box.max.z} });
+		}
+
+		
+		
 		//NPC Stuff
 		n["name"] = npc.name;//Model and modelANimation is derived from the npc name.
 		n["animSpeed"] = npc.animSpeed;
@@ -360,8 +398,19 @@ void SaveSystem::LoadNPCs(json& j)
 		npc.scale = { n["scale"][0].get<float>(), n["scale"][1].get<float>(), n["scale"][2].get<float>() };
 		npc.rotationAxis = { n["rotationAxis"][0].get<float>(), n["rotationAxis"][1].get<float>(), n["rotationAxis"][2].get<float>() };
 		npc.rotationAngle = n["rotationAngle"].get<float>();
-		npc.collider = { {n["collider"][0][0], n["collider"][0][1], n["collider"][0][2]}, {n["collider"][1][0], n["collider"][1][1], n["collider"][1][2]} };
-		npc.originalCollider = { {n["originalCollider"][0][0], n["originalCollider"][0][1], n["originalCollider"][0][2]}, {n["originalCollider"][1][0], n["originalCollider"][1][1], n["originalCollider"][1][2]} };
+		
+		//Collision Boxes
+		for (auto& box : n["collisionBox"]) {
+			npc.collisionBoxes.push_back({ { box[0][0].get<float>(), box[0][1].get<float>(), box[0][2].get<float>() },
+				{ box[1][0].get<float>(), box[1][1].get<float>(), box[1][2].get<float>() } });
+		}
+
+		//Original Boxes
+		for (auto& box : n["originalBox"]) {
+			npc.originalBoxes.push_back({ { box[0][0].get<float>(), box[0][1].get<float>(), box[0][2].get<float>() },
+				{ box[1][0].get<float>(), box[1][1].get<float>(), box[1][2].get<float>() } });
+		}
+
 
 		//Npc stuff
 		npc.name = n["name"].get<std::string>();
@@ -545,7 +594,7 @@ void SaveSystem::LoadCutscenes(json& j)
 
 	// NPC cutscene loading goes here
 	if (j.contains("npcCutscenes")) {
-
+		
 		for (auto& c : j["npcCutscenes"]) {
 
 			std::string npcName = c["npcName"].get<std::string>();
@@ -702,5 +751,40 @@ void SaveSystem::LoadDecals(const json& j)
 		decal.wallDir = { d["wallDir"][0].get<float>(), d["wallDir"][1].get<float>() };
 
 		Shared::decals.push_back(decal);
+	}
+}
+
+void SaveSystem::SaveTriggers(json& j)
+{
+	json boxTriggers = json::array();
+	//Box Triggers
+	for (const auto& [name, t] : Shared::boxTriggers) {
+		json triggerJson;
+		triggerJson["position"] = { t.pos.x, t.pos.y, t.pos.z };
+		triggerJson["size"] = { t.size.x, t.size.y, t.size.z };
+		triggerJson["name"] = name;
+		triggerJson["box"] = { {t.box.min.x, t.box.min.y, t.box.min.z}, {t.box.max.x, t.box.max.y, t.box.max.z} };
+		boxTriggers.push_back(triggerJson);
+	}
+	j["boxTriggers"] = boxTriggers;
+}
+
+void SaveSystem::LoadTriggers(const json& j)
+{
+
+	//Box Triggers
+	if (!j.contains("boxTriggers"))
+		return;
+	Shared::boxTriggers.clear();
+
+	for (auto& t : j["boxTriggers"])
+	{
+		BoxTrigger trigger;
+		trigger.pos = { t["position"][0].get<float>(), t["position"][1].get<float>(), t["position"][2].get<float>() };
+		trigger.size = { t["size"][0].get<float>(), t["size"][1].get<float>(), t["size"][2].get<float>() };
+		trigger.name = t["name"].get<std::string>();
+		trigger.box = { {t["box"][0][0].get<float>(), t["box"][0][1].get<float>(), t["box"][0][2].get<float>()}, {t["box"][1][0].get<float>(), t["box"][1][1].get<float>(), t["box"][1][2].get<float>()} };
+
+		Shared::boxTriggers[trigger.name] = trigger;
 	}
 }

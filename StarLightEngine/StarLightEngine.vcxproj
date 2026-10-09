@@ -129,6 +129,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
+    <ClCompile Include="BoxTrigger.cpp" />
     <ClCompile Include="Cutscene.cpp" />
     <ClCompile Include="Decal.cpp" />
     <ClCompile Include="DialougeSystem.cpp" />
@@ -151,10 +152,12 @@
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="TileEditor.cpp" />
     <ClCompile Include="Track.cpp" />
+    <ClCompile Include="Trigger.cpp" />
     <ClCompile Include="WorldObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Audio.h" />
+    <ClInclude Include="BoxTrigger.h" />
     <ClInclude Include="Cutscene.h" />
     <ClInclude Include="Decal.h" />
     <ClInclude Include="DialougeSystem.h" />
@@ -187,6 +190,7 @@
     <ClInclude Include="Shared.h" />
     <ClInclude Include="TileEditor.h" />
     <ClInclude Include="Track.h" />
+    <ClInclude Include="Trigger.h" />
     <ClInclude Include="Wall.h" />
     <ClInclude Include="WorldObject.h" />
   </ItemGroup>

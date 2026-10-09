@@ -35,7 +35,6 @@ public:
 	void UpdateRamp();
 	void UpdateWallFeatures();
 	void EditDoor();
-	void PlayerDoor();
 	
 
 	void DrawDoorSwitch();
@@ -47,7 +46,7 @@ public:
 	//Entities
 	void UpdateWorldObject();
 	void CreateWorldObject();
-	void DrawWorldObject(Shader activeShader);
+	void DrawWorldObject(Shader& activeShader);
 
 	//NPC
 	void CreateNpc();
@@ -59,6 +58,11 @@ public:
 	void UpdateDecal();
 	void DrawDecals();
 
+	//Trigger
+	void UpdateTrigger();
+	void DrawTrigger();
+
+
 	//Helper
 	bool WallCloserThanSector();
 	bool CheckCollisionWall(Camera3D* cam, Vector3* nextPos);
@@ -68,7 +72,6 @@ public:
 	bool CheckLineRectCollision(Vector2 lineStart, Vector2 lineEnd, Rectangle rect);
 	bool CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos);
 	bool CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos);
-
 	Wall* GetRayWall(Ray ray);
 
 };

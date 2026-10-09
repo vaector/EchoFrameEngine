@@ -6,7 +6,7 @@ class ImguiWindow
 {
 
 public:
-	void UpdateImguiTileEditor();
+	void UpdateImguiEditor();
 	void UpdateImguiExitPopup(bool& running);
 	void TrackNamePopup(std::string& name);
 

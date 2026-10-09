@@ -7,6 +7,7 @@
 #include "Audio.h"
 #include "imgui/imgui.h"
 #include "LightSystem.h"
+#include "DialougeSystem.h"
 
 RealEditor::RealEditor()
 {
@@ -58,9 +59,13 @@ void RealEditor::Update(Camera3D* cam)
 	}
 
 	if(!cursorLocked || Shared::onImguiWindow) return;
-	
+
 	//Update Camera
 	UpdateCam(cam);
+
+	Shared::freeRay = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
+	Shared::playerRay = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::player.cam);
+
 
 	//Update Wall/Sector
 	if (WallCloserThanSector())
@@ -98,6 +103,9 @@ void RealEditor::Update(Camera3D* cam)
 
 	//Light
 	LightSystem::Update(camMode, freeCamToggle);
+
+	//Trigger
+	UpdateTrigger();
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
@@ -263,7 +271,6 @@ void RealEditor::UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos)
 }
 void RealEditor::UpdateSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	float closestFloorDist = FLT_MAX;
 	float closestCeilingDist = FLT_MAX;
@@ -295,7 +302,7 @@ void RealEditor::UpdateSector()
 				sector.floorPoints[i2].y
 			};
 
-			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
+			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 
 			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
 				col.distance < closestFloorDist)
@@ -318,7 +325,7 @@ void RealEditor::UpdateSector()
 			Vector3 p1 = { sector.ceilingPoints[i1].x, y, sector.ceilingPoints[i1].y };
 			Vector3 p2 = { sector.ceilingPoints[i2].x, y, sector.ceilingPoints[i2].y };
 
-			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
+			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 
 			if (col.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
 				col.distance < closestCeilingDist)
@@ -349,10 +356,8 @@ void RealEditor::UpdateWall()
 
 	if (decalMode || camMode == false) return;//Player Cam Mode.
 	
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-
 	//Get the closest wall to the ray.
-	Wall* closestWall = GetRayWall(ray);
+	Wall* closestWall = GetRayWall(Shared::freeRay);
 
 	//Deselect Wall
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
@@ -368,7 +373,6 @@ void RealEditor::UpdateRamp()
 {
 	if (camMode == false) return;//Player Cam Mode.
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 
 	for (auto& ramp: Shared::ramps) {
 
@@ -383,7 +387,7 @@ void RealEditor::UpdateRamp()
 		Vector3 endLeft = Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
 		Vector3 endRight = Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
 
-		RayCollision rampCol = GetRayCollisionQuad(ray, startLeft, endLeft, endRight, startRight);
+		RayCollision rampCol = GetRayCollisionQuad(Shared::freeRay, startLeft, endLeft, endRight, startRight);
 
 		if (rampCol.hit && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 			selectedRamp = &ramp;
@@ -762,30 +766,71 @@ void RealEditor::Draw()
 
 	//Lights
 	LightSystem::DrawLightEX(camMode);
+	DrawTrigger();
+	DrawRay(Shared::freeRay, RED);
 }
 
 void RealEditor::UpdateWorldObject()
 {
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-
 	//select world objects and stop camera from moving when an entity is selected.
-	for (auto& [id, worldObject] : Shared::worldObjects) {
-		RayCollision hit = GetRayCollisionBox(ray, worldObject.collider);
-		if (hit.hit && IsKeyPressed(KEY_C)) {
-			Shared::selectedWorldObject = &worldObject;
-			freeCamToggle = false;
+	for (auto it = Shared::worldObjects.begin(); it != Shared::worldObjects.end(); ) {
+
+		// 'it' points to the current element in worldObjects.
+		// We dereference it (*) to get the actual [id, worldObject] pair.
+		auto& [id, worldObject] = *it;
+
+		if (worldObject.collisionBoxes.empty() || worldObject.collisionType == NONE) {
+			++it; //Move iterator to the next worldObject.
+			continue;
 		}
-		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-			//Delet entity and its cutscene tracks.
-			if (Shared::cutscenes.worldObjectCutscene.contains(id)) {
-				Shared::cutscenes.worldObjectCutscene.erase(id);
+
+		bool erased = false;
+
+		for (auto& box : worldObject.collisionBoxes) {
+			RayCollision hit = GetRayCollisionBox(Shared::freeRay, box);
+
+
+			if (hit.hit) {
+				//Select entity and stop camera from moving.
+				if (IsKeyPressed(KEY_C)) {
+					Shared::selectedWorldObject = &worldObject;
+					freeCamToggle = false;
+				}
+
+				//Delete entity and its cutscene tracks.
+				if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+
+					//Delete its Cutscenes
+					if (Shared::cutscenes.worldObjectCutscene.contains(id)) {
+						Shared::cutscenes.worldObjectCutscene.erase(id);
+					}
+
+					//Erase the current worldObject.
+					//erase(it) deletes the current object AND returns
+					//an iterator pointing to the next worldObject.
+					it = Shared::worldObjects.erase(it);
+
+					Shared::selectedWorldObject = nullptr;
+					freeCamToggle = true;
+
+					erased = true;
+
+					break;
+				}
+
+				break;
 			}
-			Shared::worldObjects.erase(id);
-			Shared::selectedWorldObject = nullptr;
-			freeCamToggle = true;
-			break;
+		}
+
+		//If we didn't erase the current worldObject,
+		//we need to manually move to the next one.
+		//
+		//If we DID erase it, 'it' is already pointing to the next object,
+		//so we must NOT increment it again.
+		if (!erased) {
+			++it;
 		}
 	}
 
@@ -809,19 +854,25 @@ void RealEditor::UpdateWorldObject()
 		
 		//----Updating XZ and check Wall collisons------
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
-		Rectangle rect;
-		rect.x = Shared::selectedWorldObject->collider.min.x + move.x;
-		rect.y = Shared::selectedWorldObject->collider.min.z + move.z;
-
-		rect.width = Shared::selectedWorldObject->collider.max.x - Shared::selectedWorldObject->collider.min.x;
-		rect.height = Shared::selectedWorldObject->collider.max.z - Shared::selectedWorldObject->collider.min.z;
-
 		static bool collided = false;
-		for (auto& wall : Shared::walls) {
-			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
-			{
-				collided = true;
+		for (auto& box : Shared::selectedWorldObject->collisionBoxes) {
+			Rectangle rect;
+			rect.x = box.min.x + move.x;
+			rect.y = box.min.z + move.z;
+
+			rect.width = box.max.x - box.min.x;
+			rect.height = box.max.z - box.min.z;
+
+			for (auto& wall : Shared::walls) {
+				if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+				{
+					collided = true;
+					break;
+				}
 			}
+
+			if (collided == true)
+				break;
 		}
 
 		if(!collided)
@@ -830,6 +881,8 @@ void RealEditor::UpdateWorldObject()
 			Shared::selectedWorldObject->position = Vector3Subtract(Shared::selectedWorldObject->position, { move.x, 0, move.z });
 			collided = false;
 		}
+
+		//----SCALE------
 
 		//Change Scale while pressing arrow keys
 		if (IsKeyPressed(KEY_RIGHT)) {
@@ -840,20 +893,17 @@ void RealEditor::UpdateWorldObject()
 		}
 		Shared::selectedWorldObject->scale = Vector3Clamp(Shared::selectedWorldObject->scale, { 1, 1, 1 }, { 200,200, 200 });
 		
+		//----ROTATION------
+
 		//Change the rotation of the entity while pressing Q and E
 		if(IsKeyPressed(KEY_Q))//Rotate left
 			Shared::selectedWorldObject->rotationAngle -= 15.0f;
 		else if (IsKeyPressed(KEY_E))//Rotate right
 			Shared::selectedWorldObject->rotationAngle += 15.0f;
 
-		//Update the rotation Axis
-		Shared::selectedWorldObject->rotationAxis = Shared::rotationAxis;
-
-
-		
-		//Update the collider
-		Shared::selectedWorldObject->collider = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalCollider, Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale, Shared::selectedWorldObject->rotationAxis, Shared::selectedWorldObject->rotationAngle);
-
+		//Update the collider (always rebuilt from the local-space boxes)
+		for (int i = 0; i < Shared::selectedWorldObject->collisionBoxes.size(); i++)
+			Shared::selectedWorldObject->collisionBoxes[i] = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalBoxes[i], Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale, Shared::selectedWorldObject->rotationAxis, Shared::selectedWorldObject->rotationAngle);
 
 	}
 
@@ -861,13 +911,6 @@ void RealEditor::UpdateWorldObject()
 	if (IsKeyReleased(KEY_C)) {
 		Shared::selectedWorldObject = nullptr;
 		freeCamToggle = true;
-	}
-
-	//Deselect entity
-	if (Shared::selectedWorldObject != nullptr && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-		Shared::selectedWorldObject = nullptr;
-		freeCamToggle = true;
-
 	}
 
 }
@@ -878,32 +921,39 @@ void RealEditor::CreateWorldObject()
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		WorldObject worldObject;
+
+		//ID
 		worldObject.id = WorldObject::currentId;
 		WorldObject::currentId++;
 		
+		//Name
 		worldObject.modelName = *Shared::selectedModelName;
 
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
 		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
 
+		//Position
 		worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
-		BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
-		worldObject.originalCollider = box;
+		//CollisionType
+		worldObject.collisionType = Shared::selectedCollisionType;
 
-		box.min.x *= worldObject.scale.x;
-		box.min.y *= worldObject.scale.y;
-		box.min.z *= worldObject.scale.z;
+		//Collision Box
+		if (Shared::selectedCollisionType == CollisionType::MESH) {
 
-		box.max.x *= worldObject.scale.x;
-		box.max.y *= worldObject.scale.y;
-		box.max.z *= worldObject.scale.z;
+			Model& model = Shared::models[worldObject.modelName];
 
-
-		box.min = Vector3Add(box.min, worldObject.position);
-		box.max = Vector3Add(box.max, worldObject.position);
-
-		worldObject.collider = box;
+			for (int i = 0; i < model.meshCount; i++) {
+				BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
+				worldObject.originalBoxes.push_back(box);//Local Coordinates
+				worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+			}
+		}
+		else if (Shared::selectedCollisionType == CollisionType::BOX) {
+			BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
+			worldObject.originalBoxes.push_back(box);
+			worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+		}
 
 		Shared::worldObjects[worldObject.id] = worldObject;
 		Shared::selectedModelName = nullptr;
@@ -911,7 +961,7 @@ void RealEditor::CreateWorldObject()
 	
 }
 
-void RealEditor::DrawWorldObject(Shader activeShader)
+void RealEditor::DrawWorldObject(Shader& activeShader)
 {
 	for (auto& [id, worldObject] : Shared::worldObjects) {
 
@@ -920,7 +970,9 @@ void RealEditor::DrawWorldObject(Shader activeShader)
 			model.materials[i].shader = activeShader;
 
 		DrawModelEx(model, worldObject.position, worldObject.rotationAxis, worldObject.rotationAngle, worldObject.scale, WHITE);
-		DrawBoundingBox(worldObject.collider, RED);
+		for(auto& box: worldObject.collisionBoxes) {
+			DrawBoundingBox(box, RED);
+		}
 	}
 }
 
@@ -946,23 +998,22 @@ void RealEditor::CreateNpc()
 		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
 		npc.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
 
-		//Collider
+
+		//Collider/Type
+		npc.collisionType = CollisionType::BOX;
 		BoundingBox box = GetModelBoundingBox(Shared::models[npc.modelName]);
-		npc.originalCollider = box;
 
-		box.min.x *= npc.scale.x;
-		box.min.y *= npc.scale.y;
-		box.min.z *= npc.scale.z;
+		//Local Original Coordinates(Original Collision)
+		npc.originalBoxes.push_back(box);
 
-		box.max.x *= npc.scale.x;
-		box.max.y *= npc.scale.y;
-		box.max.z *= npc.scale.z;
+		box.min = Vector3Multiply(box.min, npc.scale);
+		box.max = Vector3Multiply(box.max, npc.scale);
 
 		box.min = Vector3Add(box.min, npc.position);
 		box.max = Vector3Add(box.max, npc.position);
 
-		npc.collider = box;
-		
+		//World Coordinates(Nerw Collision)
+		npc.collisionBoxes.push_back(box);
 
 		int animCount = 0;
 		npc.modelAnim = LoadModelAnimations(path.c_str(), &animCount);
@@ -986,7 +1037,9 @@ void RealEditor::DrawNpc(Shader activeShader)
 			model.materials[i].shader = activeShader;
 
 		DrawModelEx(model, npc.position, npc.rotationAxis, npc.rotationAngle, npc.scale, WHITE);
-		DrawBoundingBox(npc.collider, RED);
+		for(auto& box: npc.collisionBoxes) {
+			DrawBoundingBox(box, RED);
+		}
 	}
 
 }
@@ -995,11 +1048,9 @@ void RealEditor::UpdateNpc()
 {
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-
 	//select npc and stop camera from moving when an npc is selected.
 	for (auto& [name, npc] : Shared::npcs) {
-		RayCollision hit = GetRayCollisionBox(ray, npc.collider);
+		RayCollision hit = GetRayCollisionBox(Shared::freeRay, npc.collisionBoxes[0]);
 		if (hit.hit && IsKeyPressed(KEY_C)) {
 			Shared::selectedNpc = &npc;
 			freeCamToggle = false;
@@ -1041,11 +1092,11 @@ void RealEditor::UpdateNpc()
 
 		//Convert the collider into 2d XZ Plane to check if it collides with a wall.
 		Rectangle rect;
-		rect.x = Shared::selectedNpc->collider.min.x;
-		rect.y = Shared::selectedNpc->collider.min.z;
+		rect.x = Shared::selectedNpc->collisionBoxes[0].min.x;
+		rect.y = Shared::selectedNpc->collisionBoxes[0].min.z;
 
-		rect.width = Shared::selectedNpc->collider.max.x - Shared::selectedNpc->collider.min.x;
-		rect.height = Shared::selectedNpc->collider.max.z - Shared::selectedNpc->collider.min.z;
+		rect.width = Shared::selectedNpc->collisionBoxes[0].max.x - Shared::selectedNpc->collisionBoxes[0].min.x;
+		rect.height = Shared::selectedNpc->collisionBoxes[0].max.z - Shared::selectedNpc->collisionBoxes[0].min.z;
 
 		for (auto& wall : Shared::walls) {
 			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
@@ -1075,7 +1126,7 @@ void RealEditor::UpdateNpc()
 		Shared::selectedNpc->rotationAxis = Shared::rotationAxis;
 
 		//Update the collider
-		Shared::selectedNpc->collider = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalCollider, Shared::selectedNpc->position, Shared::selectedNpc->scale, Shared::selectedNpc->rotationAxis, Shared::selectedNpc->rotationAngle);
+		Shared::selectedNpc->collisionBoxes[0] = Shared::GetUpdatedBoundingBox(Shared::selectedNpc->originalBoxes[0], Shared::selectedNpc->position, Shared::selectedNpc->scale, Shared::selectedNpc->rotationAxis, Shared::selectedNpc->rotationAngle);
 
 	}
 
@@ -1091,14 +1142,13 @@ void RealEditor::CreateDecal()
 	if (camMode == false || !IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return;//Player Cam Mode.
 
 	if (decalMode) {
-		Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-		Wall* closestWall = GetRayWall(ray);
+		Wall* closestWall = GetRayWall(Shared::freeRay);
 		if(!closestWall)
 			return;
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		if (Vector3DotProduct(ray.direction, normal) > 0.0f)
+		if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
 			normal = Vector3Scale(normal, -1.0f);
 
 		Vector3 bottomLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight), closestWall->startPos.y };
@@ -1106,7 +1156,7 @@ void RealEditor::CreateDecal()
 		Vector3 topLeft = { closestWall->startPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->startPos.y };
 		Vector3 topRight = { closestWall->endPos.x, (closestWall->floor * Shared::wallHeight) + Shared::wallHeight, closestWall->endPos.y };
 
-		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
+		RayCollision dCol = GetRayCollisionQuad(Shared::freeRay, bottomLeft, topLeft, topRight, bottomRight);
 
 		if (dCol.hit) {
 			Decal decal;
@@ -1125,7 +1175,6 @@ void RealEditor::UpdateDecal()
 {
 	if (camMode == false) return;//Player Cam Mode.
 
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 	int index = -1;
 
 	for (int i = 0; i < Shared::decals.size(); i++) {
@@ -1137,7 +1186,7 @@ void RealEditor::UpdateDecal()
 		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16));
 		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16));
 
-		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
+		RayCollision dCol = GetRayCollisionQuad(Shared::freeRay, bottomLeft, topLeft, topRight, bottomRight);
 		
 		//Select
 		if (dCol.hit)
@@ -1207,10 +1256,78 @@ void RealEditor::DrawDecals()
 	}
 }
 
+void RealEditor::UpdateTrigger()
+{
+
+	if (!camMode) return;//Player Cam Mode.
+
+	//---BoxTriggers----
+	for (auto& [name, trigger] : Shared::boxTriggers) {
+
+		//Update the bounding box of the trigger
+		trigger.UpdateBox();
+
+		if (trigger.IsRayHit(Shared::freeRay) && IsKeyPressed(KEY_C)) {
+			Shared::selectedBoxTrigger = &trigger; 
+		}
+	}
+
+	//Deselect
+	if (IsKeyReleased(KEY_C))
+	{
+		Shared::selectedBoxTrigger = nullptr;
+		freeCamToggle = true;
+	}
+	
+	//Delete Trigger
+	for (auto& [name, trigger] : Shared::boxTriggers) {
+		if(trigger.IsRayHit(Shared::freeRay) && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		{
+			Shared::boxTriggers.erase(name);
+			Shared::selectedBoxTrigger = nullptr;
+			freeCamToggle = true;
+			break;
+		}
+	}
+
+	//Move the selected trigger
+	if (Shared::selectedBoxTrigger != nullptr) {
+		freeCamToggle = false;
+
+		//Move the Trigger and its collider
+		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
+		Vector3 delta = Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
+		Vector3 move = Vector3Scale(delta, 8.0f);
+
+		if (IsKeyPressed(KEY_UP))
+			move.y = 4.0f;
+		else if (IsKeyPressed(KEY_DOWN))
+			move.y = -4.0f;
+		else
+			move.y = 0.0f;
+
+		//Updating Y
+		Shared::selectedBoxTrigger->pos = Vector3Add(Shared::selectedBoxTrigger->pos, { 0,move.y, 0 });
+
+		//Updating XZ and check Wall collisons
+
+		Shared::selectedBoxTrigger->pos = Vector3Add(Shared::selectedBoxTrigger->pos, { move.x, 0, move.z });
+	}
+
+}
+
+void RealEditor::DrawTrigger()
+{
+	if (!camMode) return;//Player Cam Mode.
+
+	for(auto& [name, trigger] : Shared::boxTriggers) {
+
+		DrawBoundingBox(trigger.box, BLUE);
+	}
+}
+
 bool RealEditor::WallCloserThanSector()
 {
-	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
-
 	float wallDist = FLT_MAX;
 	float sectorDist = FLT_MAX;
 
@@ -1221,7 +1338,7 @@ bool RealEditor::WallCloserThanSector()
 		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
 		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                   wall->endPos.y };
 
-		RayCollision col = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
+		RayCollision col = GetRayCollisionQuad(Shared::freeRay, topLeft, bottomLeft, bottomRight, topRight);
 		if (col.hit && col.distance < wallDist)
 			wallDist = col.distance;
 	}
@@ -1234,7 +1351,7 @@ bool RealEditor::WallCloserThanSector()
 			Vector3 p1 = { sector.floorPoints[j].x,   (float)(sector.floor * Shared::wallHeight), sector.floorPoints[j].y };
 			Vector3 p2 = { sector.floorPoints[j + 1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[j + 1].y };
 
-			RayCollision col = GetRayCollisionTriangle(ray, p0, p1, p2);
+			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 			if (col.hit && col.distance < sectorDist)
 				sectorDist = col.distance; 
 		}
@@ -1396,9 +1513,11 @@ bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
-	for (auto& [id, entity] : Shared::worldObjects) {
-		if (CheckCollisionBoxes(entity.collider, Shared::player.collider)) {
-			return true;
+	for (auto& [id, worldObject] : Shared::worldObjects) {
+		for(auto& box: worldObject.collisionBoxes) {
+			if (CheckCollisionBoxes(box, Shared::player.collider)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -1423,31 +1542,32 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
-	for (auto& [id, e] : Shared::worldObjects) {
-		if (CheckCollisionBoxes(e.collider, Shared::player.collider)) {
+	for (auto& [id, worldObject] : Shared::worldObjects) {
+		for (auto& box : worldObject.collisionBoxes) {
+			if (CheckCollisionBoxes(box, Shared::player.collider)) {
 
-			float eBottom = e.collider.min.y;
-			float eTop = e.collider.max.y;
+				float eBottom = box.min.y;
+				float eTop = box.max.y;
 
-			if (Shared::player.verticalVelocity <= 0.0f)
-			{
-				// Land slightly ABOVE the top face
-				nextPos->y = eTop + Shared::player.height / 2 + gap;
-				return true;
-			}
-			else
-			{
-				//stop slightly BELOW the underside
-				nextPos->y = eBottom - Shared::player.height / 2 - gap;
-				return true;
+				if (Shared::player.verticalVelocity <= 0.0f)
+				{
+					// Land slightly ABOVE the top face
+					nextPos->y = eTop + Shared::player.height / 2 + gap;
+					return true;
+				}
+				else
+				{
+					//stop slightly BELOW the underside
+					nextPos->y = eBottom - Shared::player.height / 2 - gap;
+					return true;
+				}
 			}
 		}
+		return false;
 	}
-	return false;
 }
 
-Wall* RealEditor::GetRayWall(Ray ray)
-{
+Wall* RealEditor::GetRayWall(Ray ray){
 
 	Wall* closestWall = nullptr;
 	float closestDist = FLT_MAX;

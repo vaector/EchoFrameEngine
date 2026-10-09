@@ -12,6 +12,7 @@ namespace Shared {
 	std::unordered_map<std::string, Model> models;
 	std::string* selectedTextureName = &tile1;
 	std::string* selectedModelName = nullptr;
+	CollisionType selectedCollisionType = CollisionType::BOX;
 	std::unordered_map<int, WorldObject> worldObjects;
 	std::vector<Sector> sectors;
 	bool sectorMode = true;
@@ -27,6 +28,10 @@ namespace Shared {
 	bool setPlayerPos = false;
 	Player player;
 	Player free;
+
+	//Rays
+	Ray freeRay;
+	Ray playerRay;
 
 	int layer = 0;
 
@@ -56,6 +61,10 @@ namespace Shared {
 	//Dialouge System
 	bool dialougeMode = false;
 
+	//Triggers
+	std::unordered_map< std::string,BoxTrigger> boxTriggers;
+	BoxTrigger* selectedBoxTrigger = nullptr;
+
 	BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle)
 	{
 		Vector3 corners[8] =
@@ -79,6 +88,8 @@ namespace Shared {
 			Vector3 scaled = { corners[i].x * scale.x, corners[i].y * scale.y, corners[i].z * scale.z };
 			Vector3 rotated = Vector3RotateByAxisAngle(scaled, rotationAxis, DEG2RAD * rotationAngle);
 			Vector3 world = Vector3Add(rotated, position);
+
+			
 
 			box.min.x = fminf(box.min.x, world.x);
 			box.min.y = fminf(box.min.y, world.y);

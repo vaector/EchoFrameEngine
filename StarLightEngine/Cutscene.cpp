@@ -160,9 +160,10 @@ void Cutscene::Stop()
 			worldObject.rotationAxis = track.originalKeyFrame.rotationAxis;
 			worldObject.rotationAngle = track.originalKeyFrame.rotationAngle;
 
-			worldObject.collider = Shared::GetUpdatedBoundingBox(worldObject.originalCollider, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle);
+			//Update the collider (always rebuilt from the local-space boxes)
+			for (int i = 0; i < worldObject.collisionBoxes.size(); i++)
+				worldObject.collisionBoxes[i] = Shared::GetUpdatedBoundingBox(worldObject.originalBoxes[i], worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle);
 		}
-		
 	}
 
 	//Npc
@@ -174,7 +175,8 @@ void Cutscene::Stop()
 			npc.rotationAxis = track.originalKeyFrame.rotationAxis;
 			npc.rotationAngle = track.originalKeyFrame.rotationAngle;
 
-			npc.collider = Shared::GetUpdatedBoundingBox(npc.originalCollider, npc.position, npc.scale, npc.rotationAxis, npc.rotationAngle);
+			//Update the collider
+			npc.collisionBoxes[0] = Shared::GetUpdatedBoundingBox(npc.originalBoxes[0], npc.position, npc.scale, npc.rotationAxis, npc.rotationAngle);
 		}
 
 	}

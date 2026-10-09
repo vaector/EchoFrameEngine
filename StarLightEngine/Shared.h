@@ -10,6 +10,7 @@
 #include "LightSystem.h"
 #include "Decal.h"
 #include "DoorSwitch.h"
+#include "BoxTrigger.h"
 
 namespace Shared {
 	extern bool editorMode;
@@ -24,6 +25,7 @@ namespace Shared {
 
 	extern std::string* selectedTextureName;
 	extern std::string* selectedModelName;
+	extern CollisionType selectedCollisionType;
 	extern bool sectorMode;
 	extern bool floorOnly;
 	extern bool ceilingOnly;
@@ -35,6 +37,10 @@ namespace Shared {
 	extern bool setPlayerPos;
 	extern Player player;
 	extern Player free;
+
+	//Rays
+	extern Ray freeRay;
+	extern Ray playerRay;
 
 	extern int layer;
 
@@ -63,6 +69,10 @@ namespace Shared {
 
 	//Dialouge System
 	extern bool dialougeMode;
+
+	//Triggers
+	extern std::unordered_map< std::string, BoxTrigger> boxTriggers;
+	extern BoxTrigger* selectedBoxTrigger;
 
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
 }
