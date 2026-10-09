@@ -835,7 +835,7 @@ void RealEditor::UpdateWorldObject()
 	}
 
 	//If an entity is selected
-	if (Shared::selectedWorldObject != nullptr) {
+	if (Shared::selectedWorldObject) {
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
@@ -917,7 +917,7 @@ void RealEditor::UpdateWorldObject()
 
 void RealEditor::CreateWorldObject()
 {
-	if (Shared::selectedModelName == nullptr || selectedFloor == nullptr || Shared::npcMode) return;
+	if (Shared::npcMode || !camMode || !Shared::selectedModelName) return;
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		WorldObject worldObject;
@@ -930,10 +930,47 @@ void RealEditor::CreateWorldObject()
 		worldObject.modelName = *Shared::selectedModelName;
 
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
-		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		RayCollision hit = {};
+
+		bool floorHit = false;
+
+		for (auto& sector : Shared::sectors) {
+			for (int i = 0; i < sector.indices.size(); i++) {
+				// Process each index in the sector
+				int p1 = sector.indices[i];
+				int p2 = sector.indices[i + 1];
+				int p3 = sector.indices[i + 2];
+
+				hit = GetRayCollisionTriangle(Shared::freeRay,
+					{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p1].y },
+					{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p2].y },
+					{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p3].y });
+				
+				if (hit.hit) {
+					floorHit = true;
+					break;
+				}
+			}
+
+
+			if (hit.hit) break;
+		}
+
+		Vector3 spawnPos;
+		if(!floorHit)
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		else {
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+			spawnPos.x = hit.point.x;
+			spawnPos.z = hit.point.z;
+		}
 
 		//Position
-		worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		if(selectedFloor)
+			worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		else
+			worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
+
 
 		//CollisionType
 		worldObject.collisionType = Shared::selectedCollisionType;
@@ -956,7 +993,6 @@ void RealEditor::CreateWorldObject()
 		}
 
 		Shared::worldObjects[worldObject.id] = worldObject;
-		Shared::selectedModelName = nullptr;
 	}
 	
 }
@@ -978,7 +1014,7 @@ void RealEditor::DrawWorldObject(Shader& activeShader)
 
 void RealEditor::CreateNpc()
 {
-	if (!camMode || !Shared::npcMode || !camMode) return;//If not free Cam
+	if (!camMode || !Shared::npcMode ) return;//If not free Cam
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && Shared::selectedModelName != nullptr && selectedFloor != nullptr) {
 		NPC npc;

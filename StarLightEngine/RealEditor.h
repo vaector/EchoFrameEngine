@@ -9,7 +9,7 @@ private:
 	float mouseSens = 0.1f;
 
 	bool freeCamToggle = true;//If true then free cam can be moved with mouse, otherwise if false then the free cam does not move(Camera Rotation wise).
-	bool camMode = true;//True = FreeCam
+	bool camMode = true;//camMode = FreeCam
 	bool decalMode = false;
 
 	//---------------

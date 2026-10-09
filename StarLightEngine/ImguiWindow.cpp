@@ -149,7 +149,7 @@ void ImguiWindow::UpdateImguiEditor()
 
 		//--PREOPERTIES SECTION
 		ImGui::SeparatorText("WorldObject/NPC Properties");
-		//World Object
+		//World Object Properties
 		if (Shared::selectedWorldObject) {
 			ImGui::Text("World Object Properties");
 			ImGui::NewLine();
@@ -166,7 +166,7 @@ void ImguiWindow::UpdateImguiEditor()
 			ImGui::InputFloat3("##Rotation", &Shared::selectedWorldObject->rotationAxis.x);
 		}
 
-		//Npc
+		//Npc Properties
 		if (Shared::selectedNpc) {
 			ImGui::Text("NPC Properties");
 			ImGui::NewLine();
@@ -183,15 +183,10 @@ void ImguiWindow::UpdateImguiEditor()
 		}
 
 		//Collision Type
-		if (Shared::selectedWorldObject || Shared::selectedNpc) {
-			ImGui::SeparatorText("Collision Type");
-			if (ImGui::Button("NONE"))
-				Shared::selectedCollisionType = CollisionType::NONE;
-			if (ImGui::Button("BOX"))
-				Shared::selectedCollisionType = CollisionType::BOX;
-			if (ImGui::Button("MESH"))
-				Shared::selectedCollisionType = CollisionType::MESH;
-		}
+		static bool collisionTypePopupOpen = false;
+		if(collisionTypePopupOpen)
+			ImGui::OpenPopup("CollisionType?");
+		CollisionTypePopup(collisionTypePopupOpen);
 
 		//Rotation Axis
 		ImGui::SeparatorText("Rotation Axis");
@@ -230,6 +225,8 @@ void ImguiWindow::UpdateImguiEditor()
 				{
 					selectedModel = name;
 					Shared::selectedModelName = &selectedModel;
+
+					collisionTypePopupOpen = true;//Open the collision type popup when a model is selected
 				}
 
 				if (selected)
@@ -413,7 +410,8 @@ void ImguiWindow::UpdateImguiEditor()
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];
 					auto& worldObject = Shared::worldObjects[track.worldObjectID];
-					//Update the collider (always rebuilt from the local-space boxes)
+
+					//Update the collider
 					for (int i = 0; i < worldObject.collisionBoxes.size(); i++)
 						worldObject.collisionBoxes[i] = Shared::GetUpdatedBoundingBox(worldObject.originalBoxes[i], worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle);
 				}
@@ -422,6 +420,7 @@ void ImguiWindow::UpdateImguiEditor()
 				for (int i = 0; i < tracks.size(); i++) {
 					auto& track = tracks[i];
 					auto& npc = Shared::npcs[track.npcName];
+
 					//Update the collider
 					npc.collisionBoxes[0] = Shared::GetUpdatedBoundingBox(npc.originalBoxes[0], npc.position, npc.scale, npc.rotationAxis, npc.rotationAngle);
 				}
@@ -646,6 +645,36 @@ void ImguiWindow::TrackNamePopup(std::string& name)
 			Shared::trackName.clear();
 			ImGui::CloseCurrentPopup();
 		}
+
+		ImGui::EndPopup();
+
+	}
+}
+
+void ImguiWindow::CollisionTypePopup(bool& collisionTypePopupOpen)
+{
+
+	if (ImGui::BeginPopupModal("CollisionType?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Select Collision Type:");
+
+		
+		if (ImGui::Button("NONE")) {
+			Shared::selectedCollisionType = CollisionType::NONE;
+			collisionTypePopupOpen = false;
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::Button("BOX")) {
+			Shared::selectedCollisionType = CollisionType::BOX;
+			collisionTypePopupOpen = false;
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::Button("MESH")) {
+			Shared::selectedCollisionType = CollisionType::MESH;
+			collisionTypePopupOpen = false;
+			ImGui::CloseCurrentPopup();
+		}
+		
 
 		ImGui::EndPopup();
 
