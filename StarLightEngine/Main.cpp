@@ -17,7 +17,7 @@ int main() {
     
     SetConfigFlags(FLAG_WINDOW_MAXIMIZED);
     InitWindow(screenWidth, screenHeight, "StarLight Engine");
-    ToggleBorderlessWindowed();
+    //ToggleBorderlessWindowed();
     SetTargetFPS(60);
     SetExitKey(KEY_NULL);
 

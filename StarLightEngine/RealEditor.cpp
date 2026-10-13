@@ -8,6 +8,7 @@
 #include "imgui/imgui.h"
 #include "LightSystem.h"
 #include "DialougeSystem.h"
+#include <vector>
 
 RealEditor::RealEditor()
 {
@@ -997,18 +998,68 @@ void RealEditor::CreateWorldObject()
 	
 }
 
+
 void RealEditor::DrawWorldObject(Shader& activeShader)
 {
-	for (auto& [id, worldObject] : Shared::worldObjects) {
+	// Group world objects by model.
+	std::unordered_map<std::string, std::vector<Matrix>> batches;
 
-		Model& model = Shared::models[worldObject.modelName];
+	for (auto& [id, worldObject] : Shared::worldObjects)
+	{
+		Matrix transform = MatrixMultiply(
+			MatrixMultiply(
+				MatrixScale(
+					worldObject.scale.x,
+					worldObject.scale.y,
+					worldObject.scale.z
+				),
+				MatrixRotate(
+					worldObject.rotationAxis,
+					worldObject.rotationAngle * DEG2RAD
+				)
+			),
+			MatrixTranslate(
+				worldObject.position.x,
+				worldObject.position.y,
+				worldObject.position.z
+			)
+		);
+
+		batches[worldObject.modelName].push_back(transform);
+	}
+
+	// Switch the shader into instancing mode (restored after the draws below).
+	int useInstancing = 1;
+	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
+	activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(activeShader, "instanceTransform");
+
+	// Render each model's instances together.
+	for (auto& [modelName, transforms] : batches)
+	{
+		Model& model = Shared::models[modelName];
+
 		for (int i = 0; i < model.materialCount; i++)
 			model.materials[i].shader = activeShader;
 
-		DrawModelEx(model, worldObject.position, worldObject.rotationAxis, worldObject.rotationAngle, worldObject.scale, WHITE);
-		for(auto& box: worldObject.collisionBoxes) {
+		// First mesh only: additional meshes need their own draw.
+		DrawMeshInstanced(
+			model.meshes[0],
+			model.materials[model.meshMaterial[0]],
+			transforms.data(),
+			static_cast<int>(transforms.size())
+		);
+	}
+
+	// Back to normal mode so every other draw using this shader works again.
+	useInstancing = 0;
+	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
+	activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(activeShader, "matModel");
+
+	// Collision boxes remain per-object.
+	for (auto& [id, worldObject] : Shared::worldObjects)
+	{
+		for (auto& box : worldObject.collisionBoxes)
 			DrawBoundingBox(box, RED);
-		}
 	}
 }
 

@@ -10,11 +10,11 @@ LightShader LightSystem::directionalShader;
 
 void LightSystem::InitLights()
 {
-
 	// Point shader uniforms
 	pointShader.shader = Shared::shaders["point"];
 	spotShader.shader = Shared::shaders["spot"];
 	directionalShader.shader = Shared::shaders["directional"];
+
 
 	// Point
 	pointShader.lightPositionLoc =
@@ -31,6 +31,7 @@ void LightSystem::InitLights()
 
 	pointShader.baseColorLoc =
 		GetShaderLocation(pointShader.shader, "baseColor");
+
 
 	// Directional
 	directionalShader.lightDirectionLoc =
