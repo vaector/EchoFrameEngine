@@ -44,8 +44,8 @@ public:
 	void Draw();
 	       
 	//Entities
-	void UpdateWorldObject();
 	void CreateWorldObject();
+	void UpdateWorldObject();
 	void DrawWorldObject(Shader& activeShader);
 
 	//NPC

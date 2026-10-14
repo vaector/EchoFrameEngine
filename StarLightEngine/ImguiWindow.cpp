@@ -126,12 +126,6 @@ void ImguiWindow::UpdateImguiEditor()
 	//Door Mode
 	ImGui::Checkbox("Door Mode", &Shared::doorMode);
 
-	ImGui::NewLine();
-
-	//NPC mode
-	ImGui::Checkbox("NPC Mode", &Shared::npcMode);
-
-
 	ImGui::End();
 
 
@@ -237,8 +231,15 @@ void ImguiWindow::UpdateImguiEditor()
 		}
 		ImGui::NewLine();
 
+		//NPC mode
+		ImGui::Checkbox("NPC Mode", &Shared::npcMode);
+
+
+		ImGui::NewLine();
+
 		//Animations of selested model
 		if (Shared::selectedModelName != nullptr) {
+			ImGui::BeginChild("Animations", ImVec2(0, 300));
 
 			for (auto& [name, animNames] : Shared::modelAnimationNames) {
 				if (name == *Shared::selectedModelName) {
@@ -248,6 +249,7 @@ void ImguiWindow::UpdateImguiEditor()
 					}
 				}
 			}
+			ImGui::EndChild();
 
 		}
 

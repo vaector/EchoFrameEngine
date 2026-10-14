@@ -211,7 +211,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 			move.z = 0;
 
 
-		//Check collision with entities
+		//Check collision with entities(XZ)
 		if (CheckCollisionPlayerEntityXZ(&Shared::player.cam, &nextPosX)) {
 			move.x = 0;
 		}
@@ -240,7 +240,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 
 		UpdatePlayerHeight(&Shared::player.cam, &nextPosY);//Renews the player Bottom and Top values.
 
-		// Check collision
+		// Check collision(Y)
 		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
 		{
 			Shared::player.verticalVelocity = 0.0f;
@@ -252,7 +252,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		{
 			Shared::player.isGround = false;
 		}
-
+		//(Y)
 		if (CheckCollisionPlayerEntityY(&Shared::player.cam, &nextPosY)) {
 			Shared::player.verticalVelocity = 0;
 			move.y = nextPosY.y - Shared::player.cam.position.y;
@@ -771,69 +771,145 @@ void RealEditor::Draw()
 	DrawRay(Shared::freeRay, RED);
 }
 
+void RealEditor::CreateWorldObject()
+{
+	if (Shared::npcMode || !camMode || !Shared::selectedModelName) return;
+
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+		WorldObject worldObject;
+
+		//ID
+		worldObject.id = WorldObject::currentId;
+		WorldObject::currentId++;
+
+		//Name
+		worldObject.modelName = *Shared::selectedModelName;
+
+		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+		bool floorHit = false;
+		Vector3 pointHit = {0};
+
+		for (auto& sector : Shared::sectors) {
+			for (int i = 0; i+2 < sector.indices.size(); i += 3) {
+				// Process each index in the sector
+				int p1 = sector.indices[i];
+				int p2 = sector.indices[i + 1];
+				int p3 = sector.indices[i + 2];
+
+				RayCollision hit = GetRayCollisionTriangle(Shared::freeRay,
+					{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p1].y },
+					{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p2].y },
+					{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p3].y });
+
+				if (hit.hit) {
+					floorHit = true;
+					pointHit = hit.point;
+					break;
+				}
+			}
+
+			if (floorHit) break;
+		}
+
+		Vector3 spawnPos;
+		if (!floorHit)
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		else {
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+			spawnPos.x = pointHit.x;
+			spawnPos.z = pointHit.z;
+		}
+
+		//Position
+		if (selectedFloor)
+			worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		else
+			worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
+
+
+		//CollisionType
+		worldObject.collisionType = Shared::selectedCollisionType;
+
+		//Collision Box
+		if (Shared::selectedCollisionType == CollisionType::MESH) {
+
+			Model& model = Shared::models[worldObject.modelName];
+
+			for (int i = 0; i < model.meshCount; i++) {
+				BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
+				worldObject.originalBoxes.push_back(box);//Local Coordinates
+				worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+			}
+		}
+		else {
+			BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
+			worldObject.originalBoxes.push_back(box);
+			worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+		}
+
+		Shared::worldObjects[worldObject.id] = worldObject;
+	}
+
+}
+
 void RealEditor::UpdateWorldObject()
 {
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
-	//select world objects and stop camera from moving when an entity is selected.
-	for (auto it = Shared::worldObjects.begin(); it != Shared::worldObjects.end(); ) {
 
-		// 'it' points to the current element in worldObjects.
-		// We dereference it (*) to get the actual [id, worldObject] pair.
-		auto& [id, worldObject] = *it;
+	float dist = -1;
+	float closestDist = INFINITY;
+	bool isHit = false;
+	WorldObject* currentW = nullptr;
+
+	//select world objects and stop camera from moving when an entity is selected.
+	for (auto& [id,worldObject]: Shared::worldObjects) {
 
 		if (worldObject.collisionBoxes.empty() || worldObject.collisionType == NONE) {
-			++it; //Move iterator to the next worldObject.
 			continue;
 		}
 
-		bool erased = false;
-
 		for (auto& box : worldObject.collisionBoxes) {
 			RayCollision hit = GetRayCollisionBox(Shared::freeRay, box);
-
-
+			//Fetches the closes World Object
 			if (hit.hit) {
-				//Select entity and stop camera from moving.
-				if (IsKeyPressed(KEY_C)) {
-					Shared::selectedWorldObject = &worldObject;
-					freeCamToggle = false;
-				}
-
-				//Delete entity and its cutscene tracks.
-				if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-
-					//Delete its Cutscenes
-					if (Shared::cutscenes.worldObjectCutscene.contains(id)) {
-						Shared::cutscenes.worldObjectCutscene.erase(id);
-					}
-
-					//Erase the current worldObject.
-					//erase(it) deletes the current object AND returns
-					//an iterator pointing to the next worldObject.
-					it = Shared::worldObjects.erase(it);
-
-					Shared::selectedWorldObject = nullptr;
-					freeCamToggle = true;
-
-					erased = true;
-
-					break;
-				}
-
+				isHit = true;
+				dist = hit.distance;
 				break;
 			}
 		}
 
-		//If we didn't erase the current worldObject,
-		//we need to manually move to the next one.
-		//
-		//If we DID erase it, 'it' is already pointing to the next object,
-		//so we must NOT increment it again.
-		if (!erased) {
-			++it;
+		if (isHit && dist < closestDist) {
+			closestDist = dist;
+			currentW = &worldObject;
+		}
+		
+	}
+
+	if (isHit && currentW) {
+		//Select entity and stop camera from moving.
+		if (IsKeyPressed(KEY_C)) {
+			freeCamToggle = false;
+			Shared::selectedWorldObject = currentW;
+		}
+
+		//Delete entity and its cutscene tracks.
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+
+			//Delete its Cutscenes
+			if (Shared::cutscenes.worldObjectCutscene.contains(currentW->id)) {
+				Shared::cutscenes.worldObjectCutscene.erase(currentW->id);
+			}
+			Shared::worldObjects.erase(currentW->id);
+
+			Shared::selectedWorldObject = nullptr;
+			freeCamToggle = true;
+
+			isHit = false;
+
 		}
 	}
+
 
 	//If an entity is selected
 	if (Shared::selectedWorldObject) {
@@ -916,89 +992,6 @@ void RealEditor::UpdateWorldObject()
 
 }
 
-void RealEditor::CreateWorldObject()
-{
-	if (Shared::npcMode || !camMode || !Shared::selectedModelName) return;
-
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		WorldObject worldObject;
-
-		//ID
-		worldObject.id = WorldObject::currentId;
-		WorldObject::currentId++;
-		
-		//Name
-		worldObject.modelName = *Shared::selectedModelName;
-
-		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
-		RayCollision hit = {};
-
-		bool floorHit = false;
-
-		for (auto& sector : Shared::sectors) {
-			for (int i = 0; i < sector.indices.size(); i++) {
-				// Process each index in the sector
-				int p1 = sector.indices[i];
-				int p2 = sector.indices[i + 1];
-				int p3 = sector.indices[i + 2];
-
-				hit = GetRayCollisionTriangle(Shared::freeRay,
-					{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p1].y },
-					{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p2].y },
-					{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p3].y });
-				
-				if (hit.hit) {
-					floorHit = true;
-					break;
-				}
-			}
-
-
-			if (hit.hit) break;
-		}
-
-		Vector3 spawnPos;
-		if(!floorHit)
-			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
-		else {
-			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
-			spawnPos.x = hit.point.x;
-			spawnPos.z = hit.point.z;
-		}
-
-		//Position
-		if(selectedFloor)
-			worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
-		else
-			worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
-
-
-		//CollisionType
-		worldObject.collisionType = Shared::selectedCollisionType;
-
-		//Collision Box
-		if (Shared::selectedCollisionType == CollisionType::MESH) {
-
-			Model& model = Shared::models[worldObject.modelName];
-
-			for (int i = 0; i < model.meshCount; i++) {
-				BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
-				worldObject.originalBoxes.push_back(box);//Local Coordinates
-				worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
-			}
-		}
-		else if (Shared::selectedCollisionType == CollisionType::BOX) {
-			BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
-			worldObject.originalBoxes.push_back(box);
-			worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
-		}
-
-		Shared::worldObjects[worldObject.id] = worldObject;
-	}
-	
-}
-
-
 void RealEditor::DrawWorldObject(Shader& activeShader)
 {
 	// Group world objects by model.
@@ -1050,17 +1043,24 @@ void RealEditor::DrawWorldObject(Shader& activeShader)
 		);
 	}
 
+	// Collision boxes remain per-object.
+	if (!camMode) return;
+	for (auto& [id, worldObject] : Shared::worldObjects)
+	{
+		for (auto& box : worldObject.collisionBoxes) {
+			if(worldObject.collisionType == CollisionType::NONE)
+				DrawBoundingBox(box, RED);
+			else
+				DrawBoundingBox(box, WHITE);
+		}
+			
+	}
+
 	// Back to normal mode so every other draw using this shader works again.
 	useInstancing = 0;
 	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
 	activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(activeShader, "matModel");
 
-	// Collision boxes remain per-object.
-	for (auto& [id, worldObject] : Shared::worldObjects)
-	{
-		for (auto& box : worldObject.collisionBoxes)
-			DrawBoundingBox(box, RED);
-	}
 }
 
 void RealEditor::CreateNpc()
@@ -1082,8 +1082,44 @@ void RealEditor::CreateNpc()
 
 		//Position
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
-		Vector3 spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
-		npc.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		bool floorHit = false;
+		Vector3 pointHit = { 0 };
+
+		for (auto& sector : Shared::sectors) {
+			for (int i = 0; i + 2 < sector.indices.size(); i += 3) {
+				// Process each index in the sector
+				int p1 = sector.indices[i];
+				int p2 = sector.indices[i + 1];
+				int p3 = sector.indices[i + 2];
+
+				RayCollision hit = GetRayCollisionTriangle(Shared::freeRay,
+					{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p1].y },
+					{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p2].y },
+					{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::wallHeight), sector.floorPoints[p3].y });
+
+				if (hit.hit) {
+					floorHit = true;
+					pointHit = hit.point;
+					break;
+				}
+			}
+
+			if (floorHit) break;
+		}
+
+		Vector3 spawnPos;
+		if (!floorHit)
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+		else {
+			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+			spawnPos.x = pointHit.x;
+			spawnPos.z = pointHit.z;
+		}
+
+		if(selectedFloor)
+			npc.position = { spawnPos.x, (float)selectedFloor->floor * Shared::wallHeight, spawnPos.z };
+		else
+			npc.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z};
 
 
 		//Collider/Type
@@ -1135,24 +1171,57 @@ void RealEditor::UpdateNpc()
 {
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
 
-	//select npc and stop camera from moving when an npc is selected.
+
+	float dist = -1;
+	float closestDist = INFINITY;
+	bool isHit = false;
+	NPC* currentNpc = nullptr;
+
+	//select world objects and stop camera from moving when an entity is selected.
 	for (auto& [name, npc] : Shared::npcs) {
-		RayCollision hit = GetRayCollisionBox(Shared::freeRay, npc.collisionBoxes[0]);
-		if (hit.hit && IsKeyPressed(KEY_C)) {
-			Shared::selectedNpc = &npc;
-			freeCamToggle = false;
+
+		if (npc.collisionBoxes.empty() || npc.collisionType == NONE) {
+			continue;
 		}
 
-		//Remove
-		if (hit.hit && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-			//Delete NPC nad its tracks
-			if (Shared::cutscenes.npcCutscene.contains(name)) {
-				Shared::cutscenes.npcCutscene.erase(name);
+		for (auto& box : npc.collisionBoxes) {
+			RayCollision hit = GetRayCollisionBox(Shared::freeRay, box);
+			//Fetches the closes World Object
+			if (hit.hit) {
+				isHit = true;
+				dist = hit.distance;
+				break;
 			}
-			Shared::npcs.erase(name);
-			Shared::selectedNpc = nullptr;
+		}
 
-			break;
+		if (isHit && dist < closestDist) {
+			closestDist = dist;
+			currentNpc = &npc;
+		}
+
+	}
+
+	if (isHit && currentNpc) {
+		//Select entity and stop camera from moving.
+		if (IsKeyPressed(KEY_C)) {
+			freeCamToggle = false;
+			Shared::selectedNpc = currentNpc;
+		}
+
+		//Delete entity and its cutscene tracks.
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+
+			//Delete its Cutscenes
+			if (Shared::cutscenes.npcCutscene.contains(currentNpc->name)) {
+				Shared::cutscenes.npcCutscene.erase(currentNpc->name);
+			}
+			Shared::npcs.erase(currentNpc->name);
+
+			Shared::selectedNpc = nullptr;
+			freeCamToggle = true;
+
+			isHit = false;
+
 		}
 	}
 
@@ -1600,9 +1669,18 @@ bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
+	//WorldObject
 	for (auto& [id, worldObject] : Shared::worldObjects) {
 		for(auto& box: worldObject.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider)) {
+			if (CheckCollisionBoxes(box, Shared::player.collider) && worldObject.collisionType != CollisionType::NONE) {
+				return true;
+			}
+		}
+	}
+	//NPC
+	for (auto& [name, npc] : Shared::npcs) {
+		for (auto& box : npc.collisionBoxes) {
+			if (CheckCollisionBoxes(box, Shared::player.collider) && npc.collisionType != CollisionType::NONE) {
 				return true;
 			}
 		}
@@ -1629,9 +1707,10 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 		nextPos->z + Shared::player.radius
 	};
 
+	//WorldObjects
 	for (auto& [id, worldObject] : Shared::worldObjects) {
 		for (auto& box : worldObject.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider)) {
+			if (CheckCollisionBoxes(box, Shared::player.collider) && worldObject.collisionType != CollisionType::NONE) {
 
 				float eBottom = box.min.y;
 				float eTop = box.max.y;
@@ -1650,8 +1729,35 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 				}
 			}
 		}
-		return false;
+		
 	}
+
+	//NPC
+	for (auto& [name, npc] : Shared::npcs) {
+		for (auto& box : npc.collisionBoxes) {
+			if (CheckCollisionBoxes(box, Shared::player.collider) && npc.collisionType != CollisionType::NONE) {
+
+				float eBottom = box.min.y;
+				float eTop = box.max.y;
+
+				if (Shared::player.verticalVelocity <= 0.0f)
+				{
+					// Land slightly ABOVE the top face
+					nextPos->y = eTop + Shared::player.height / 2 + gap;
+					return true;
+				}
+				else
+				{
+					//stop slightly BELOW the underside
+					nextPos->y = eBottom - Shared::player.height / 2 - gap;
+					return true;
+				}
+			}
+		}
+
+	}
+
+	return false;
 }
 
 Wall* RealEditor::GetRayWall(Ray ray){
