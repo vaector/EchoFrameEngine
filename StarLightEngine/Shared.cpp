@@ -49,6 +49,7 @@ namespace Shared {
 	std::unordered_map<std::string, Music> music;
 
 	Vector3 rotationAxis = {0,1,0};
+	Vector3 entityScale = { 50.f,50.f,50.f };
 
 	//Lights and shaders
 	std::vector<Light> lights;

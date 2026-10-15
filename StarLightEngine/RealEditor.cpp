@@ -782,9 +782,14 @@ void RealEditor::CreateWorldObject()
 		worldObject.id = WorldObject::currentId;
 		WorldObject::currentId++;
 
+
 		//Name
 		worldObject.modelName = *Shared::selectedModelName;
 
+		//Scale
+		worldObject.scale = Shared::entityScale;
+
+		//Position
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
 		bool floorHit = false;
 		Vector3 pointHit = {0};
@@ -1019,6 +1024,15 @@ void RealEditor::DrawWorldObject(Shader& activeShader)
 		);
 
 		batches[worldObject.modelName].push_back(transform);
+
+		if (camMode) {
+			for (auto& box : worldObject.collisionBoxes) {
+				if (worldObject.collisionType == CollisionType::NONE)
+					DrawBoundingBox(box, RED);
+				else
+					DrawBoundingBox(box, WHITE);
+			}
+		}
 	}
 
 	// Switch the shader into instancing mode (restored after the draws below).
@@ -1043,19 +1057,6 @@ void RealEditor::DrawWorldObject(Shader& activeShader)
 		);
 	}
 
-	// Collision boxes remain per-object.
-	if (!camMode) return;
-	for (auto& [id, worldObject] : Shared::worldObjects)
-	{
-		for (auto& box : worldObject.collisionBoxes) {
-			if(worldObject.collisionType == CollisionType::NONE)
-				DrawBoundingBox(box, RED);
-			else
-				DrawBoundingBox(box, WHITE);
-		}
-			
-	}
-
 	// Back to normal mode so every other draw using this shader works again.
 	useInstancing = 0;
 	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
@@ -1078,7 +1079,7 @@ void RealEditor::CreateNpc()
 
 
 		npc.model = Shared::models[npc.modelName];
-		npc.scale = { 0.5, 0.5, 0.5 };
+		npc.scale = Shared::entityScale;
 
 		//Position
 		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));

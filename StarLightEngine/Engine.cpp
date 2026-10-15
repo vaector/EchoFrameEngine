@@ -40,7 +40,7 @@ void Engine::DrawEditor()
 
 void Engine::DrawGUI()
 {
-	DrawFPS(200, 0);//FPS
+	DrawFPS(GetScreenWidth()/2, 0);//FPS
 
 	if (Shared::dialougeMode) {
 		DialougeSystem::DrawDialouge();//Dialouge Box Draw

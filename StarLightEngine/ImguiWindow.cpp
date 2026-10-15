@@ -40,46 +40,14 @@ void ImguiWindow::UpdateImguiEditor()
 	// Save
 	if (ImGui::Button("Save"))
 		ImGui::OpenPopup("Save?");
-
-	if (ImGui::BeginPopupModal("Save?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		ImGui::Text("Are you sure you want to overwrite the save?");
-
-		if (ImGui::Button("Yes"))
-		{
-			SaveSystem::SaveGame(fileName + ".json");
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("No"))
-			ImGui::CloseCurrentPopup();
-
-		ImGui::EndPopup();
-	}
+	SavePopup(fileName);
+	
 
 	// Load
 	if (ImGui::Button("Load"))
 		ImGui::OpenPopup("Load?");
-
-	if (ImGui::BeginPopupModal("Load?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-	{
-		ImGui::Text("Are you sure? Current data will be lost.");
-
-		if (ImGui::Button("Yes"))
-		{
-			SaveSystem::LoadGame(fileName + ".json");
-			ImGui::CloseCurrentPopup();
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("No"))
-			ImGui::CloseCurrentPopup();
-
-		ImGui::EndPopup();
-	}
+	LoadPopup(fileName);
+	
 	ImGui::NewLine();
 
 	//Drop Down box for choosing textures
@@ -140,6 +108,15 @@ void ImguiWindow::UpdateImguiEditor()
 		ImGui::Begin("3D Models", nullptr, ImGuiChildFlags_AlwaysAutoResize);
 		ImGui::SetWindowPos({ (float)GetScreenWidth() - 600,0 });
 
+		//---ON CREATE ENTITY PROPERTIES
+
+		ImGui::SeparatorText("On Create Entity Properties");
+
+		ImGui::InputFloat("X##", &Shared::entityScale.x);
+		ImGui::InputFloat("Y##", &Shared::entityScale.y);
+		ImGui::InputFloat("Z##", &Shared::entityScale.z);
+		
+		ImGui::NewLine();
 
 		//--PREOPERTIES SECTION
 		ImGui::SeparatorText("WorldObject/NPC Properties");
@@ -185,17 +162,17 @@ void ImguiWindow::UpdateImguiEditor()
 		//Rotation Axis
 		ImGui::SeparatorText("Rotation Axis");
 
-		static bool isAxisX = false;
-		static bool isAxisY = true;
-		static bool isAxisZ = false;
+		static bool isRotationAxisX = false;
+		static bool isRotationAxisY = true;
+		static bool isRotationAxisZ = false;
 
-		ImGui::Checkbox("X", &isAxisX);
+		ImGui::Checkbox("X", &isRotationAxisX);
 		ImGui::SameLine();
-		ImGui::Checkbox("Y", &isAxisY);
+		ImGui::Checkbox("Y", &isRotationAxisY);
 		ImGui::SameLine();
-		ImGui::Checkbox("Z", &isAxisZ);
+		ImGui::Checkbox("Z", &isRotationAxisZ);
 
-		Shared::rotationAxis = { (float)isAxisX, (float)isAxisY, (float)isAxisZ };
+		Shared::rotationAxis = { (float)isRotationAxisX, (float)isRotationAxisY, (float)isRotationAxisZ };
 
 		ImGui::SeparatorText("3D Models");
 
@@ -230,6 +207,7 @@ void ImguiWindow::UpdateImguiEditor()
 			ImGui::EndListBox();
 		}
 		ImGui::NewLine();
+
 
 		//NPC mode
 		ImGui::Checkbox("NPC Mode", &Shared::npcMode);
@@ -597,6 +575,12 @@ void ImguiWindow::UpdateImguiExitPopup(bool& running)
 		Shared::popupOpen = true;
 	}
 
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
 	if (ImGui::BeginPopupModal("Exit?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		ImGui::Text("Do you want to save before exiting?");
@@ -621,6 +605,60 @@ void ImguiWindow::UpdateImguiExitPopup(bool& running)
 
 		ImGui::EndPopup();
 
+	}
+}
+
+void ImguiWindow::LoadPopup(std::string& fileName)
+{
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
+	if (ImGui::BeginPopupModal("Load?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Are you sure? Current data will be lost.");
+
+		if (ImGui::Button("Yes"))
+		{
+			SaveSystem::LoadGame(fileName + ".json");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
+}
+
+void ImguiWindow::SavePopup(std::string& fileName)
+{
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
+	if (ImGui::BeginPopupModal("Save?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Are you sure you want to overwrite the save?");
+
+		if (ImGui::Button("Yes"))
+		{
+			SaveSystem::SaveGame(fileName + ".json");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
 	}
 }
 
@@ -655,6 +693,12 @@ void ImguiWindow::TrackNamePopup(std::string& name)
 
 void ImguiWindow::CollisionTypePopup(bool& collisionTypePopupOpen)
 {
+
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
 
 	if (ImGui::BeginPopupModal("CollisionType?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
 	{
