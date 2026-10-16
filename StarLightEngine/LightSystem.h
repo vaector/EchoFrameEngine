@@ -4,20 +4,23 @@
 
 
 enum LIGHT_TYPE {
-	POINT_LIGHT,
-	SPOT_LIGHT,
-	DIRECTIONAL_LIGHT
+	POINT_LIGHT = 0,
+	SPOT_LIGHT = 1,
+	DIRECTIONAL_LIGHT = 2
 };
 
 struct LightShader{ // The uniforms for all light shaders
 	Shader shader;
 
-	int lightPositionLoc = -1;
-	int lightDirectionLoc = -1;
-	int lightColorLoc = -1;
-	int lightIntensityLoc = -1;
-	int lightRangeLoc = -1;
-	int spotAngleLoc = -1;
+	int lightCountLoc = -1;
+	int lightTypesLoc = -1;
+	int lightPositionsLoc = -1;
+	int lightDirectionsLoc = -1;
+	int lightColorsLoc = -1;
+	int lightIntensitiesLoc = -1;
+	int lightRangesLoc = -1;
+
+	int spotAnglesLoc = -1;
 	int baseColorLoc = -1;
 };
 
@@ -41,17 +44,16 @@ static class LightSystem
 
 public:
 	static Light* selectedLight;
+	static Light defaultLight;
 
 	//Light Shaders
-	static LightShader pointShader;
-	static LightShader spotShader;
-	static LightShader directionalShader;
+	static LightShader lightShader;
 
 	static void InitLights();//Init Lights
 	static void Create(Vector3 pos, LIGHT_TYPE type);//Create Lights (position, lightType).
 	static void DrawLightEX(bool& camMode);
 
 	static void Update(bool& camMode, bool& freeCamToggle);//camMode -> bool in realEditor if false then we are using the free Cam(Editor Camera).
-	static void UpdateShaderValues(LightShader& lightShader, Light& light);
+	static void UpdateShaderValues(LightShader& lightShader);
 };
 

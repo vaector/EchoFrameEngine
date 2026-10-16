@@ -57,12 +57,14 @@ namespace Shared {
 	extern std::unordered_map<std::string, Sound> sounds;
 	extern std::unordered_map<std::string, Music> music;
 
+	extern bool isMeshInstance;
 	extern Vector3 rotationAxis;
 	extern Vector3 entityScale;
 
 	//Lights and Shaders
 	extern std::vector<Light> lights;
 	extern std::unordered_map<std::string, Shader> shaders;
+	extern bool DefaultDirectionalLightEnabled;
 
 	//Decals
 	extern std::vector<Decal> decals;

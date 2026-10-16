@@ -1,72 +1,44 @@
 #include "LightSystem.h"
 #include "Shared.h"
 #include "raymath.h"
+#include <algorithm>
 
 Light* LightSystem::selectedLight = nullptr;
-
-LightShader LightSystem::pointShader;
-LightShader LightSystem::spotShader;
-LightShader LightSystem::directionalShader;
+Light LightSystem::defaultLight;
+LightShader LightSystem::lightShader;
 
 void LightSystem::InitLights()
 {
-	// Point shader uniforms
-	pointShader.shader = Shared::shaders["point"];
-	spotShader.shader = Shared::shaders["spot"];
-	directionalShader.shader = Shared::shaders["directional"];
+	// Use the unified shader loaded by your existing shader loader.
+	lightShader.shader = Shared::shaders["lighting"];
 
+	// Retrieve the unified shader's uniform locations.
+	lightShader.lightCountLoc =
+		GetShaderLocation(lightShader.shader, "lightCount");
 
-	// Point
-	pointShader.lightPositionLoc =
-		GetShaderLocation(pointShader.shader, "lightPosition");
+	lightShader.lightTypesLoc =
+		GetShaderLocation(lightShader.shader, "lightTypes");
 
-	pointShader.lightColorLoc =
-		GetShaderLocation(pointShader.shader, "lightColor");
+	lightShader.lightPositionsLoc =
+		GetShaderLocation(lightShader.shader, "lightPositions");
 
-	pointShader.lightIntensityLoc =
-		GetShaderLocation(pointShader.shader, "lightIntensity");
+	lightShader.lightDirectionsLoc =
+		GetShaderLocation(lightShader.shader, "lightDirections");
 
-	pointShader.lightRangeLoc =
-		GetShaderLocation(pointShader.shader, "lightRange");
+	lightShader.lightColorsLoc =
+		GetShaderLocation(lightShader.shader, "lightColors");
 
-	pointShader.baseColorLoc =
-		GetShaderLocation(pointShader.shader, "baseColor");
+	lightShader.lightIntensitiesLoc =
+		GetShaderLocation(lightShader.shader, "lightIntensities");
 
+	lightShader.lightRangesLoc =
+		GetShaderLocation(lightShader.shader, "lightRanges");
 
-	// Directional
-	directionalShader.lightDirectionLoc =
-		GetShaderLocation(directionalShader.shader, "lightDirection");
+	lightShader.spotAnglesLoc =
+		GetShaderLocation(lightShader.shader, "spotAngles");
 
-	directionalShader.lightColorLoc =
-		GetShaderLocation(directionalShader.shader, "lightColor");
-
-	directionalShader.lightIntensityLoc =
-		GetShaderLocation(directionalShader.shader, "lightIntensity");
-
-	directionalShader.baseColorLoc =
-		GetShaderLocation(directionalShader.shader, "baseColor");
-
-	// Spot
-	spotShader.lightPositionLoc =
-		GetShaderLocation(spotShader.shader, "lightPosition");
-
-	spotShader.lightDirectionLoc =
-		GetShaderLocation(spotShader.shader, "lightDirection");
-
-	spotShader.lightColorLoc =
-		GetShaderLocation(spotShader.shader, "lightColor");
-
-	spotShader.lightIntensityLoc =
-		GetShaderLocation(spotShader.shader, "lightIntensity");
-
-	spotShader.lightRangeLoc =
-		GetShaderLocation(spotShader.shader, "lightRange");
-
-	spotShader.spotAngleLoc =
-		GetShaderLocation(spotShader.shader, "spotAngle");
-
-	spotShader.baseColorLoc =
-		GetShaderLocation(spotShader.shader, "baseColor");
+	lightShader.baseColorLoc =
+		GetShaderLocation(lightShader.shader, "baseColor");
 }
 
 void LightSystem::Create(Vector3 pos, LIGHT_TYPE type)
@@ -141,62 +113,98 @@ void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 	}
 }
 
-void LightSystem::UpdateShaderValues(LightShader& lightShader, Light& light)
+void LightSystem::UpdateShaderValues(LightShader& lightShader)
 {
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.lightPositionLoc,
-		&light.position,
-		SHADER_UNIFORM_VEC3
-	);
+	constexpr int MAX_LIGHTS = 32;
 
-	Vector3 dirToUse = light.dir;
-	if (light.type == DIRECTIONAL_LIGHT)
-		dirToUse = Vector3Scale(Vector3Normalize(light.position), -1.0f);
+	int lightTypes[MAX_LIGHTS] = {};
+	float lightPositions[MAX_LIGHTS * 3] = {};
+	float lightDirections[MAX_LIGHTS * 3] = {};
+	float lightColors[MAX_LIGHTS * 4] = {};
+	float lightIntensities[MAX_LIGHTS] = {};
+	float lightRanges[MAX_LIGHTS] = {};
+	float spotAngles[MAX_LIGHTS] = {};
 
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.lightDirectionLoc,
-		&dirToUse,
-		SHADER_UNIFORM_VEC3
-	);
+	int count = 0;
 
-	Vector4 color = ColorNormalize(light.color);
+	for (const Light& light : Shared::lights)
+	{
+		if (!light.enabled || count >= MAX_LIGHTS - 1)//Because of the default
+			continue;
 
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.lightColorLoc,
-		&color,
-		SHADER_UNIFORM_VEC4
-	);
+		lightTypes[count] = static_cast<int>(light.type);
 
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.lightIntensityLoc,
-		&light.intensity,
-		SHADER_UNIFORM_FLOAT
-	);
+		lightPositions[count * 3 + 0] = light.position.x;
+		lightPositions[count * 3 + 1] = light.position.y;
+		lightPositions[count * 3 + 2] = light.position.z;
 
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.lightRangeLoc,
-		&light.range,
-		SHADER_UNIFORM_FLOAT
-	);
+		Vector3 dirToUse = light.dir;
+		if (light.type == DIRECTIONAL_LIGHT)
+			dirToUse = Vector3Scale(Vector3Normalize(light.position), -1.0f);
 
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.spotAngleLoc,
-		&light.spotAngle,
-		SHADER_UNIFORM_FLOAT
-	);
+		lightDirections[count * 3 + 0] = dirToUse.x;
+		lightDirections[count * 3 + 1] = dirToUse.y;
+		lightDirections[count * 3 + 2] = dirToUse.z;
+
+		Vector4 color = ColorNormalize(light.color);
+		lightColors[count * 4 + 0] = color.x;
+		lightColors[count * 4 + 1] = color.y;
+		lightColors[count * 4 + 2] = color.z;
+		lightColors[count * 4 + 3] = color.w;
+
+		lightIntensities[count] = light.intensity;
+		lightRanges[count] = light.range;
+		spotAngles[count] = light.spotAngle;
+
+		++count;
+	}
+
+	//Default Directional Light
+	if (Shared::DefaultDirectionalLightEnabled) {
+
+		auto& light = LightSystem::defaultLight;
+
+		lightTypes[count] = static_cast<int>(LightSystem::defaultLight.type);
+
+		lightPositions[count * 3 + 0] = light.position.x;
+		lightPositions[count * 3 + 1] = light.position.y;
+		lightPositions[count * 3 + 2] = light.position.z;
+
+		Vector3 dirToUse = light.dir;
+		if (light.type == DIRECTIONAL_LIGHT)
+			dirToUse = Vector3Scale(Vector3Normalize(light.position), -1.0f);
+
+		lightDirections[count * 3 + 0] = dirToUse.x;
+		lightDirections[count * 3 + 1] = dirToUse.y;
+		lightDirections[count * 3 + 2] = dirToUse.z;
+
+		Vector4 color = ColorNormalize(light.color);
+		lightColors[count * 4 + 0] = color.x;
+		lightColors[count * 4 + 1] = color.y;
+		lightColors[count * 4 + 2] = color.z;
+		lightColors[count * 4 + 3] = color.w;
+
+		lightIntensities[count] = light.intensity;
+		lightRanges[count] = light.range;
+		spotAngles[count] = light.spotAngle;
+
+		++count;
+	}
+
+
+	SetShaderValue(lightShader.shader, lightShader.lightCountLoc, &count, SHADER_UNIFORM_INT);
+
+	if (count > 0)
+	{
+		SetShaderValueV(lightShader.shader, lightShader.lightTypesLoc, lightTypes, SHADER_UNIFORM_INT, count);
+		SetShaderValueV(lightShader.shader, lightShader.lightPositionsLoc, lightPositions, SHADER_UNIFORM_VEC3, count);
+		SetShaderValueV(lightShader.shader, lightShader.lightDirectionsLoc, lightDirections, SHADER_UNIFORM_VEC3, count);
+		SetShaderValueV(lightShader.shader, lightShader.lightColorsLoc, lightColors, SHADER_UNIFORM_VEC4, count);
+		SetShaderValueV(lightShader.shader, lightShader.lightIntensitiesLoc, lightIntensities, SHADER_UNIFORM_FLOAT, count);
+		SetShaderValueV(lightShader.shader, lightShader.lightRangesLoc, lightRanges, SHADER_UNIFORM_FLOAT, count);
+		SetShaderValueV(lightShader.shader, lightShader.spotAnglesLoc, spotAngles, SHADER_UNIFORM_FLOAT, count);
+	}
 
 	Vector4 baseColor = ColorNormalize(WHITE);
-
-	SetShaderValue(
-		lightShader.shader,
-		lightShader.baseColorLoc,
-		&baseColor,
-		SHADER_UNIFORM_VEC4
-	);
+	SetShaderValue(lightShader.shader, lightShader.baseColorLoc, &baseColor, SHADER_UNIFORM_VEC4);
 }

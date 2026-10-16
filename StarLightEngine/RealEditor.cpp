@@ -717,58 +717,23 @@ void RealEditor::Draw()
 {
 	rlDisableBackfaceCulling();
 
-	if (Shared::lights.empty()) {
-		//No lights - draw once, unlit, so the scene isn't blank
-		DrawWall();
-		DrawRamp();
-		DrawDoorSwitch();
-		DrawSector();
-		DrawWorldObject(LightSystem::pointShader.shader);
-		DrawNpc(LightSystem::pointShader.shader);
-		DrawDecals();
-	}
-	else {
-		for (size_t i = 0; i < Shared::lights.size(); i++) {
-			Light& light = Shared::lights[i];
+	LightSystem::UpdateShaderValues(LightSystem::lightShader);
 
-			if(!light.enabled)
-				continue;
+	BeginShaderMode(LightSystem::lightShader.shader);
 
-			LightShader* activeLightShader = &LightSystem::pointShader;//Default shader to use
-			switch (light.type) {
-			case POINT_LIGHT:       activeLightShader = &LightSystem::pointShader; break;
-			case SPOT_LIGHT:        activeLightShader = &LightSystem::spotShader; break;
-			case DIRECTIONAL_LIGHT: activeLightShader = &LightSystem::directionalShader; break;
-			}
+	DrawWall();
+	DrawRamp();
+	DrawDoorSwitch();
+	DrawSector();
+	DrawWorldObject(LightSystem::lightShader.shader);
+	DrawNpc(LightSystem::lightShader.shader);
+	DrawDecals();
 
-			LightSystem::UpdateShaderValues(*activeLightShader, light);
+	EndShaderMode();
 
-			if (i > 0)
-				BeginBlendMode(BLEND_ADDITIVE); // stack this light's contribution on top of previous passes
-
-			BeginShaderMode(activeLightShader->shader);
-
-			DrawWall();
-			DrawRamp();
-			DrawDoorSwitch();
-			DrawSector();
-			DrawWorldObject(activeLightShader->shader);
-			DrawNpc(activeLightShader->shader);
-			DrawDecals();
-
-			EndShaderMode();
-
-			if (i > 0)
-				EndBlendMode();
-		}
-	}
-
-	//----Draw things without the light shader on it---
-
-	//Lights
+	// Draw editor elements separately
 	LightSystem::DrawLightEX(camMode);
 	DrawTrigger();
-	DrawRay(Shared::freeRay, RED);
 }
 
 void RealEditor::CreateWorldObject()
@@ -781,6 +746,9 @@ void RealEditor::CreateWorldObject()
 		//ID
 		worldObject.id = WorldObject::currentId;
 		WorldObject::currentId++;
+
+		//Is Mesh Instance
+		worldObject.isMeshInstance = Shared::isMeshInstance;
 
 
 		//Name
@@ -859,7 +827,7 @@ void RealEditor::CreateWorldObject()
 
 void RealEditor::UpdateWorldObject()
 {
-	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam
+	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam || Cutscene Playing
 
 
 	float dist = -1;
@@ -870,7 +838,7 @@ void RealEditor::UpdateWorldObject()
 	//select world objects and stop camera from moving when an entity is selected.
 	for (auto& [id,worldObject]: Shared::worldObjects) {
 
-		if (worldObject.collisionBoxes.empty() || worldObject.collisionType == NONE) {
+		if (worldObject.collisionBoxes.empty()) {
 			continue;
 		}
 
@@ -999,69 +967,53 @@ void RealEditor::UpdateWorldObject()
 
 void RealEditor::DrawWorldObject(Shader& activeShader)
 {
-	// Group world objects by model.
 	std::unordered_map<std::string, std::vector<Matrix>> batches;
+	std::vector<WorldObject*> individualObjects;
+	individualObjects.reserve(Shared::worldObjects.size());
 
 	for (auto& [id, worldObject] : Shared::worldObjects)
 	{
-		Matrix transform = MatrixMultiply(
-			MatrixMultiply(
-				MatrixScale(
-					worldObject.scale.x,
-					worldObject.scale.y,
-					worldObject.scale.z
-				),
-				MatrixRotate(
-					worldObject.rotationAxis,
-					worldObject.rotationAngle * DEG2RAD
-				)
-			),
-			MatrixTranslate(
-				worldObject.position.x,
-				worldObject.position.y,
-				worldObject.position.z
-			)
-		);
-
-		batches[worldObject.modelName].push_back(transform);
-
-		if (camMode) {
-			for (auto& box : worldObject.collisionBoxes) {
-				if (worldObject.collisionType == CollisionType::NONE)
-					DrawBoundingBox(box, RED);
-				else
-					DrawBoundingBox(box, WHITE);
-			}
+		//Add the world object to the appropriate batch or individual list based on whether it is a mesh instance
+		if (worldObject.isMeshInstance)
+		{
+			Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(worldObject.scale.x, worldObject.scale.y, worldObject.scale.z), MatrixRotate(worldObject.rotationAxis, worldObject.rotationAngle * DEG2RAD)), MatrixTranslate(worldObject.position.x, worldObject.position.y, worldObject.position.z));
+			batches[worldObject.modelName].push_back(transform);
 		}
+		else 
+			individualObjects.push_back(&worldObject);
+
 	}
 
-	// Switch the shader into instancing mode (restored after the draws below).
-	int useInstancing = 1;
-	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
-	activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(activeShader, "instanceTransform");
-
-	// Render each model's instances together.
-	for (auto& [modelName, transforms] : batches)
+	//Render individual objects
+	for (WorldObject* worldObject : individualObjects)
 	{
-		Model& model = Shared::models[modelName];
-
+		Model& model = Shared::models[worldObject->modelName];
 		for (int i = 0; i < model.materialCount; i++)
 			model.materials[i].shader = activeShader;
-
-		// First mesh only: additional meshes need their own draw.
-		DrawMeshInstanced(
-			model.meshes[0],
-			model.materials[model.meshMaterial[0]],
-			transforms.data(),
-			static_cast<int>(transforms.size())
-		);
+		DrawModelEx(model, worldObject->position, worldObject->rotationAxis, worldObject->rotationAngle, worldObject->scale, WHITE);
 	}
 
-	// Back to normal mode so every other draw using this shader works again.
-	useInstancing = 0;
-	SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
-	activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(activeShader, "matModel");
+	//Render batched objects using instancing
+	if (!batches.empty())
+	{
+		// Enable instancing in the shader.
+		int useInstancing = 1;
+		SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
+		activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(activeShader, "instanceTransform");
 
+		for (auto& [modelName, transforms] : batches)
+		{
+			Model& model = Shared::models[modelName];
+			for (int i = 0; i < model.materialCount; i++) model.materials[i].shader = activeShader;
+			for (int meshIndex = 0; meshIndex < model.meshCount; meshIndex++)
+				DrawMeshInstanced(model.meshes[meshIndex], model.materials[model.meshMaterial[meshIndex]], transforms.data(), static_cast<int>(transforms.size()));
+		}
+
+		// Disable instancing in the shader.
+		useInstancing = 0;
+		SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
+		activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(activeShader, "matModel");
+	}
 }
 
 void RealEditor::CreateNpc()
@@ -1181,7 +1133,7 @@ void RealEditor::UpdateNpc()
 	//select world objects and stop camera from moving when an entity is selected.
 	for (auto& [name, npc] : Shared::npcs) {
 
-		if (npc.collisionBoxes.empty() || npc.collisionType == NONE) {
+		if (npc.collisionBoxes.empty()) {
 			continue;
 		}
 
@@ -1672,16 +1624,20 @@ bool RealEditor::CheckCollisionPlayerEntityXZ(Camera3D* cam, Vector3* nextPos)
 
 	//WorldObject
 	for (auto& [id, worldObject] : Shared::worldObjects) {
+		if (worldObject.collisionType == CollisionType::NONE) continue;
+
 		for(auto& box: worldObject.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider) && worldObject.collisionType != CollisionType::NONE) {
+			if (CheckCollisionBoxes(box, Shared::player.collider) ) {
 				return true;
 			}
 		}
 	}
 	//NPC
 	for (auto& [name, npc] : Shared::npcs) {
+		if (npc.collisionType == CollisionType::NONE) continue;
+
 		for (auto& box : npc.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider) && npc.collisionType != CollisionType::NONE) {
+			if (CheckCollisionBoxes(box, Shared::player.collider)) {
 				return true;
 			}
 		}
@@ -1710,8 +1666,10 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 
 	//WorldObjects
 	for (auto& [id, worldObject] : Shared::worldObjects) {
+		if(worldObject.collisionType == CollisionType::NONE) continue;
+
 		for (auto& box : worldObject.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider) && worldObject.collisionType != CollisionType::NONE) {
+			if (CheckCollisionBoxes(box, Shared::player.collider)) {
 
 				float eBottom = box.min.y;
 				float eTop = box.max.y;
@@ -1735,8 +1693,10 @@ bool RealEditor::CheckCollisionPlayerEntityY(Camera3D* cam, Vector3* nextPos)
 
 	//NPC
 	for (auto& [name, npc] : Shared::npcs) {
+		if(npc.collisionType == CollisionType::NONE) continue;
+
 		for (auto& box : npc.collisionBoxes) {
-			if (CheckCollisionBoxes(box, Shared::player.collider) && npc.collisionType != CollisionType::NONE) {
+			if (CheckCollisionBoxes(box, Shared::player.collider)) {
 
 				float eBottom = box.min.y;
 				float eTop = box.max.y;

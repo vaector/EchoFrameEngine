@@ -76,6 +76,7 @@ void ImguiWindow::UpdateImguiEditor()
 	ImGui::Checkbox("Floor Only", &Shared::floorOnly);
 	ImGui::Checkbox("Ceiling Only", &Shared::ceilingOnly);
 	ImGui::NewLine();
+
 	//Current Floor
 	if (ImGui::InputInt("Floor", &Shared::floor)) {
 		if (Shared::floor <= 0)
@@ -174,6 +175,9 @@ void ImguiWindow::UpdateImguiEditor()
 
 		Shared::rotationAxis = { (float)isRotationAxisX, (float)isRotationAxisY, (float)isRotationAxisZ };
 
+		ImGui::NewLine();
+		ImGui::Checkbox("Is Mesh Instance", &Shared::isMeshInstance);
+
 		ImGui::SeparatorText("3D Models");
 
 		//Search for models
@@ -194,10 +198,14 @@ void ImguiWindow::UpdateImguiEditor()
 
 				if (ImGui::Selectable(name.c_str(), selected))
 				{
-					selectedModel = name;
-					Shared::selectedModelName = &selectedModel;
-
-					collisionTypePopupOpen = true;//Open the collision type popup when a model is selected
+					if (Shared::selectedModelName != nullptr && *Shared::selectedModelName == name)
+						Shared::selectedModelName = nullptr;
+					else
+					{
+						selectedModel = name;
+						Shared::selectedModelName = &selectedModel;
+						collisionTypePopupOpen = true;
+					}
 				}
 
 				if (selected)
@@ -411,8 +419,60 @@ void ImguiWindow::UpdateImguiEditor()
 		//---LIGHTS----
 		ImGui::SeparatorText("LIGHTS");
 
+		const float minPos = 0.0f;
+		const float maxPos = 6000.0f;
+		const  float minIntensity = 0.0f;
+		const float maxIntensity = 500.0f;
+		const float minRange = 0.0f;
+		const float maxRange = 3000.0f;
+
 		static int selectedLightType = 0;//Point Light by default
 		static const char* lightTypeNames[] = { "Point", "Spot", "Directional" };
+
+		ImGui::SeparatorText("Default Light");
+		ImGui::Checkbox("Default Directional Light", &Shared::DefaultDirectionalLightEnabled);
+
+		if (Shared::DefaultDirectionalLightEnabled) {
+
+			ImGui::Text("Default Light Properties");
+			ImGui::NewLine();
+
+			ImGui::Text("Sun Position");
+			ImGui::NewLine();
+
+			ImGui::SliderFloat("Pos_X", &LightSystem::defaultLight.position.x, minPos, maxPos);
+			ImGui::SameLine();
+			ImGui::SliderFloat("Pos_Y", &LightSystem::defaultLight.position.y, minPos, maxPos);
+			ImGui::SameLine();
+			ImGui::SliderFloat("Pos_Z", &LightSystem::defaultLight.position.z, minPos, maxPos);
+
+			ImGui::NewLine();
+			ImGui::SliderFloat("Intensity", &LightSystem::defaultLight.intensity, minIntensity, maxIntensity);
+
+			ImGui::NewLine();
+			ImGui::SliderFloat("Range", &LightSystem::defaultLight.range, minRange, maxRange);
+
+			ImGui::NewLine();
+			float col[4] = {
+				LightSystem::defaultLight.color.r / 255.0f,
+				LightSystem::defaultLight.color.g / 255.0f,
+				LightSystem::defaultLight.color.b / 255.0f,
+				LightSystem::defaultLight.color.a / 255.0f
+			};
+
+			ImGui::NewLine();
+			if (ImGui::ColorEdit4("Color", col)) {
+				LightSystem::defaultLight.color.r = (unsigned char)(col[0] * 255.0f);
+				LightSystem::defaultLight.color.g = (unsigned char)(col[1] * 255.0f);
+				LightSystem::defaultLight.color.b = (unsigned char)(col[2] * 255.0f);
+				LightSystem::defaultLight.color.a = (unsigned char)(col[3] * 255.0f);
+			}
+
+
+
+		}
+
+		ImGui::NewLine();
 
 		if (ImGui::BeginCombo("Select Light Type", lightTypeNames[selectedLightType])) {
 
@@ -443,18 +503,18 @@ void ImguiWindow::UpdateImguiEditor()
 				ImGui::Text("Sun Position");
 				ImGui::NewLine();
 
-				ImGui::InputFloat("Pos_X", &LightSystem::selectedLight->position.x);
+				ImGui::SliderFloat("Pos_X", &LightSystem::selectedLight->position.x, minPos, maxPos);
 				ImGui::SameLine();
-				ImGui::InputFloat("Pos_Y", &LightSystem::selectedLight->position.y);
+				ImGui::SliderFloat("Pos_Y", &LightSystem::selectedLight->position.y, minPos, maxPos);
 				ImGui::SameLine();
-				ImGui::InputFloat("Pos_Z", &LightSystem::selectedLight->position.z);
+				ImGui::SliderFloat("Pos_Z", &LightSystem::selectedLight->position.z, minPos, maxPos);
 			}
 
 			ImGui::NewLine();
-			ImGui::InputFloat("Intensity", &LightSystem::selectedLight->intensity);
+			ImGui::SliderFloat("Intensity", &LightSystem::selectedLight->intensity, minIntensity, maxIntensity);
 
 			ImGui::NewLine();
-			ImGui::InputFloat("Range", &LightSystem::selectedLight->range);
+			ImGui::SliderFloat("Range", &LightSystem::selectedLight->range, minRange, maxRange);
 
 			ImGui::NewLine();
 			float col[4] = {
