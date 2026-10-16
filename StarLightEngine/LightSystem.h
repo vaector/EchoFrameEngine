@@ -25,13 +25,13 @@ struct LightShader{ // The uniforms for all light shaders
 };
 
 struct Light{
-	Vector3 position = {0};
+	Vector3 position = {1000,1000,1000};
 	Vector3 dir = { 0,-1,0 };
 
 	LIGHT_TYPE type = POINT_LIGHT;
 
-	float intensity = 2.0f;
-	float range = 200.0f;
+	float intensity = 10.0f;
+	float range = 2500.0f;
 	float spotAngle = 45.0f;
 
 	Color color = WHITE;

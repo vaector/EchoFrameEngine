@@ -1,0 +1,162 @@
+{
+    "boxTriggers": [],
+    "decals": [],
+    "defaultLight": {
+        "color": [
+            255,
+            255,
+            255,
+            255
+        ],
+        "dir": [
+            0.0,
+            -1.0,
+            0.0
+        ],
+        "enabled": true,
+        "intensity": 83.75,
+        "position": [
+            2175.0,
+            0.0,
+            0.0
+        ],
+        "range": 1642.5,
+        "spotAngle": 45.0,
+        "type": 0
+    },
+    "doorSwitches": [],
+    "isCutscenePlaying": false,
+    "lights": [],
+    "npcCutscenes": [],
+    "npcs": [],
+    "player": {
+        "gravity": 512.0,
+        "height": 150.0,
+        "jump": 250.0,
+        "moveSpeed": 150,
+        "playerPos": [
+            1024.0,
+            0.0,
+            1024.0
+        ],
+        "radius": 8.0,
+        "setPlayerPos": true
+    },
+    "playingTrack": "",
+    "ramps": [],
+    "sectors": [
+        {
+            "ceilingPoints": [
+                [
+                    920.0,
+                    808.0
+                ],
+                [
+                    936.0,
+                    1128.0
+                ],
+                [
+                    1432.0,
+                    1176.0
+                ],
+                [
+                    1480.0,
+                    760.0
+                ]
+            ],
+            "ceilingTextureName": "tile1",
+            "floor": 0,
+            "floorPoints": [
+                [
+                    920.0,
+                    808.0
+                ],
+                [
+                    936.0,
+                    1128.0
+                ],
+                [
+                    1432.0,
+                    1176.0
+                ],
+                [
+                    1480.0,
+                    760.0
+                ]
+            ],
+            "floorTextureName": "tile1",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                1,
+                0,
+                3,
+                1,
+                3,
+                2
+            ],
+            "layer": 0
+        }
+    ],
+    "walls": [
+        {
+            "currentWallId": 3,
+            "endPos": [
+                936.0,
+                1128.0
+            ],
+            "floor": 0,
+            "id": 0,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                920.0,
+                808.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 3,
+            "endPos": [
+                1432.0,
+                1176.0
+            ],
+            "floor": 0,
+            "id": 1,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                936.0,
+                1160.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 3,
+            "endPos": [
+                1480.0,
+                760.0
+            ],
+            "floor": 0,
+            "id": 2,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1448.0,
+                1176.0
+            ],
+            "textureName": "tile1",
+            "wallHeight": 200.0
+        }
+    ],
+    "worldObjectCutscenes": [],
+    "worldObjects": []
+}

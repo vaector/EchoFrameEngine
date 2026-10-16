@@ -48,27 +48,8 @@ void ImguiWindow::UpdateImguiEditor()
 		ImGui::OpenPopup("Load?");
 	LoadPopup(fileName);
 	
-	ImGui::NewLine();
+	ImGui::SeparatorText("PROPERTIES");
 
-	//Drop Down box for choosing textures
-	static std::string selectedT = "tile1";
-	int count = 0;
-	ImGui::Text(selectedT.c_str());
-	ImGui::NewLine();
-	for (auto& [key, tex] : Shared::textures)
-	{
-		if (ImGui::ImageButton(
-			key.c_str(),
-			(ImTextureID)(intptr_t)tex.id,
-			ImVec2(64, 64)))
-		{
-			selectedT = key;
-			Shared::selectedTextureName = &selectedT;
-		}
-
-		if (++count % 4 != 0)
-			ImGui::SameLine();
-	}
 
 	//Checkbox for sectorMode
 	ImGui::NewLine();
@@ -94,6 +75,30 @@ void ImguiWindow::UpdateImguiEditor()
 
 	//Door Mode
 	ImGui::Checkbox("Door Mode", &Shared::doorMode);
+
+	ImGui::SeparatorText("TEXTURES");
+
+	//Drop Down box for choosing textures
+	static std::string selectedT = "tile1";
+	int count = 0;
+	ImGui::Text(selectedT.c_str());
+	ImGui::NewLine();
+	for (auto& [key, tex] : Shared::textures)
+	{
+		if (ImGui::ImageButton(
+			key.c_str(),
+			(ImTextureID)(intptr_t)tex.id,
+			ImVec2(64, 64)))
+		{
+			selectedT = key;
+			Shared::selectedTextureName = &selectedT;
+		}
+
+		if (++count % 4 != 0)
+			ImGui::SameLine();
+	}
+
+	
 
 	ImGui::End();
 
@@ -430,20 +435,17 @@ void ImguiWindow::UpdateImguiEditor()
 		static const char* lightTypeNames[] = { "Point", "Spot", "Directional" };
 
 		ImGui::SeparatorText("Default Light");
-		ImGui::Checkbox("Default Directional Light", &Shared::DefaultDirectionalLightEnabled);
+		ImGui::Checkbox("Default Directional Light", &LightSystem::defaultLight.enabled);
 
-		if (Shared::DefaultDirectionalLightEnabled) {
+		if (LightSystem::defaultLight.enabled) {
 
 			ImGui::Text("Default Light Properties");
 			ImGui::NewLine();
 
 			ImGui::Text("Sun Position");
-			ImGui::NewLine();
 
 			ImGui::SliderFloat("Pos_X", &LightSystem::defaultLight.position.x, minPos, maxPos);
-			ImGui::SameLine();
 			ImGui::SliderFloat("Pos_Y", &LightSystem::defaultLight.position.y, minPos, maxPos);
-			ImGui::SameLine();
 			ImGui::SliderFloat("Pos_Z", &LightSystem::defaultLight.position.z, minPos, maxPos);
 
 			ImGui::NewLine();
@@ -501,12 +503,9 @@ void ImguiWindow::UpdateImguiEditor()
 
 			if (LightSystem::selectedLight->type == DIRECTIONAL_LIGHT) {
 				ImGui::Text("Sun Position");
-				ImGui::NewLine();
 
 				ImGui::SliderFloat("Pos_X", &LightSystem::selectedLight->position.x, minPos, maxPos);
-				ImGui::SameLine();
 				ImGui::SliderFloat("Pos_Y", &LightSystem::selectedLight->position.y, minPos, maxPos);
-				ImGui::SameLine();
 				ImGui::SliderFloat("Pos_Z", &LightSystem::selectedLight->position.z, minPos, maxPos);
 			}
 

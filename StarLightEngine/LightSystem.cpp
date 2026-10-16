@@ -160,7 +160,7 @@ void LightSystem::UpdateShaderValues(LightShader& lightShader)
 	}
 
 	//Default Directional Light
-	if (Shared::DefaultDirectionalLightEnabled) {
+	if (LightSystem::defaultLight.enabled) {
 
 		auto& light = LightSystem::defaultLight;
 

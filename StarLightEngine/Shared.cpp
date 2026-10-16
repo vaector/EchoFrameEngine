@@ -55,7 +55,6 @@ namespace Shared {
 	//Lights and shaders
 	std::vector<Light> lights;
 	std::unordered_map<std::string, Shader> shaders;
-	bool DefaultDirectionalLightEnabled = true;
 
 	//Decals
 	std::vector<Decal> decals;

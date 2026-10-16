@@ -677,10 +677,9 @@ void SaveSystem::LoadPlayer(json& j)
 void SaveSystem::SaveLights(json& j)
 {
 	json lights = json::array();
+	json defaultLight = json::object();
 
 	//Default Light
-	json defaultLight;
-
 	defaultLight["position"] = { LightSystem::defaultLight.position.x, LightSystem::defaultLight.position.y, LightSystem::defaultLight.position.z };
 	defaultLight["dir"] = { LightSystem::defaultLight.dir.x, LightSystem::defaultLight.dir.y, LightSystem::defaultLight.dir.z };
 	defaultLight["color"] = { LightSystem::defaultLight.color.r, LightSystem::defaultLight.color.g, LightSystem::defaultLight.color.b, LightSystem::defaultLight.color.a };
@@ -690,7 +689,7 @@ void SaveSystem::SaveLights(json& j)
 	defaultLight["range"] = LightSystem::defaultLight.range;
 	defaultLight["spotAngle"] = LightSystem::defaultLight.spotAngle;
 
-	lights.push_back(defaultLight);
+	j["defaultLight"] = defaultLight;
 
 	for (const auto& light : Shared::lights) {
 		json lightJson;
@@ -711,26 +710,25 @@ void SaveSystem::SaveLights(json& j)
 
 void SaveSystem::LoadLights(const json& j)
 {
-	if (!j.contains("lights"))
-		return;
-
 	Shared::lights.clear();
 
-	//Default Light
-	auto& defaultLight = j["lights"][0];
+	if (j.contains("defaultLight"))
+	{
+		auto& d = j["defaultLight"];
+		Light& light = LightSystem::defaultLight;
 
-	Light light;
-	light.position = { defaultLight["position"][0].get<float>(), defaultLight["position"][1].get<float>(),defaultLight["position"][2].get<float>() };
-	light.dir = { defaultLight["dir"][0].get<float>(), defaultLight["dir"][1].get<float>(),defaultLight["dir"][2].get<float>() };
-	light.color = { defaultLight["color"][0].get<unsigned char>(), defaultLight["color"][1].get<unsigned char>(),defaultLight["color"][2].get<unsigned char>(),defaultLight["color"][3].get<unsigned char>() };
-	light.type = static_cast<LIGHT_TYPE>(defaultLight["type"].get<int>());
-	light.intensity = defaultLight["intensity"].get<float>();
-	light.range = defaultLight["range"].get<float>();
-	light.spotAngle = defaultLight["spotAngle"].get<float>();
-	light.enabled = defaultLight["enabled"].get<bool>();
+		light.position = { d["position"][0].get<float>(), d["position"][1].get<float>(), d["position"][2].get<float>() };
+		light.dir = { d["dir"][0].get<float>(), d["dir"][1].get<float>(), d["dir"][2].get<float>() };
+		light.color = { d["color"][0].get<unsigned char>(), d["color"][1].get<unsigned char>(), d["color"][2].get<unsigned char>(), d["color"][3].get<unsigned char>() };
+		light.type = static_cast<LIGHT_TYPE>(d["type"].get<int>());
+		light.intensity = d["intensity"].get<float>();
+		light.range = d["range"].get<float>();
+		light.spotAngle = d["spotAngle"].get<float>();
+		light.enabled = d["enabled"].get<bool>();
+	}
 
-	Shared::lights.push_back(light);
-
+	if (!j.contains("lights"))
+		return;
 
 	for(auto& l : j["lights"])
 	{
