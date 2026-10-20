@@ -41,6 +41,12 @@ namespace Shared {
 	std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 	WorldObject* selectedWorldObject = nullptr;
+	
+	//Brush
+	bool brushMode = false;
+	float brushRadius = 100.0f;
+	int brushAmount = 10;
+
 	Cutscene cutscenes;
 	std::string trackName;
 	bool isCutscenePlaying = false;

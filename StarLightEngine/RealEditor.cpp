@@ -759,86 +759,185 @@ void RealEditor::CreateWorldObject()
 	if (Shared::npcMode || !camMode || !Shared::selectedModelName) return;
 
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		WorldObject worldObject;
 
-		//ID
-		worldObject.id = WorldObject::currentId;
-		WorldObject::currentId++;
+		//Create Many World Objects with Brush Mode
+		if (Shared::brushMode) {
 
-		//Is Mesh Instance
-		worldObject.isMeshInstance = Shared::isMeshInstance;
+			for (int i = 0; i < Shared::brushAmount; i++) {
+				WorldObject worldObject;
+
+				//ID
+				worldObject.id = WorldObject::currentId;
+				WorldObject::currentId++;
+
+				//Is Mesh Instance
+				worldObject.isMeshInstance = Shared::isMeshInstance;
 
 
-		//Name
-		worldObject.modelName = *Shared::selectedModelName;
+				//Name
+				worldObject.modelName = *Shared::selectedModelName;
 
-		//Scale
-		worldObject.scale = Shared::entityScale;
+				//Scale
+				worldObject.scale = Shared::entityScale;
 
-		//Position
-		Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
-		bool floorHit = false;
-		Vector3 pointHit = {0};
+				//Position
+				Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+				bool floorHit = false;
+				Vector3 pointHit = { 0 };
 
-		for (auto& sector : Shared::sectors) {
-			for (int i = 0; i+2 < sector.indices.size(); i += 3) {
-				// Process each index in the sector
-				int p1 = sector.indices[i];
-				int p2 = sector.indices[i + 1];
-				int p3 = sector.indices[i + 2];
+				for (auto& sector : Shared::sectors) {
+					for (int i = 0; i + 2 < sector.indices.size(); i += 3) {
+						// Process each index in the sector
+						int p1 = sector.indices[i];
+						int p2 = sector.indices[i + 1];
+						int p3 = sector.indices[i + 2];
 
-				RayCollision hit = GetRayCollisionTriangle(Shared::freeRay,
-					{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p1].y },
-					{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p2].y },
-					{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p3].y });
+						RayCollision hit = GetRayCollisionTriangle(Shared::freeRay,
+							{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p1].y },
+							{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p2].y },
+							{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p3].y });
 
-				if (hit.hit) {
-					floorHit = true;
-					pointHit = hit.point;
-					break;
+						if (hit.hit) {
+							floorHit = true;
+							pointHit = hit.point;
+							break;
+						}
+					}
+
+					if (floorHit) break;
+				}
+
+				Vector3 spawnPos;
+				if (!floorHit)
+					spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+				else {
+					spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+					spawnPos.x = pointHit.x;
+					spawnPos.z = pointHit.z;
+				}
+
+				// Random scatter around mouse position (XZ plane)
+				float angle = GetRandomValue(0, 359) * DEG2RAD;
+				float distance = sqrtf(
+					GetRandomValue(0, 10000) / 10000.0f
+				) * Shared::brushRadius;
+
+				spawnPos.x += cosf(angle) * distance;
+				spawnPos.z += sinf(angle) * distance;
+
+				//Position
+				if (selectedFloor)
+					worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::globalWallHeight, spawnPos.z };
+				else
+					worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
+
+
+				//CollisionType
+				worldObject.collisionType = Shared::selectedCollisionType;
+
+				//Collision Box
+				if (Shared::selectedCollisionType == CollisionType::MESH) {
+
+					Model& model = Shared::models[worldObject.modelName];
+
+					for (int i = 0; i < model.meshCount; i++) {
+						BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
+						worldObject.originalBoxes.push_back(box);//Local Coordinates
+						worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+					}
+				}
+				else {
+					BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
+					worldObject.originalBoxes.push_back(box);
+					worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
+				}
+
+				Shared::worldObjects[worldObject.id] = worldObject;
+			}
+
+		}
+		else {
+			WorldObject worldObject;
+
+			//ID
+			worldObject.id = WorldObject::currentId;
+			WorldObject::currentId++;
+
+			//Is Mesh Instance
+			worldObject.isMeshInstance = Shared::isMeshInstance;
+
+
+			//Name
+			worldObject.modelName = *Shared::selectedModelName;
+
+			//Scale
+			worldObject.scale = Shared::entityScale;
+
+			//Position
+			Vector3 direction = Vector3Normalize(Vector3Subtract(Shared::free.cam.target, Shared::free.cam.position));
+			bool floorHit = false;
+			Vector3 pointHit = { 0 };
+
+			for (auto& sector : Shared::sectors) {
+				for (int i = 0; i + 2 < sector.indices.size(); i += 3) {
+					// Process each index in the sector
+					int p1 = sector.indices[i];
+					int p2 = sector.indices[i + 1];
+					int p3 = sector.indices[i + 2];
+
+					RayCollision hit = GetRayCollisionTriangle(Shared::freeRay,
+						{ sector.floorPoints[p1].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p1].y },
+						{ sector.floorPoints[p2].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p2].y },
+						{ sector.floorPoints[p3].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[p3].y });
+
+					if (hit.hit) {
+						floorHit = true;
+						pointHit = hit.point;
+						break;
+					}
+				}
+
+				if (floorHit) break;
+			}
+
+			Vector3 spawnPos;
+			if (!floorHit)
+				spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+			else {
+				spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
+				spawnPos.x = pointHit.x;
+				spawnPos.z = pointHit.z;
+			}
+
+			//Position
+			if (selectedFloor)
+				worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::globalWallHeight, spawnPos.z };
+			else
+				worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
+
+
+			//CollisionType
+			worldObject.collisionType = Shared::selectedCollisionType;
+
+			//Collision Box
+			if (Shared::selectedCollisionType == CollisionType::MESH) {
+
+				Model& model = Shared::models[worldObject.modelName];
+
+				for (int i = 0; i < model.meshCount; i++) {
+					BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
+					worldObject.originalBoxes.push_back(box);//Local Coordinates
+					worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
 				}
 			}
-
-			if (floorHit) break;
-		}
-
-		Vector3 spawnPos;
-		if (!floorHit)
-			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
-		else {
-			spawnPos = Vector3Add(Shared::free.cam.position, Vector3Scale(direction, 50.0f)); // Spawn 5 units in front of the camera
-			spawnPos.x = pointHit.x;
-			spawnPos.z = pointHit.z;
-		}
-
-		//Position
-		if (selectedFloor)
-			worldObject.position = { spawnPos.x, (float)selectedFloor->floor * Shared::globalWallHeight, spawnPos.z };
-		else
-			worldObject.position = { spawnPos.x, ceilf(spawnPos.y), spawnPos.z };
-
-
-		//CollisionType
-		worldObject.collisionType = Shared::selectedCollisionType;
-
-		//Collision Box
-		if (Shared::selectedCollisionType == CollisionType::MESH) {
-
-			Model& model = Shared::models[worldObject.modelName];
-
-			for (int i = 0; i < model.meshCount; i++) {
-				BoundingBox box = GetMeshBoundingBox(model.meshes[i]);
-				worldObject.originalBoxes.push_back(box);//Local Coordinates
+			else {
+				BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
+				worldObject.originalBoxes.push_back(box);
 				worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
 			}
-		}
-		else {
-			BoundingBox box = GetModelBoundingBox(Shared::models[worldObject.modelName]);
-			worldObject.originalBoxes.push_back(box);
-			worldObject.collisionBoxes.push_back(Shared::GetUpdatedBoundingBox(box, worldObject.position, worldObject.scale, worldObject.rotationAxis, worldObject.rotationAngle));
-		}
 
-		Shared::worldObjects[worldObject.id] = worldObject;
+			Shared::worldObjects[worldObject.id] = worldObject;
+		}
 	}
 
 }
@@ -848,6 +947,7 @@ void RealEditor::UpdateWorldObject()
 	if (camMode == false || Shared::isCutscenePlaying) return;//Player Cam || Cutscene Playing
 
 
+	Vector3 mouseWorldPos = { 0 };
 	float dist = -1;
 	float closestDist = INFINITY;
 	bool isHit = false;
@@ -866,6 +966,7 @@ void RealEditor::UpdateWorldObject()
 			if (hit.hit) {
 				isHit = true;
 				dist = hit.distance;
+				mouseWorldPos = hit.point;
 				break;
 			}
 		}
@@ -974,6 +1075,49 @@ void RealEditor::UpdateWorldObject()
 			Shared::selectedWorldObject->collisionBoxes[i] = Shared::GetUpdatedBoundingBox(Shared::selectedWorldObject->originalBoxes[i], Shared::selectedWorldObject->position, Shared::selectedWorldObject->scale, Shared::selectedWorldObject->rotationAxis, Shared::selectedWorldObject->rotationAngle);
 
 	}
+
+
+	// Delete world objects using brush mode
+	if (Shared::brushMode && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+	{
+		auto it = Shared::worldObjects.begin();
+
+		while (it != Shared::worldObjects.end())
+		{
+			WorldObject& worldObject = it->second;
+
+			// Check distance on the XZ plane
+			float dx = worldObject.position.x - mouseWorldPos.x;
+			float dz = worldObject.position.z - mouseWorldPos.z;
+
+			float distanceSquared = dx * dx + dz * dz;
+			float radiusSquared = Shared::brushRadius * Shared::brushRadius;
+
+			if (distanceSquared <= radiusSquared)
+			{
+				int id = worldObject.id;
+
+				// Remove its cutscene track
+				Shared::cutscenes.worldObjectCutscene.erase(id);
+
+				// Clear selection if this object is selected
+				if (Shared::selectedWorldObject == &worldObject)
+				{
+					Shared::selectedWorldObject = nullptr;
+					freeCamToggle = true;
+				}
+
+				// Erase safely while iterating
+				it = Shared::worldObjects.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+
+
 
 	//Deselect
 	if (IsKeyReleased(KEY_C)) {

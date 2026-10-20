@@ -161,6 +161,13 @@ void ImguiWindow::UpdateImguiEditor()
 			ImGui::InputFloat3("##Rotation", &Shared::selectedNpc->rotationAxis.x);
 		}
 
+		ImGui::SeparatorText("BRUSH MODE");
+		ImGui::Checkbox("Brush Mode", &Shared::brushMode);
+		if (Shared::brushMode) {
+			ImGui::SliderFloat("Brush Radius", &Shared::brushRadius, 10.0f, 500.0f);
+			ImGui::SliderInt("Brush Amount", &Shared::brushAmount, 1, 100);
+		}
+
 		//Collision Type
 		static bool collisionTypePopupOpen = false;
 		if(collisionTypePopupOpen)

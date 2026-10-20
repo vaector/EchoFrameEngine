@@ -50,6 +50,12 @@ namespace Shared {
 	extern std::unordered_map<std::string, std::vector< std::string>> modelAnimationNames;
 
 	extern WorldObject* selectedWorldObject;
+
+	//Brush
+	extern bool brushMode;
+	extern float brushRadius;
+	extern int brushAmount;
+
 	extern Cutscene cutscenes;
 	extern std::string trackName;
 	extern bool isCutscenePlaying;
