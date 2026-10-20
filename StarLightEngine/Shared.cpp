@@ -7,7 +7,7 @@ namespace Shared {
 	bool editorMode = true;
 	bool popupOpen = false;
 	std::vector<Wall*> walls;
-	int wallHeight = 200;
+	int globalWallHeight = 200;
 	std::unordered_map<std::string, Texture2D> textures;
 	std::unordered_map<std::string, Model> models;
 	std::string* selectedTextureName = &tile1;

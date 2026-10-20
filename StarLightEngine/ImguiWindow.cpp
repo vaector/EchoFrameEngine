@@ -48,6 +48,8 @@ void ImguiWindow::UpdateImguiEditor()
 		ImGui::OpenPopup("Load?");
 	LoadPopup(fileName);
 	
+	ImGui::SeparatorText("Gloabal Wall Height");
+	ImGui::InputInt("Wall Height", &Shared::globalWallHeight);
 	ImGui::SeparatorText("PROPERTIES");
 
 
@@ -111,7 +113,7 @@ void ImguiWindow::UpdateImguiEditor()
 	if (!Shared::editorMode) {
 
 		//------3D Models Window------
-		ImGui::Begin("3D Models", nullptr, ImGuiChildFlags_AlwaysAutoResize);
+		ImGui::Begin("3D Editor", nullptr, ImGuiChildFlags_AlwaysAutoResize);
 		ImGui::SetWindowPos({ (float)GetScreenWidth() - 600,0 });
 
 		//---ON CREATE ENTITY PROPERTIES
@@ -437,6 +439,7 @@ void ImguiWindow::UpdateImguiEditor()
 		ImGui::SeparatorText("Default Light");
 		ImGui::Checkbox("Default Directional Light", &LightSystem::defaultLight.enabled);
 
+		ImGui::PushID("DefaultLight");
 		if (LightSystem::defaultLight.enabled) {
 
 			ImGui::Text("Default Light Properties");
@@ -473,6 +476,7 @@ void ImguiWindow::UpdateImguiEditor()
 
 
 		}
+		ImGui::PopID();
 
 		ImGui::NewLine();
 
@@ -493,6 +497,8 @@ void ImguiWindow::UpdateImguiEditor()
 
 		ImGui::NewLine();
 
+		ImGui::SeparatorText("SELECTED LIGHT");
+		ImGui::PushID("SelectedLight");
 		//Edit the details of the selected light
 		if (LightSystem::selectedLight != nullptr) {
 
@@ -538,10 +544,21 @@ void ImguiWindow::UpdateImguiEditor()
 
 			
 		}
-
+		ImGui::PopID();
 		
 		//Decal Settings
 		ImGui::SeparatorText("DECALS");
+		if (Shared::selectedDecal) {
+			ImGui::Text("Selected Decal Properties");
+			ImGui::NewLine();
+			ImGui::Text(("Texture Name: " + Shared::selectedDecal->textureName).c_str());
+			ImGui::NewLine();
+			ImGui::Text("Position");
+			ImGui::InputFloat3("##Position", &Shared::selectedDecal->pos.x);
+			ImGui::NewLine();
+			ImGui::Text("Scale");
+			ImGui::InputFloat("##Scale", &Shared::selectedDecal->scale);
+		}
 
 		//Dialouges
 		ImGui::SeparatorText("DIALOGUES");

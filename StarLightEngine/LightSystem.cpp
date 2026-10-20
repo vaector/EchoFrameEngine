@@ -67,21 +67,37 @@ void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 
 	Ray ray = GetScreenToWorldRay({ (float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2 }, Shared::free.cam);
 	
+	float closestDistance = INFINITY;
+	Light* closestLight = nullptr;
 	//Select
 	for (int i = 0; i < Shared::lights.size(); i++) {
 		Light& light = Shared::lights[i];
 		RayCollision hit = GetRayCollisionSphere(ray, light.position, 5);
 
-		if (hit.hit) {
-			if (IsKeyPressed(KEY_C)) {
-				selectedLight = &light;
-				freeCamToggle = false;
-				break;
-			}
-			if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-				Shared::lights.erase(Shared::lights.begin() + i);
-				LightSystem::selectedLight = nullptr;
-			}
+		//fIND THE CLOSEST lIGHT
+		if (hit.hit && hit.distance < closestDistance) {
+			closestDistance = hit.distance;
+			closestLight = &light;
+		}
+		
+	}
+
+	//If closest Light is found, check for selection or deletion
+	if (closestLight) {
+		if (IsKeyPressed(KEY_C)) {
+			selectedLight = closestLight;
+			freeCamToggle = false;
+		}
+
+		if (closestLight && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+
+			//Index found using pointer subtraction
+			auto index = closestLight - Shared::lights.data();
+
+			selectedLight = nullptr;
+			freeCamToggle = true;
+
+			Shared::lights.erase(Shared::lights.begin() + index);
 		}
 	}
 
@@ -129,7 +145,7 @@ void LightSystem::UpdateShaderValues(LightShader& lightShader)
 
 	for (const Light& light : Shared::lights)
 	{
-		if (!light.enabled || count >= MAX_LIGHTS - 1)//Because of the default
+		if (!light.enabled || count >= MAX_LIGHTS)//Because of the default
 			continue;
 
 		lightTypes[count] = static_cast<int>(light.type);
@@ -170,9 +186,7 @@ void LightSystem::UpdateShaderValues(LightShader& lightShader)
 		lightPositions[count * 3 + 1] = light.position.y;
 		lightPositions[count * 3 + 2] = light.position.z;
 
-		Vector3 dirToUse = light.dir;
-		if (light.type == DIRECTIONAL_LIGHT)
-			dirToUse = Vector3Scale(Vector3Normalize(light.position), -1.0f);
+		Vector3 dirToUse = Vector3Scale(Vector3Normalize(light.position), -1.0f);
 
 		lightDirections[count * 3 + 0] = dirToUse.x;
 		lightDirections[count * 3 + 1] = dirToUse.y;

@@ -81,6 +81,11 @@ void SaveSystem::LoadGame(const std::string& filename)
 void SaveSystem::SaveWalls(json& j)
 {
 	j["walls"] = json::array();
+	json GlobalWallHeight = json::object();
+
+	// Save the global wall height
+	GlobalWallHeight["value"] = Shared::globalWallHeight;
+	j["GlobalWallHeight"] = GlobalWallHeight;
 
 	for(auto& wall: Shared::walls) {
 		json w;
@@ -102,6 +107,10 @@ void SaveSystem::SaveWalls(json& j)
 void SaveSystem::LoadWalls(const json& j)
 {
 	Shared::walls.clear();
+
+	// Load the global wall height
+	if(j.contains("GlobalWallHeight"))
+		Shared::globalWallHeight = j["GlobalWallHeight"]["value"].get<float>();
 
 	if (!j.contains("walls"))
 		return;

@@ -136,7 +136,7 @@ void TileEditor::UpdateWall()
 	else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && placeHolderWall.startPos != placeHolderWall.endPos) {
 		Vector2 currentTile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };;
 		pendingWall.endPos = currentTile;
-		pendingWall.wallHeight = Shared::wallHeight;
+		pendingWall.wallHeight = Shared::globalWallHeight;
 		pendingWall.floor = Shared::floor;
 		pendingWall.textureName = *Shared::selectedTextureName;
 		pendingWall.inSector = !Shared::sectorMode;
@@ -302,7 +302,7 @@ void TileEditor::UpdateRamp()
 
 		pendingRamp.endPos = tile;
 		pendingRamp.floor = Shared::floor;
-		pendingRamp.rampHeight = Shared::wallHeight;
+		pendingRamp.rampHeight = Shared::globalWallHeight;
 		pendingRamp.layer = Shared::layer;
 		pendingRamp.textureName = *Shared::selectedTextureName;
 		
@@ -442,7 +442,7 @@ void TileEditor::UpdatePlayerPos()
 		WallMode = false;
 	}
 	if (selected) {
-		Shared::playerPos = { mouse.x, (float)Shared::floor * Shared::wallHeight, mouse.y };
+		Shared::playerPos = { mouse.x, (float)Shared::floor * Shared::globalWallHeight, mouse.y };
 	}
 	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
 		selected = false;

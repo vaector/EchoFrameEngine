@@ -100,6 +100,10 @@ int main() {
             EndMode2D();
         }
         else if (!Shared::editorMode) {
+
+			//How far the player can see in the 3D world. (0.01 is the near plane, 10000.0 is the far plane)
+            rlSetClipPlanes(0.01, 10000.0);
+
             //Real(3d Stuff)
             if(freeCamMode)
                 BeginMode3D(Shared::free.cam);
