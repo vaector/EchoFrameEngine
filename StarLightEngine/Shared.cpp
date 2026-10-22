@@ -4,7 +4,7 @@
 std::string tile1 = "tile1";//Default texture name
 
 namespace Shared {
-	bool editorMode = true;
+	bool editorMode = true;//EditorMode = 2D Tile Map Editor
 	bool popupOpen = false;
 	std::vector<Wall*> walls;
 	int globalWallHeight = 200;

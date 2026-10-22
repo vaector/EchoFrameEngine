@@ -11,6 +11,7 @@ uniform vec4 baseColor;
 
 // Keep these values in sync with the C++ LIGHT_TYPE enum:
 // POINT_LIGHT = 0, SPOT_LIGHT = 1, DIRECTIONAL_LIGHT = 2.
+// Directional lights behave like sunlight: no position-based attenuation and no range cutoff.
 uniform int lightCount;
 uniform int lightTypes[MAX_LIGHTS];
 uniform vec3 lightPositions[MAX_LIGHTS];
@@ -74,8 +75,12 @@ void main()
             lightContribution = lightColors[i].rgb * diffuse
                               * lightIntensities[i] * attenuation * spotFactor;
         }
-        else if (lightTypes[i] == 2) // DIRECTIONAL_LIGHT
+        else if (lightTypes[i] == 2) // DIRECTIONAL_LIGHT (sun)
         {
+            // lightDirections[i] is the direction the rays travel.
+            // The opposite vector points from the surface toward the sun.
+            // Deliberately do not use lightPositions[i] or lightRanges[i] here:
+            // sunlight illuminates the whole scene without distance attenuation.
             vec3 directionToLight = normalize(-lightDirections[i]);
             float diffuse = max(dot(normal, directionToLight), 0.0);
 

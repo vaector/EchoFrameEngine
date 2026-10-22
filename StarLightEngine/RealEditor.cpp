@@ -59,6 +59,13 @@ void RealEditor::Update(Camera3D* cam)
 
 	}
 
+	// Prevent ImGui from interacting with the mouse
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+
+	if (!cursorLocked)
+		io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+
 	if(!cursorLocked || Shared::onImguiWindow) return;
 
 	//Update Camera
