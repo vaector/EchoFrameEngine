@@ -47,6 +47,11 @@ void ImguiWindow::UpdateImguiEditor()
 	if (ImGui::Button("Load"))
 		ImGui::OpenPopup("Load?");
 	LoadPopup(fileName);
+
+	ImGui::SeparatorText("DELETE WORLD");
+	if (ImGui::Button("Delete"))
+		ImGui::OpenPopup("Delete?");
+	DeletePopup();
 	
 	ImGui::SeparatorText("Gloabal Wall Height");
 	ImGui::InputInt("Wall Height", &Shared::globalWallHeight);
@@ -119,7 +124,8 @@ void ImguiWindow::UpdateImguiEditor()
 		//---ON CREATE ENTITY PROPERTIES
 
 		ImGui::SeparatorText("On Create Entity Properties");
-
+		ImGui::Text("Scale");
+		ImGui::NewLine();
 		ImGui::InputFloat("X##", &Shared::entityScale.x);
 		ImGui::InputFloat("Y##", &Shared::entityScale.y);
 		ImGui::InputFloat("Z##", &Shared::entityScale.z);
@@ -437,8 +443,8 @@ void ImguiWindow::UpdateImguiEditor()
 		const float maxPos = 6000.0f;
 		const  float minIntensity = 0.0f;
 		const float maxIntensity = 500.0f;
-		const float minRange = 0.0f;
-		const float maxRange = 3000.0f;
+		const float minRange = 10.0f;
+		const float maxRange = 10000.0f;
 
 		static int selectedLightType = 0;//Point Light by default
 		static const char* lightTypeNames[] = { "Point", "Spot", "Directional" };
@@ -733,6 +739,49 @@ void ImguiWindow::SavePopup(std::string& fileName)
 		if (ImGui::Button("Yes"))
 		{
 			SaveSystem::SaveGame(fileName + ".json");
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("No"))
+			ImGui::CloseCurrentPopup();
+
+		ImGui::EndPopup();
+	}
+}
+
+void ImguiWindow::DeletePopup()
+{
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
+	if (ImGui::BeginPopupModal("Delete?", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+	{
+		ImGui::Text("Are you sure you want to DELETE the WORLD?");
+
+		if (ImGui::Button("Yes"))
+		{
+			Shared::walls.clear();
+			Shared::sectors.clear();
+			Shared::decals.clear();
+			Shared::doorSwitches.clear();
+			Shared::lights.clear();
+			Shared::ramps.clear();
+			Shared::worldObjects.clear();
+			Shared::npcs.clear();
+			Shared::boxTriggers.clear();
+
+			Shared::selectedBoxTrigger = nullptr;
+			Shared::selectedDecal = nullptr;
+			Shared::selectedNpc = nullptr;
+			Shared::selectedWorldObject = nullptr;
+
+			LightSystem::selectedLight = nullptr;
+
 			ImGui::CloseCurrentPopup();
 		}
 
