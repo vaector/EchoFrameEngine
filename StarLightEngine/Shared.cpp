@@ -47,6 +47,8 @@ namespace Shared {
 	float brushRadius = 100.0f;
 	int brushAmount = 10;
 
+	float maxRenderDistance = 2500.0f;
+
 	Cutscene cutscenes;
 	std::string trackName;
 	bool isCutscenePlaying = false;

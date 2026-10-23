@@ -56,6 +56,8 @@ namespace Shared {
 	extern float brushRadius;
 	extern int brushAmount;
 
+	extern float maxRenderDistance;
+
 	extern Cutscene cutscenes;
 	extern std::string trackName;
 	extern bool isCutscenePlaying;

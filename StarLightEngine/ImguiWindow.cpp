@@ -181,6 +181,8 @@ void ImguiWindow::UpdateImguiEditor()
 
 			ImGui::NewLine();
 			ImGui::Checkbox("Is Mesh Instance", &Shared::isMeshInstance);
+			ImGui::NewLine();
+			ImGui::InputFloat("Max WorldObject Render Distance", &Shared::maxRenderDistance);
 
 			if (ImGui::CollapsingHeader("SEARCH/APPLY_3D_MODEL")) {
 				//Search for models

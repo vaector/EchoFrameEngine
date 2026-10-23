@@ -1136,52 +1136,82 @@ void RealEditor::UpdateWorldObject()
 
 void RealEditor::DrawWorldObject(Shader& activeShader)
 {
-	std::unordered_map<std::string, std::vector<Matrix>> batches;
+	float maxRenderDistanceSqr = Shared::maxRenderDistance * Shared::maxRenderDistance;
+	const Camera3D& cam = Shared::free.cam;
+	Vector3 cameraForward = Vector3Normalize(Vector3Subtract(cam.target, cam.position));
 	std::vector<WorldObject*> individualObjects;
 	individualObjects.reserve(Shared::worldObjects.size());
 
+	bool rebuildBatches = false;
+
 	for (auto& [id, worldObject] : Shared::worldObjects)
 	{
-		//Add the world object to the appropriate batch or individual list based on whether it is a mesh instance
 		if (worldObject.isMeshInstance)
 		{
-			Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(worldObject.scale.x, worldObject.scale.y, worldObject.scale.z), MatrixRotate(worldObject.rotationAxis, worldObject.rotationAngle * DEG2RAD)), MatrixTranslate(worldObject.position.x, worldObject.position.y, worldObject.position.z));
-			batches[worldObject.modelName].push_back(transform);
+			auto& batch = WorldObject::batches[worldObject.modelName];
+			if (batch.dirty) rebuildBatches = true;
 		}
-		else 
-			individualObjects.push_back(&worldObject);
-
+		else individualObjects.push_back(&worldObject);
 	}
 
-	//Render individual objects
+	if (rebuildBatches)
+	{
+		for (auto& [modelName, batch] : WorldObject::batches) batch.transforms.clear();
+
+		for (auto& [id, worldObject] : Shared::worldObjects)
+		{
+			if (!worldObject.isMeshInstance) continue;
+			Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(worldObject.scale.x, worldObject.scale.y, worldObject.scale.z), MatrixRotate(worldObject.rotationAxis, worldObject.rotationAngle * DEG2RAD)), MatrixTranslate(worldObject.position.x, worldObject.position.y, worldObject.position.z));
+			WorldObject::batches[worldObject.modelName].transforms.push_back(transform);
+		}
+
+		for (auto& [modelName, batch] : WorldObject::batches) batch.dirty = false;
+	}
+
+	// Render individual objects.
 	for (WorldObject* worldObject : individualObjects)
 	{
+		Vector3 toObject = Vector3Subtract(worldObject->position, cam.position);
+		if (Vector3LengthSqr(toObject) > maxRenderDistanceSqr || Vector3DotProduct(toObject, cameraForward) < 0.0f) continue;
+
 		Model& model = Shared::models[worldObject->modelName];
-		for (int i = 0; i < model.materialCount; i++)
-			model.materials[i].shader = activeShader;
+		for (int i = 0; i < model.materialCount; i++) model.materials[i].shader = activeShader;
 		DrawModelEx(model, worldObject->position, worldObject->rotationAxis, worldObject->rotationAngle, worldObject->scale, WHITE);
 	}
 
-	//Render batched objects using instancing
-	if (!batches.empty())
+	// Filter visible mesh instances.
+	if (!WorldObject::batches.empty())
 	{
-		// Enable instancing in the shader.
+		std::unordered_map<std::string, std::vector<Matrix>> visibleBatches;
+
+		for (auto& [id, worldObject] : Shared::worldObjects)
+		{
+			if (!worldObject.isMeshInstance) continue;
+
+			Vector3 toObject = Vector3Subtract(worldObject.position, cam.position);
+			if (Vector3LengthSqr(toObject) > maxRenderDistanceSqr || Vector3DotProduct(toObject, cameraForward) < 0.0f) continue;
+
+			Matrix transform = MatrixMultiply(MatrixMultiply(MatrixScale(worldObject.scale.x, worldObject.scale.y, worldObject.scale.z), MatrixRotate(worldObject.rotationAxis, worldObject.rotationAngle * DEG2RAD)), MatrixTranslate(worldObject.position.x, worldObject.position.y, worldObject.position.z));
+			visibleBatches[worldObject.modelName].push_back(transform);
+		}
+
 		int useInstancing = 1;
 		SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
 		activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(activeShader, "instanceTransform");
 
-		for (auto& [modelName, transforms] : batches)
+		for (auto& [modelName, transforms] : visibleBatches)
 		{
+			if (transforms.empty()) continue;
+
 			Model& model = Shared::models[modelName];
 			for (int i = 0; i < model.materialCount; i++) model.materials[i].shader = activeShader;
 			for (int meshIndex = 0; meshIndex < model.meshCount; meshIndex++)
 				DrawMeshInstanced(model.meshes[meshIndex], model.materials[model.meshMaterial[meshIndex]], transforms.data(), static_cast<int>(transforms.size()));
 		}
 
-		// Disable instancing in the shader.
 		useInstancing = 0;
 		SetShaderValue(activeShader, GetShaderLocation(activeShader, "useInstancing"), &useInstancing, SHADER_UNIFORM_INT);
-		activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocation(activeShader, "matModel");
+		activeShader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(activeShader, "matModel");
 	}
 }
 
