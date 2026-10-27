@@ -201,17 +201,19 @@ void TileEditor::UpdateSector()
 	if (IsKeyPressed(KEY_C)) {
 		std::vector<Vector2> currentSector;
 		bool first = false;
-		for (auto& wall : Shared::walls) {
-			if (wall->floor != Shared::floor) continue;
 
-			if (!wall->inSector) {
-				if (first == false) {
-					currentSector.push_back(wall->startPos);
-					first = true;
-				}
-				currentSector.push_back(wall->endPos);
-				wall->inSector = true;
+		for (auto& wall : Shared::walls) {
+			if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
+			if (wall->inSector) continue;
+
+			//The first wall's startPos is added to the sector, but for the rest of the walls only the endPos is added to avoid duplicate points.
+			if (first == false) {
+				currentSector.push_back(wall->startPos);
+				first = true;
 			}
+			if(wall->endPos != currentSector.at(0))
+				currentSector.push_back(wall->endPos);
+			wall->inSector = true;
 		}
 
 		if (currentSector.size() >= 3) {
@@ -460,13 +462,15 @@ void TileEditor::SplitWall()
 	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
 
 
-	for(int i = Shared::walls.size() - 1; i >= 0; i--) {
+	for(int i = 0; i < Shared::walls.size(); i++) {
 		auto& wall = Shared::walls[i];
 		if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
 
 		Vector2 dir = Vector2Normalize(Vector2Subtract(wall->endPos, wall->startPos));
 
-		if (CheckCollisionPointLine(mouse, Vector2Add(wall->startPos, Vector2Scale(dir, 4)), Vector2Subtract(wall->endPos, Vector2Scale(dir, 4)), 4)) {
+		if (CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 4)) {
+			if (Vector2Distance(tile, wall->startPos) < 1.0f || Vector2Distance(tile, wall->endPos) < 1.0f) continue;
+
 			Vector2 oldEndPos = wall->endPos;
 			wall->endPos = tile;
 
@@ -479,8 +483,8 @@ void TileEditor::SplitWall()
 			newWall->id = Wall::currentWallId;
 			Wall::currentWallId++;
 
-			wall->inSector = false;
-			newWall->inSector = false;
+			wall->inSector = true;
+			newWall->inSector = true;
 
 			newWall->layer = wall->layer;
 			
@@ -497,7 +501,7 @@ bool TileEditor::RemoveWall()
 	for (int i = 0; i < Shared::walls.size(); i++) {
 		if (Shared::walls[i]->floor != Shared::floor || Shared::walls[i]->layer != Shared::layer) continue;
 
-		if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 2)) {
+		if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 4)) {
 
 			//Remove connection that the wall has with a door switch if it is linked to one.
 			for (int j = 0; j < Shared::doorSwitches.size(); j++) {
