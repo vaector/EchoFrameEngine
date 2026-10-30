@@ -53,13 +53,15 @@ void TileEditor::InitCamera()
 
 void TileEditor::UpdateEditor()
 {
-	mouse = GetScreenToWorld2D(GetMousePosition(), cam);
 	Shared::onImguiWindow = (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) || ImGui::IsAnyItemHovered());
 
 	if (Shared::onImguiWindow) return;
 
 	//Update Camera
 	UpdateCam();
+
+	//Update the mouse after changing the camera position and zoom to get the correct mouse position in world space.
+	mouse = GetScreenToWorld2D(GetMousePosition(), cam);
 
 	//Select wall
 	UpdateSelectedWall();
@@ -730,16 +732,10 @@ void TileEditor::Draw()
 	Vector2 bottomRight = GetScreenToWorld2D({ (float)GetScreenWidth(), (float)GetScreenHeight() }, cam);
 
 	// Convert to tile indices
-	int startX = (int)(topLeft.x / tileSize) - 1;
-	int startY = (int)(topLeft.y / tileSize) - 1;
-	int endX = (int)(bottomRight.x / tileSize) + 1;
-	int endY = (int)(bottomRight.y / tileSize) + 1;
-
-	// Clamp to world bounds
-	startX = Clamp(startX, 0, cols);
-	startY = Clamp(startY, 0, rows);
-	endX = Clamp(endX, 0, cols);
-	endY = Clamp(endY, 0, rows);
+	int startX = (int)floor(topLeft.x / tileSize) - 1;
+	int startY = (int)floor(topLeft.y / tileSize) - 1;
+	int endX = (int)ceil(bottomRight.x / tileSize) + 1;
+	int endY = (int)ceil(bottomRight.y / tileSize) + 1;
 
 	//Drawing the Grid
 	for (int y = startY; y < endY; y++)
@@ -759,6 +755,9 @@ void TileEditor::Draw()
 
 	DrawDoorSwitch();
 
+	//Draw the free Camera
+	DrawTexture(Shared::textures["camera"], Shared::free.cam.position.x - Shared::textures["camera"].width/2, Shared::free.cam.position.z - Shared::textures["camera"].height/2, { 255,255,255,255 });
+	
 	DrawPlayerPos();
 
 }

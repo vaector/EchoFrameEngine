@@ -65,6 +65,9 @@ int main() {
         }
         else if (IsKeyPressed(KEY_F) && !Shared::editorMode && !Shared::popupOpen && !ImGui::GetIO().WantCaptureKeyboard) {
             Shared::editorMode = true;
+
+            ImGuiIO& io = ImGui::GetIO();
+            io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
             EnableCursor();
         }
 
