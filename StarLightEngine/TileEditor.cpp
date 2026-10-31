@@ -67,7 +67,10 @@ void TileEditor::UpdateEditor()
 	UpdateSelectedWall();
 
 	//Update Walls and Vertives(UpdateWallVertices)
-	if(!UpdateWallVertices() && WallMode)
+	bool draggingWall = UpdateWallVertices();
+	bool draggingSector = UpdateSectorVertices();
+
+	if (!draggingWall && !draggingSector && WallMode)
 		UpdateWall();
 
 	//Update Sector
@@ -160,38 +163,64 @@ void TileEditor::UpdateWall()
 
 bool TileEditor::UpdateWallVertices()
 {
-	if (Shared::onImguiWindow)
-		return false;
+	if (Shared::onImguiWindow)return false;
 
 	int tileX = (int)mouse.x / tileSize;
 	int tileY = (int)mouse.y / tileSize;
 	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
+	float grabRadius = tileSize * 0.25f;
 
-	const float grabRadius = tileSize * 0.25f; 
+	//Check if the mouse is over any wall vertices and select them for dragging
+	for (auto& wall : Shared::walls) {
+		if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-		draggingVertices.clear();
-		for (auto& wall : Shared::walls) {
-			if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointCircle(mouse, wall->startPos, grabRadius)) draggingVertices.push_back(&wall->startPos);
+		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointCircle(mouse, wall->endPos, grabRadius)) draggingVertices.push_back(&wall->endPos);
+	}
 
-			if (CheckCollisionPointCircle(mouse, wall->startPos, grabRadius))
-				draggingVertices.push_back(&wall->startPos);
-			if (CheckCollisionPointCircle(mouse, wall->endPos, grabRadius))
-				draggingVertices.push_back(&wall->endPos);
+	//If a vertex is selected, update its position to the current tile position
+	if (!draggingVertices.empty()) {
+		for (auto& vertex : draggingVertices) {
+			*vertex = tile;
 		}
 	}
-
-	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !draggingVertices.empty()) {
-		for (Vector2* v : draggingVertices)
-			*v = tile;
-		placeHolderWall = { 0, 0 };
-		return true;
-	}
-
-	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+	
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggingVertices.empty())
 		draggingVertices.clear();
 
 	return !draggingVertices.empty();
+}
+
+bool TileEditor::UpdateSectorVertices()
+{
+	if (Shared::onImguiWindow)return false;
+
+	int tileX = (int)mouse.x / tileSize;
+	int tileY = (int)mouse.y / tileSize;
+	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
+	float grabRadius = tileSize * 0.25f;
+
+	//Check if the mouse is over any wall vertices and select them for dragging
+	for (auto& sector : Shared::sectors) {
+		if (sector.floor != Shared::floor || sector.layer != Shared::layer) continue;
+
+		for(auto& floorPoint : sector.floorPoints)
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointCircle(mouse, floorPoint, grabRadius)) draggingSectorVertices.push_back(&floorPoint);
+		for(auto& ceilingPoint : sector.ceilingPoints)
+			if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointCircle(mouse, ceilingPoint, grabRadius)) draggingSectorVertices.push_back(&ceilingPoint);
+	}
+
+	//If a vertex is selected, update its position to the current tile position
+	if (!draggingSectorVertices.empty()) {
+		for (auto& vertex : draggingSectorVertices) {
+			*vertex = tile;
+		}
+	}
+
+	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT) && !draggingSectorVertices.empty())
+		draggingSectorVertices.clear();
+
+	return !draggingSectorVertices.empty();
 }
 
 void TileEditor::UpdateSector()
@@ -251,34 +280,6 @@ void TileEditor::UpdateSector()
 		}
 
 	}
-
-	//Resize Sector
-	int tileX = (int)mouse.x / tileSize;
-	int tileY = (int)mouse.y / tileSize;
-	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2), (float)(tileY * tileSize + tileSize / 2) };
-	const float grabRadius = tileSize * 0.25f;
-
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-
-		draggingSectorVertices.clear();
-		for (auto& sector : Shared::sectors) {
-			if (sector.floor != Shared::floor || sector.layer != Shared::layer) continue;
-			for (int i = 0; i < sector.floorPoints.size(); i++) {
-				if (CheckCollisionPointCircle(mouse, sector.floorPoints[i], grabRadius)) {
-					draggingSectorVertices.push_back(&sector.floorPoints[i]);
-					draggingSectorVertices.push_back(&sector.ceilingPoints[i]);
-				}
-			}
-		}
-	}
-
-	if (IsMouseButtonDown(MOUSE_BUTTON_LEFT) && !draggingSectorVertices.empty()) {
-		for (Vector2* point : draggingSectorVertices)
-			*point = tile;
-	}
-
-	if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
-		draggingSectorVertices.clear();
 	
 }
 
@@ -441,7 +442,7 @@ void TileEditor::UpdateSelectedWall()
 void TileEditor::UpdatePlayerPos()
 {
 	static bool selected = false;
-	if (CheckCollisionPointCircle(mouse, {Shared::playerPos.x, Shared::playerPos.z}, 6) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+	if (CheckCollisionPointRec(mouse, {Shared::playerPos.x - Shared::textures["spawn"].width/2, Shared::playerPos.z - Shared::textures["spawn"].height/2, (float)Shared::textures["spawn"].width, (float)Shared::textures["spawn"].height }) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 		selected = true;
 		WallMode = false;
 	}
@@ -611,7 +612,8 @@ bool TileEditor::RemoveDoorSwitch()
 
 void TileEditor::DrawPlayerPos()
 {
-	DrawCircleV({Shared::playerPos.x, Shared::playerPos.z}, 6, BLUE);
+	DrawTextureV(Shared::textures["spawn"], {Shared::playerPos.x - Shared::textures["spawn"].width/2, Shared::playerPos.z - Shared::textures["spawn"].height/2}, WHITE);
+
 }
 
 void TileEditor::DrawDoorSwitch()
@@ -668,6 +670,8 @@ void TileEditor::DrawWall()
 		}
 		
 	}
+
+	//Draw Place Holder Wall
 	DrawLineEx(placeHolderWall.startPos, placeHolderWall.endPos, 2, PURPLE);
 }
 
@@ -692,6 +696,16 @@ void TileEditor::DrawSector()
 				sector.ceilingPoints[sector.indices[i + 1]],
 				color
 			);
+		}
+	}
+
+
+	//Draw Dragging Vertices
+	for(auto& sector: Shared::sectors)
+	{
+		for(auto& vertex: sector.floorPoints)
+		{
+			DrawCircleV(vertex, 2, RED);
 		}
 	}
 }

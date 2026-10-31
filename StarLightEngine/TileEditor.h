@@ -24,6 +24,7 @@ private:
 	std::vector<Vector2*> draggingVertices;
 	std::vector<Vector2*> draggingSectorVertices;
 
+
 	Wall* selectedWall = nullptr;
 
 	bool WallMode = true;
@@ -42,6 +43,7 @@ public:
 	void UpdateCam();
 	void UpdateWall();
 	bool UpdateWallVertices();
+	bool UpdateSectorVertices();
 	void UpdateSector();
 	void UpdateRamp();
 	void UpdateDoor();

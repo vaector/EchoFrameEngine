@@ -738,6 +738,12 @@ void RealEditor::DrawRamp()
 	}
 }
 
+void RealEditor::DrawBillboards()
+{
+	if (!camMode) return;
+	DrawBillboard(Shared::free.cam, Shared::textures["spawn"], Shared::player.cam.position, 50, WHITE);
+}
+
 void RealEditor::Draw()
 {
 	rlDisableBackfaceCulling();
@@ -759,6 +765,7 @@ void RealEditor::Draw()
 	// Draw editor elements separately
 	LightSystem::DrawLightEX(camMode);
 	DrawTrigger();
+	DrawBillboards();
 }
 
 void RealEditor::CreateWorldObject()

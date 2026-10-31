@@ -41,6 +41,7 @@ public:
 	void DrawWall();
 	void DrawSector();
 	void DrawRamp();
+	void DrawBillboards();
 	void Draw();
 	       
 	//Entities
