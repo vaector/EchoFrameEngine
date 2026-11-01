@@ -1,26 +1,24 @@
 #include "Audio.h"
 
-void Audio::Play(Sound& sound, bool loop , bool condition)
+void Audio::Play(Sound& sound, bool loop)
 {
-	if (!loop)
-	{
-		if(!IsSoundPlaying(sound))
-			PlaySound(sound);
-	}
-	else {
-		if (condition) {
-			if (!IsSoundPlaying(sound))
-				PlaySound(sound);
-		}
-		else {
-			if (IsSoundPlaying(sound))
-				StopSound(sound);
-		}
-	}	
+    if (loop) {
+        if (!IsSoundPlaying(sound))
+            PlaySound(sound);
+    }
+    else {
+        PlaySound(sound);
+    }
+}
+
+void Audio::Stop(Sound& sound)
+{
+    if (IsSoundPlaying(sound))
+        StopSound(sound);
 }
 
 void Audio::Play(Music& music)
 {
-	if (!IsMusicStreamPlaying(music))
-		PlayMusicStream(music);
+    if (!IsMusicStreamPlaying(music))
+        PlayMusicStream(music);
 }

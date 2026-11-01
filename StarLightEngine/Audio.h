@@ -8,7 +8,8 @@ private:
 
 
 public:
-	static void Play(Sound& sound, bool loop = false, bool condition = true);
+	static void Play(Sound& sound, bool loop = false);
+	static void Stop(Sound& sound);
 	static void Play(Music& music);
 };
 

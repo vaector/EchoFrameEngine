@@ -187,9 +187,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 right = Vector3Normalize(Vector3CrossProduct(Shared::player.forward, { 0,1,0 }));
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::player.forward));
 
-		//MOVEMENT AND WALKING SFX
-		bool walking = IsKeyDown(KEY_W) || IsKeyDown(KEY_A) || IsKeyDown(KEY_S) || IsKeyDown(KEY_D);
-		Audio::Play(Shared::sounds["running"], true, walking);
+		//MOVEMENT
 
 		if (IsKeyDown(KEY_W))
 			move = Vector3Add(move, Vector3Scale(Shared::player.forward, Shared::player.moveSpeed * dt));
@@ -225,7 +223,6 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		if (CheckCollisionPlayerEntityXZ(&Shared::player.cam, &nextPosZ)) {
 			move.z = 0;
 		}
-		
 
 		// Gravity
 		if (!Shared::player.isGround)
@@ -241,17 +238,22 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		// Apply vertical velocity
 		move.y = Shared::player.verticalVelocity * dt;
 
-		// Calculate the next Y position AFTER move.y is updated
 		nextPosY = Shared::player.cam.position;
 		nextPosY.y += move.y;
 
-		UpdatePlayerHeight(&Shared::player.cam, &nextPosY);//Renews the player Bottom and Top values.
+		UpdatePlayerHeight(&Shared::player.cam, &nextPosY);
 
-		// Check collision(Y)
-		if (CheckCollisionSector(cam, &nextPosY) || CheckCollisionRamp(cam, &nextPosY))
+		// Save velocity BEFORE collision resolution
+		float velocityBeforeCollision = Shared::player.verticalVelocity;
+
+		// Sector / ramp collision
+		if (CheckCollisionSector(cam, &nextPosY) ||
+			CheckCollisionRamp(cam, &nextPosY))
 		{
 			Shared::player.verticalVelocity = 0.0f;
-			Shared::player.isGround = true;
+
+			// Only consider downward collisions as landing
+			Shared::player.isGround = velocityBeforeCollision <= 0.0f;
 
 			move.y = nextPosY.y - Shared::player.cam.position.y;
 		}
@@ -259,16 +261,32 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		{
 			Shared::player.isGround = false;
 		}
-		//(Y)
-		if (CheckCollisionPlayerEntityY(&Shared::player.cam, &nextPosY)) {
-			Shared::player.verticalVelocity = 0;
+
+		// Entity collision
+		if (CheckCollisionPlayerEntityY(&Shared::player.cam, &nextPosY))
+		{
+			Shared::player.verticalVelocity = 0.0f;
+
+			Shared::player.isGround = velocityBeforeCollision <= 0.0f;
+
 			move.y = nextPosY.y - Shared::player.cam.position.y;
-			Shared::player.isGround = true;
 		}
 
-		// Apply updated position and target
+		// Apply updated position
 		Shared::player.cam.position = Vector3Add(Shared::player.cam.position, move);
 		Shared::player.cam.target = Vector3Add(Shared::player.cam.position, Shared::player.forward);
+
+		// Walking SFX AFTER collision resolution
+		bool moving =
+			IsKeyDown(KEY_W) || IsKeyDown(KEY_A) ||
+			IsKeyDown(KEY_S) || IsKeyDown(KEY_D);
+
+		bool walking = moving && Shared::player.isGround;
+
+		if (walking)
+			Audio::Play(Shared::sounds["running"], true);
+		else
+			Audio::Stop(Shared::sounds["running"]);
 	}
 
 }
@@ -1715,28 +1733,29 @@ bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 
 bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 {
+    const float epsilon = 0.001f;
 
-	for(auto& sector: Shared::sectors) {
+    for (auto& sector : Shared::sectors) {
 
-		//Collision with floor/ceiling(All floor points are on the same y so just use 1 of them)....Same for ceiling
-		float floorY = sector.floor * Shared::globalWallHeight;
-		float ceilingY = floorY + Shared::globalWallHeight - 1.0f;
-		
-		if (Shared::player.top > floorY && Shared::player.bottom < floorY && sector.hasFloor && PointInSector({nextPos->x, nextPos->z},sector.floorPoints))
-		{
-			nextPos->y = floorY + Shared::player.height / 2;
-			return true;
-		}
+        float floorY = sector.floor * Shared::globalWallHeight;
+        float ceilingY = floorY + Shared::globalWallHeight - 1.0f;
 
-		if (Shared::player.bottom < ceilingY && Shared::player.top > ceilingY && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
-		{
-			nextPos->y = ceilingY - Shared::player.height / 2;
-			return true;
-		}
+        // Floor collision
+        if (Shared::player.verticalVelocity <= 0.0f && Shared::player.top >= floorY && Shared::player.bottom <= floorY + epsilon && sector.hasFloor && PointInSector({ nextPos->x, nextPos->z }, sector.floorPoints))
+        {
+            nextPos->y = floorY + Shared::player.height / 2;
+            return true;
+        }
 
-	}
+        // Ceiling collision
+        if (Shared::player.verticalVelocity > 0.0f && Shared::player.bottom <= ceilingY && Shared::player.top >= ceilingY - epsilon && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+        {
+            nextPos->y = ceilingY - Shared::player.height / 2;
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
