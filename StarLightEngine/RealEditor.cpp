@@ -166,9 +166,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		//Update Position from TileEditor
 		if (Shared::setPlayerPos)
 		{
-			Shared::player.cam.position.x = Shared::playerPos.x;
-			Shared::player.cam.position.y = Shared::playerPos.y;
-			Shared::player.cam.position.z = Shared::playerPos.z;
+			Shared::player.cam.position = Shared::ToWorld(Shared::playerPos);
 			Shared::setPlayerPos = false;
 		}
 
@@ -292,6 +290,7 @@ void RealEditor::UpdateCam(Camera3D* cam)
 }
 void RealEditor::UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos)
 {
+
 	Shared::player.bottom = nextPos->y - Shared::player.height / 2;
 	Shared::player.top = nextPos->y + Shared::player.height / 2;
 }
@@ -310,23 +309,11 @@ void RealEditor::UpdateSector()
 			int i1 = sector.indices[j + 1];
 			int i2 = sector.indices[j + 2];
 
-			Vector3 p0 = {
-				sector.floorPoints[i0].x,
-				(float)(sector.floor * Shared::globalWallHeight),
-				sector.floorPoints[i0].y
-			};
+			Vector3 p0 = Shared::ToWorld({sector.floorPoints[i0].x,(float)(sector.floor * Shared::globalWallHeight),sector.floorPoints[i0].y});
 
-			Vector3 p1 = {
-				sector.floorPoints[i1].x,
-				(float)(sector.floor * Shared::globalWallHeight),
-				sector.floorPoints[i1].y
-			};
+			Vector3 p1 = Shared::ToWorld({sector.floorPoints[i1].x,(float)(sector.floor * Shared::globalWallHeight),sector.floorPoints[i1].y});
 
-			Vector3 p2 = {
-				sector.floorPoints[i2].x,
-				(float)(sector.floor * Shared::globalWallHeight),
-				sector.floorPoints[i2].y
-			};
+			Vector3 p2 = Shared::ToWorld({ sector.floorPoints[i2].x,(float)(sector.floor * Shared::globalWallHeight),sector.floorPoints[i2].y});
 
 			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 
@@ -347,9 +334,9 @@ void RealEditor::UpdateSector()
 
 			float y = (float)(sector.floor * Shared::globalWallHeight)+ Shared::globalWallHeight - 1.0f;
 
-			Vector3 p0 = { sector.ceilingPoints[i0].x, y, sector.ceilingPoints[i0].y };
-			Vector3 p1 = { sector.ceilingPoints[i1].x, y, sector.ceilingPoints[i1].y };
-			Vector3 p2 = { sector.ceilingPoints[i2].x, y, sector.ceilingPoints[i2].y };
+			Vector3 p0 = Shared::ToWorld({ sector.ceilingPoints[i0].x, y, sector.ceilingPoints[i0].y });
+			Vector3 p1 = Shared::ToWorld({ sector.ceilingPoints[i1].x, y, sector.ceilingPoints[i1].y });
+			Vector3 p2 = Shared::ToWorld({ sector.ceilingPoints[i2].x, y, sector.ceilingPoints[i2].y });
 
 			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 
@@ -412,10 +399,10 @@ void RealEditor::UpdateRamp()
 		float lowY = (float)ramp.rampHeight * ramp.floor;
 		float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight;
 
-		Vector3 startLeft = Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 startRight = Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 endLeft = Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
-		Vector3 endRight = Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth));
+		Vector3 startLeft = Shared::ToWorld(Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth)));
+		Vector3 startRight = Shared::ToWorld(Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(perp, ramp.halfWidth)));
+		Vector3 endLeft = Shared::ToWorld(Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth)));
+		Vector3 endRight = Shared::ToWorld(Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(perp, ramp.halfWidth)));
 
 		RayCollision rampCol = GetRayCollisionQuad(Shared::freeRay, startLeft, endLeft, endRight, startRight);
 
@@ -499,10 +486,10 @@ void RealEditor::EditDoor()
 		if (Vector3DotProduct(ray.direction, normal) > 0.0f)
 			normal = Vector3Scale(normal, -1.0f);
 
-		Vector3 bottomLeft = { closestWall->startPos.x, (closestWall->floor * Shared::globalWallHeight), closestWall->startPos.y };
-		Vector3 bottomRight = { closestWall->endPos.x, (closestWall->floor * Shared::globalWallHeight), closestWall->endPos.y };
-		Vector3 topLeft = { closestWall->startPos.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, closestWall->startPos.y };
-		Vector3 topRight = { closestWall->endPos.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, closestWall->endPos.y };
+		Vector3 bottomLeft = Shared::ToWorld({ closestWall->startPos.x, (float)(closestWall->floor * Shared::globalWallHeight), closestWall->startPos.y });
+		Vector3 bottomRight = Shared::ToWorld({ closestWall->endPos.x, (float)(closestWall->floor * Shared::globalWallHeight), closestWall->endPos.y });
+		Vector3 topLeft = Shared::ToWorld({ closestWall->startPos.x, (float)((closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight), closestWall->startPos.y });
+		Vector3 topRight = Shared::ToWorld({ closestWall->endPos.x, (float)((closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight), closestWall->endPos.y });
 
 		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
 
@@ -566,28 +553,34 @@ void RealEditor::EditDoor()
 }
 void RealEditor::DrawDoorSwitch()
 {
-
 	for (auto& d : Shared::doorSwitches) {
 
-		//Find the closest wall in the same floor as the door switch to draw the door switch in front of it.
-		static Wall* closestWall = nullptr;
-		float clostseDist = FLT_MAX;
+		//Find the closest wall to draw the door switch in front of it (all in tile space).
+		Wall* closestWall = nullptr;
+		float closestDist = FLT_MAX;
 		for (auto& wall : Shared::walls) {
-			
 			float dist = Vector2Distance({ d.pos.x, d.pos.z }, { (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2 });
-			if(dist < clostseDist) {
-				clostseDist = dist;
+			if (dist < closestDist) {
+				closestDist = dist;
 				closestWall = wall;
 			}
 		}
+		if (!closestWall) continue;
 
+		// Direction and normal are unaffected by the uniform scale
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		
-		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
-		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, -16));
-		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16, d.pos.z }, Vector3Scale({ dir.x, 0, dir.y }, 16));
+
+		// Convert only the center point
+		Vector3 pos = Shared::ToWorld(d.pos);
+
+		const float half = 16.0f;   // world units; use 16.0f * Shared::worldScale if the switch should grow with the map
+		Vector3 along = { dir.x * half, 0, dir.y * half };
+
+		Vector3 bottomLeft = Vector3Subtract({ pos.x, pos.y - half, pos.z }, along);
+		Vector3 bottomRight = Vector3Add({ pos.x, pos.y - half, pos.z }, along);
+		Vector3 topLeft = Vector3Subtract({ pos.x, pos.y + half, pos.z }, along);
+		Vector3 topRight = Vector3Add({ pos.x, pos.y + half, pos.z }, along);
 
 		float tileX = 1.0f;
 		float tileY = 1.0f;
@@ -598,8 +591,8 @@ void RealEditor::DrawDoorSwitch()
 
 		rlColor4ub(255, 255, 255, 255);
 
-		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
-		rlTexCoord2f(0.0f, tileY); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+		rlTexCoord2f(0.0f, 0.0f);   rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+		rlTexCoord2f(0.0f, tileY);  rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
 		rlTexCoord2f(tileX, tileY); rlVertex3f(topRight.x, topRight.y, topRight.z);
 		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
 
@@ -611,12 +604,12 @@ void RealEditor::DrawWall()
 {
 	for (auto& wall : Shared::walls) {
 
-		Vector3 topLeft = { wall->startPos.x, (Shared::globalWallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
-		Vector3 bottomLeft = { wall->startPos.x, Shared::globalWallHeight * wall->floor,       wall->startPos.y };
-		Vector3 topRight = { wall->endPos.x,   (Shared::globalWallHeight *wall->floor) + wall->wallHeight, wall->endPos.y };
-		Vector3 bottomRight = { wall->endPos.x,   Shared::globalWallHeight * wall->floor,       wall->endPos.y };
+		Vector3 topLeft = Shared::ToWorld({ wall->startPos.x, (Shared::globalWallHeight * wall->floor) + wall->wallHeight, wall->startPos.y });
+		Vector3 bottomLeft = Shared::ToWorld({ wall->startPos.x, (float)Shared::globalWallHeight * wall->floor,       wall->startPos.y });
+		Vector3 topRight = Shared::ToWorld({ wall->endPos.x,   (Shared::globalWallHeight *wall->floor) + wall->wallHeight, wall->endPos.y });
+		Vector3 bottomRight = Shared::ToWorld({ wall->endPos.x,   (float)Shared::globalWallHeight * wall->floor,       wall->endPos.y });
 
-		float wallLength = Vector2Distance(wall->startPos, wall->endPos);
+		float wallLength = Vector2Distance(wall->startPos, wall->endPos) * Shared::worldScale;//Converting To World Scale
 		float tileX = wallLength / 32.0f;
 		float tileY = wall->wallHeight / 32.0f;
 
@@ -663,18 +656,18 @@ void RealEditor::DrawSector()
 
 			for (int i = 0; i < sector.indices.size(); i += 3)
 			{
-				const Vector2& p0 = sector.floorPoints[sector.indices[i]];
-				const Vector2& p1 = sector.floorPoints[sector.indices[i + 1]];
-				const Vector2& p2 = sector.floorPoints[sector.indices[i + 2]];
+				const Vector3& p0 = Shared::ToWorld({ sector.floorPoints[sector.indices[i]].x, 0, sector.floorPoints[sector.indices[i]].y });
+				const Vector3& p1 = Shared::ToWorld({ sector.floorPoints[sector.indices[i+1]].x, 0, sector.floorPoints[sector.indices[i+1]].y });
+				const Vector3& p2 = Shared::ToWorld({ sector.floorPoints[sector.indices[i+2]].x, 0, sector.floorPoints[sector.indices[i+2]].y });
 
-				rlTexCoord2f(p0.x / 32.0f, p0.y / 32.0f);
-				rlVertex3f(p0.x, sector.floor * Shared::globalWallHeight, p0.y);
+				rlTexCoord2f(p0.x / 32.0f, p0.z / 32.0f);
+				rlVertex3f(p0.x, sector.floor * Shared::globalWallHeight, p0.z);
 
-				rlTexCoord2f(p1.x / 32.0f, p1.y / 32.0f);
-				rlVertex3f(p1.x, sector.floor * Shared::globalWallHeight, p1.y);
+				rlTexCoord2f(p1.x / 32.0f, p1.z / 32.0f);
+				rlVertex3f(p1.x, sector.floor * Shared::globalWallHeight, p1.z);
 
-				rlTexCoord2f(p2.x / 32.0f, p2.y / 32.0f);
-				rlVertex3f(p2.x, sector.floor * Shared::globalWallHeight, p2.y);
+				rlTexCoord2f(p2.x / 32.0f, p2.z / 32.0f);
+				rlVertex3f(p2.x, sector.floor * Shared::globalWallHeight, p2.z);
 			}
 
 			rlEnd();
@@ -696,19 +689,19 @@ void RealEditor::DrawSector()
 
 			for (int i = 0; i  < sector.indices.size(); i += 3)
 			{
-				const Vector2& p0 = sector.ceilingPoints[sector.indices[i]];
-				const Vector2& p1 = sector.ceilingPoints[sector.indices[i + 1]];
-				const Vector2& p2 = sector.ceilingPoints[sector.indices[i + 2]];
+				const Vector3& p0 = Shared::ToWorld({ sector.ceilingPoints[sector.indices[i]].x, 0, sector.ceilingPoints[sector.indices[i]].y });
+				const Vector3& p1 = Shared::ToWorld({ sector.ceilingPoints[sector.indices[i+1]].x, 0, sector.ceilingPoints[sector.indices[i+1]].y });
+				const Vector3& p2 = Shared::ToWorld({ sector.ceilingPoints[sector.indices[i+2]].x, 0, sector.ceilingPoints[sector.indices[i+2]].y });
 
 				// Reverse winding so the ceiling faces downward
-				rlTexCoord2f(p2.x / 32.0f, p2.y / 32.0f);
-				rlVertex3f(p2.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p2.y);
+				rlTexCoord2f(p2.x / 32.0f, p2.z / 32.0f);
+				rlVertex3f(p2.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p2.z);
 
-				rlTexCoord2f(p1.x / 32.0f, p1.y / 32.0f);
-				rlVertex3f(p1.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p1.y);
+				rlTexCoord2f(p1.x / 32.0f, p1.z / 32.0f);
+				rlVertex3f(p1.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p1.z);
 
-				rlTexCoord2f(p0.x / 32.0f, p0.y / 32.0f);
-				rlVertex3f(p0.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p0.y);
+				rlTexCoord2f(p0.x / 32.0f, p0.z / 32.0f);
+				rlVertex3f(p0.x, (sector.floor * Shared::globalWallHeight) + Shared::globalWallHeight - 1.0f, p0.z);
 			}
 
 			rlEnd();
@@ -728,10 +721,10 @@ void RealEditor::DrawRamp()
 		float lowY = (float)ramp.rampHeight * ramp.floor;
 		float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight; 
 
-		Vector3 startLeft = Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth));
-		Vector3 startRight = Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth));
-		Vector3 endLeft = Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth));
-		Vector3 endRight = Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth));
+		Vector3 startLeft = Shared::ToWorld(Vector3Subtract({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth)));
+		Vector3 startRight = Shared::ToWorld(Vector3Add({ ramp.startPos.x, lowY,  ramp.startPos.y }, Vector3Scale(normal, ramp.halfWidth)));
+		Vector3 endLeft = Shared::ToWorld(Vector3Subtract({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth)));
+		Vector3 endRight = Shared::ToWorld(Vector3Add({ ramp.endPos.x,   highY, ramp.endPos.y }, Vector3Scale(normal, ramp.halfWidth)));
 
 		float wallLength = Vector2Distance(ramp.startPos, ramp.endPos);
 		float tileX = 12;
@@ -759,7 +752,7 @@ void RealEditor::DrawRamp()
 void RealEditor::DrawBillboards()
 {
 	if (!camMode) return;
-	DrawBillboard(Shared::free.cam, Shared::textures["spawn"], Shared::player.cam.position, 50, WHITE);
+	DrawBillboard(Shared::free.cam, Shared::textures["spawn"], Shared::ToWorld({Shared::playerPos.x, Shared::player.cam.position.y, Shared::playerPos.z}), 50, WHITE);
 }
 
 void RealEditor::Draw()
@@ -1684,10 +1677,10 @@ bool RealEditor::WallCloserThanSector()
 
 	for (auto& wall : Shared::walls)
 	{
-		Vector3 topLeft = { wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
-		Vector3 bottomLeft = { wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y };
-		Vector3 topRight = { wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
-		Vector3 bottomRight = { wall->endPos.x,    wall->wallHeight * wall->floor,                   wall->endPos.y };
+		Vector3 topLeft = Shared::ToWorld({ wall->startPos.x, (wall->wallHeight * wall->floor) + wall->wallHeight, wall->startPos.y });
+		Vector3 bottomLeft = Shared::ToWorld({ wall->startPos.x,  wall->wallHeight * wall->floor,                    wall->startPos.y });
+		Vector3 topRight = Shared::ToWorld({ wall->endPos.x,   (wall->wallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y });
+		Vector3 bottomRight = Shared::ToWorld({ wall->endPos.x,    wall->wallHeight * wall->floor,                   wall->endPos.y });
 
 		RayCollision col = GetRayCollisionQuad(Shared::freeRay, topLeft, bottomLeft, bottomRight, topRight);
 		if (col.hit && col.distance < wallDist)
@@ -1698,9 +1691,9 @@ bool RealEditor::WallCloserThanSector()
 	{
 		for (int j = 1; j < sector.floorPoints.size() - 1; j++)
 		{
-			Vector3 p0 = { sector.floorPoints[0].x,   (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[0].y };
-			Vector3 p1 = { sector.floorPoints[j].x,   (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[j].y };
-			Vector3 p2 = { sector.floorPoints[j + 1].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[j + 1].y };
+			Vector3 p0 = Shared::ToWorld({ sector.floorPoints[0].x,   (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[0].y });
+			Vector3 p1 = Shared::ToWorld({ sector.floorPoints[j].x,   (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[j].y });
+			Vector3 p2 = Shared::ToWorld({ sector.floorPoints[j + 1].x, (float)(sector.floor * Shared::globalWallHeight), sector.floorPoints[j + 1].y });
 
 			RayCollision col = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
 			if (col.hit && col.distance < sectorDist)
@@ -1713,15 +1706,17 @@ bool RealEditor::WallCloserThanSector()
 
 bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 {
+	// World -> tile space once, so it matches the stored sector points
+	Vector3 tilePos = Shared::ToTile(*nextPos);
+	Vector2 testPoint = { tilePos.x, tilePos.z };
 
 	for (auto& wall : Shared::walls) {
 		if (wall->isDoor && wall->isOpen) continue;
 
-		Vector2 testPosXZ = { nextPos->x, nextPos->z };
 		float wallMinY = wall->floor * wall->wallHeight;
 		float wallMaxY = wallMinY + wall->wallHeight;
 
-		if (CheckCollisionPointLine(testPosXZ, wall->startPos, wall->endPos, 2) && (Shared::player.bottom <= wallMaxY && Shared::player.top >= wallMinY)){
+		if (CheckCollisionPointLine(testPoint, wall->startPos, wall->endPos, 2) && (Shared::player.bottom <= wallMaxY && Shared::player.top >= wallMinY)){
 			nextPos->x = cam->position.x;
 			nextPos->z = cam->position.z;
 			return true;
@@ -1734,6 +1729,9 @@ bool RealEditor::CheckCollisionWall(Camera3D* cam, Vector3* nextPos)
 bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 {
     const float epsilon = 0.001f;
+	// World -> tile space once, so it matches the stored sector points
+    Vector3 tilePos = Shared::ToTile(*nextPos);
+    Vector2 testPoint = { tilePos.x, tilePos.z };
 
     for (auto& sector : Shared::sectors) {
 
@@ -1741,14 +1739,14 @@ bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
         float ceilingY = floorY + Shared::globalWallHeight - 1.0f;
 
         // Floor collision
-        if (Shared::player.verticalVelocity <= 0.0f && Shared::player.top >= floorY && Shared::player.bottom <= floorY + epsilon && sector.hasFloor && PointInSector({ nextPos->x, nextPos->z }, sector.floorPoints))
+        if (Shared::player.verticalVelocity <= 0.0f && Shared::player.top >= floorY && Shared::player.bottom <= floorY + epsilon && sector.hasFloor && PointInSector(testPoint, sector.floorPoints))
         {
             nextPos->y = floorY + Shared::player.height / 2;
             return true;
         }
 
         // Ceiling collision
-        if (Shared::player.verticalVelocity > 0.0f && Shared::player.bottom <= ceilingY && Shared::player.top >= ceilingY - epsilon && sector.hasCeiling && PointInSector({ nextPos->x, nextPos->z }, sector.ceilingPoints))
+        if (Shared::player.verticalVelocity > 0.0f && Shared::player.bottom <= ceilingY && Shared::player.top >= ceilingY - epsilon && sector.hasCeiling && PointInSector(testPoint, sector.ceilingPoints))
         {
             nextPos->y = ceilingY - Shared::player.height / 2;
             return true;
@@ -1760,45 +1758,53 @@ bool RealEditor::CheckCollisionSector(Camera3D* cam, Vector3* nextPos)
 
 bool RealEditor::CheckCollisionRamp(Camera3D* cam, Vector3* nextPos)
 {
-    const float skin = 0.05f; // same resting-contact margin used for entities
+	const float epsilon = 0.05f; // resting-contact margin
 
-    for (auto& ramp : Shared::ramps) {
+	for (auto& ramp : Shared::ramps) {
 
-        Vector2 dir = Vector2Normalize(Vector2Subtract(ramp.endPos, ramp.startPos));
-        Vector3 perp = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
+		// Ramp footprint in world space (Y is untouched by ToWorld)
+		Vector3 a = Shared::ToWorld({ ramp.startPos.x, 0, ramp.startPos.y });
+		Vector3 b = Shared::ToWorld({ ramp.endPos.x,   0, ramp.endPos.y });
+		Vector2 start = { a.x, a.z };
+		Vector2 end = { b.x, b.z };
 
-        float lowY = (float)ramp.rampHeight * ramp.floor;
-        float highY = (float)ramp.rampHeight * ramp.floor + ramp.rampHeight;
+		float halfWidth = ramp.halfWidth * Shared::worldScale;   // a length, so it scales
 
-        float rampLength = Vector2Distance(ramp.startPos, ramp.endPos);
+		Vector2 dir = Vector2Normalize(Vector2Subtract(end, start));
+		Vector2 perp = { -dir.y, dir.x };
 
-        Vector3 toPlayer = { nextPos->x - ramp.startPos.x, 0, nextPos->z - ramp.startPos.y };
+		float lowY = (float)ramp.rampHeight * ramp.floor;
+		float highY = lowY + ramp.rampHeight;
 
-        float along = toPlayer.x * dir.x + toPlayer.z * dir.y;
-        float across = toPlayer.x * perp.x + toPlayer.z * perp.z;
+		float rampLength = Vector2Distance(start, end);
 
-        if (along < 0.0f || along > rampLength) continue;
-        if (across < -ramp.halfWidth || across > ramp.halfWidth) continue;
+		// Is the player inside the ramp's XZ rectangle?
+		Vector2 toPlayer = { nextPos->x - start.x, nextPos->z - start.y };
+		float along = Vector2DotProduct(toPlayer, dir);
+		float across = Vector2DotProduct(toPlayer, perp);
 
-        float t = along / rampLength;
-        float rampY = lowY + (highY - lowY) * t; // local surface height at this point
+		if (along < 0.0f || along > rampLength) continue;
+		if (across < -halfWidth || across > halfWidth) continue;
 
-		// Falling or resting -> only land if we're actually straddling the surface
-		if (Shared::player.bottom <= rampY && Shared::player.top > rampY)
+		// Surface height under the player
+		float t = along / rampLength;
+		float rampY = lowY + (highY - lowY) * t;
+
+		// Standing on / falling onto the surface -> ride it up
+		if (Shared::player.bottom <= rampY + epsilon && Shared::player.top > rampY)
 		{
-			nextPos->y = rampY + Shared::player.height / 2 + skin;
+			nextPos->y = rampY + Shared::player.height / 2;
 			return true;
 		}
-		// Moving upward -> treat the ramp's underside like a ceiling, bump instead of climb
+		// Jumping up into the underside -> bump instead of climbing
 		else if (Shared::player.top >= rampY && Shared::player.bottom < rampY)
 		{
-			nextPos->y = rampY - Shared::player.height / 2 - skin;
+			nextPos->y = rampY - Shared::player.height / 2 - epsilon;
 			return true;
 		}
+	}
 
-    }
-
-    return false;
+	return false;
 }
 
 bool RealEditor::PointInSector(Vector2 point, const std::vector<Vector2>& poly)
@@ -1971,10 +1977,10 @@ Wall* RealEditor::GetRayWall(Ray ray){
 
 	for (auto& wall : Shared::walls)
 	{
-		Vector3 topLeft = { wall->startPos.x, (Shared::globalWallHeight * wall->floor) + wall->wallHeight, wall->startPos.y };
-		Vector3 bottomLeft = { wall->startPos.x,  Shared::globalWallHeight * wall->floor,                    wall->startPos.y };
-		Vector3 topRight = { wall->endPos.x,   (Shared::globalWallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y };
-		Vector3 bottomRight = { wall->endPos.x,    Shared::globalWallHeight * wall->floor,                     wall->endPos.y };
+		Vector3 topLeft = Shared::ToWorld({ wall->startPos.x, (Shared::globalWallHeight * wall->floor) + wall->wallHeight, wall->startPos.y });
+		Vector3 bottomLeft = Shared::ToWorld({ wall->startPos.x,  (float)Shared::globalWallHeight * wall->floor,                    wall->startPos.y });
+		Vector3 topRight = Shared::ToWorld({ wall->endPos.x,   (Shared::globalWallHeight * wall->floor) + wall->wallHeight,  wall->endPos.y });
+		Vector3 bottomRight = Shared::ToWorld({ wall->endPos.x,    (float)Shared::globalWallHeight * wall->floor,                     wall->endPos.y });
 
 		RayCollision wallCol = GetRayCollisionQuad(ray, topLeft, bottomLeft, bottomRight, topRight);
 

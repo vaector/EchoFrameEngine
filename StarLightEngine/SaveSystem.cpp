@@ -35,6 +35,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SaveLights(data);
 	SaveDecals(data);
 	SaveTriggers(data);
+	SaveWorldData(data);
 
 	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
@@ -76,6 +77,35 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadLights(data);
 	LoadDecals(data);
 	LoadTriggers(data);
+	LoadWorldData(data);
+}
+
+void SaveSystem::SaveWorldData(json& j)
+{
+	json worldData = json::object();
+	worldData["worldScale"] = Shared::worldScale;
+	worldData["worldPivot"] = { Shared::worldPivot.x, Shared::worldPivot.y };
+	j["worldData"] = worldData;
+}
+
+void SaveSystem::LoadWorldData(const json& j)
+{
+	// Defaults for saves made before world scaling existed
+	Shared::worldScale = 1.0f;
+	Shared::worldPivot = { 1024.0f, 1024.0f };
+
+	if (!j.contains("worldData")) return;
+
+	const json& w = j["worldData"];
+
+	if (w.contains("worldScale")) {
+		float s = w["worldScale"].get<float>();
+		if (s > 0.0f) Shared::worldScale = s;   // never allow 0 or negative
+	}
+
+	if (w.contains("worldPivot") && w["worldPivot"].is_array() && w["worldPivot"].size() == 2) {
+		Shared::worldPivot = { w["worldPivot"][0].get<float>(), w["worldPivot"][1].get<float>() };
+	}
 }
 
 void SaveSystem::SaveWalls(json& j)

@@ -14,6 +14,9 @@
 
 namespace Shared {
 	extern bool editorMode;
+	extern float worldScale;
+	extern Vector2 worldPivot;
+
 	extern bool popupOpen;
 	extern std::vector<Wall*> walls;
 	extern int globalWallHeight;
@@ -85,6 +88,10 @@ namespace Shared {
 	extern BoxTrigger* selectedBoxTrigger;
 
 	extern BoundingBox GetUpdatedBoundingBox(const BoundingBox& original, Vector3 position, Vector3 scale, Vector3 rotationAxis, float rotationAngle);
+	
+	extern Vector3 ToWorld(Vector3 p);// Tile-editor 2D point -> 3D world XZ
+	extern Vector3 ToTile(Vector3 p);// 3D world XZ -> tile-editor 2D point (inverse)
+
 }
 
 //-------WALLS VECTOR------> A vector of walls(wall-> {{start position, end position}, floor, texture}) -> SHARED.H (Shared::walls)

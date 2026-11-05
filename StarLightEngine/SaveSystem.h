@@ -12,6 +12,9 @@ public:
 	static void LoadGame(const std::string& filename);
 
 private:
+	static void SaveWorldData(json& j);
+	static void LoadWorldData(const json& j);
+
 	static void SaveWalls(json& j);
 	static void LoadWalls(const json& j);
 

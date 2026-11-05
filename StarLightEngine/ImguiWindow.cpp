@@ -52,10 +52,15 @@ void ImguiWindow::UpdateImguiEditor()
 		DeletePopup();
 	}
 
-	if (ImGui::CollapsingHeader("PROPERTIES")) {
+	if (ImGui::CollapsingHeader("WORLD PROPERTIES")) {
 
 		ImGui::SeparatorText("Gloabal Wall Height");
 		ImGui::InputInt("Wall Height", &Shared::globalWallHeight);
+		ImGui::NewLine();
+
+		ImGui::SeparatorText("World Scale");
+		ImGui::InputFloat("Scale", &Shared::worldScale);	
+		ImGui::NewLine();
 
 		ImGui::SeparatorText("PROPERTIES");
 
@@ -111,7 +116,7 @@ void ImguiWindow::UpdateImguiEditor()
 	//---3D Editor----
 	if (ImGui::CollapsingHeader("3D PROPERTIES") && !Shared::editorMode) {
 
-		//--PREOPERTIES SECTION
+		//--PROPERTIES SECTION
 
 		ImGui::SeparatorText(" Selected WorldObject/NPC Properties");
 		//World Object Properties

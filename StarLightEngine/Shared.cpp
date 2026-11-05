@@ -5,6 +5,9 @@ std::string tile1 = "tile1";//Default texture name
 
 namespace Shared {
 	bool editorMode = true;//EditorMode = 2D Tile Map Editor
+	float worldScale = 5.0f;
+	Vector2 worldPivot = { 1024, 1024 };
+
 	bool popupOpen = false;
 	std::vector<Wall*> walls;
 	int globalWallHeight = 200;
@@ -111,5 +114,14 @@ namespace Shared {
 		}
 
 		return box;
+	}
+
+	Vector3 ToWorld(Vector3 p) {
+		return { worldPivot.x + (p.x - worldPivot.x) * worldScale, p.y,  worldPivot.y + (p.z - worldPivot.y) * worldScale };
+	}
+
+	// 3D world XZ -> tile-editor 2D point (inverse)
+	Vector3 ToTile(Vector3 p) {
+		return { worldPivot.x + (p.x - worldPivot.x) / worldScale, p.y, worldPivot.y + (p.z - worldPivot.y) / worldScale };
 	}
 }
