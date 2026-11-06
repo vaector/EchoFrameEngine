@@ -770,7 +770,8 @@ void TileEditor::Draw()
 	DrawDoorSwitch();
 
 	//Draw the free Camera
-	DrawTexture(Shared::textures["camera"], Shared::free.cam.position.x - Shared::textures["camera"].width/2, Shared::free.cam.position.z - Shared::textures["camera"].height/2, { 255,255,255,255 });
+	Vector2 camPos = { Shared::ToTile(Shared::free.cam.position).x - Shared::textures["camera"].width / 2, Shared::ToTile(Shared::free.cam.position).z - Shared::textures["camera"].height / 2 };
+	DrawTextureV(Shared::textures["camera"], camPos, { 255,255,255,255 });
 	
 	DrawPlayerPos();
 

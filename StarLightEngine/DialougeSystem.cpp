@@ -13,7 +13,7 @@ std::string DialougeSystem::selectedDialougeName = "";
 
 void DialougeSystem::DrawDialouge()
 {
-	DrawRectangle(GetScreenWidth() / 4, GetScreenHeight()/1.5, GetScreenWidth()/2, GetScreenHeight()/4, {130, 130, 130, 150});
+	DrawRectangle(GetScreenWidth() / 6, GetScreenHeight()/1.5, GetScreenWidth()/1.5, GetScreenHeight()/4, {50, 50, 50, 200});
 }
 
 void DialougeSystem::AddDialouge(std::string& npcName, std::string& dialougeName,DialougeText& dialougeText)
@@ -46,12 +46,11 @@ void DialougeSystem::RenderDialougeTexts(std::string& npcName, std::string& dial
 
 	//Draw the text on the dialouge box
 	DialougeText& dialougeText = texts[DialougeSystem::index];
-	dialougeText.position.x = GetScreenWidth() / 4 + 20;
-	dialougeText.position.y = GetScreenHeight() / 1.5 + 20;
+	dialougeText.position.x = GetScreenWidth() / 6 + dialougeText.fontSize;
+	dialougeText.position.y = GetScreenHeight() / 1.5 + dialougeText.fontSize;
 	DrawText(dialougeText.text.c_str(), dialougeText.position.x, dialougeText.position.y, dialougeText.fontSize, dialougeText.textColor);
 	
-	
-	std::cout << DialougeSystem::index << std::endl;
+	//std::cout << DialougeSystem::index << std::endl;
 }
 void DialougeSystem::StartDialouge(const std::string& npcName, const std::string& dialougeName)
 {

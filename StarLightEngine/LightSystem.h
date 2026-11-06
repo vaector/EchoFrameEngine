@@ -39,7 +39,7 @@ struct Light{
 	bool enabled = true;
 
 };
-static class LightSystem
+class LightSystem
 {	
 
 public:

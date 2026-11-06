@@ -6,7 +6,7 @@
 struct DialougeText {
 	std::string text = "";
 	Color textColor = WHITE;
-	int fontSize = 20;
+	int fontSize = 38;
 	Vector2 position = { 0, 0 };	
 };
 

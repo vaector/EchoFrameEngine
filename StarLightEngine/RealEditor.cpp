@@ -114,6 +114,10 @@ void RealEditor::Update(Camera3D* cam)
 
 	//Trigger
 	UpdateTrigger();
+
+	if (IsKeyPressed(KEY_G)) {
+		DialougeSystem::StartDialouge("ethan", "1");
+	}
 }
 
 void RealEditor::UpdateCam(Camera3D* cam)
