@@ -7,6 +7,7 @@
 #include "ImguiWindow.h"
 #include "LightSystem.h"
 #include "imgui/imgui.h"
+#include "Game.h"
 
 int main() {
     
@@ -95,7 +96,7 @@ int main() {
 
         if (Shared::editorMode) {
             
-            //GUI(2d Stuff)
+			//2D Editor
             BeginMode2D(engine.tileEditor.cam);
 
             engine.DrawEditor();
@@ -118,8 +119,9 @@ int main() {
             EndMode3D();
 
             //GUI FOR 3D
-                
+               
             DrawCircle(GetScreenWidth()/2, GetScreenHeight()/2, 1, WHITE); //Crosshair
+            Game::DrawUi();
         }
 
         engine.DrawGUI();
