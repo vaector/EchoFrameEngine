@@ -1,12 +1,13 @@
 #include "Engine.h"
 #include "Importer.h"
 #include "DialougeSystem.h"
+#include "Game.h"
 
 Engine::Engine()
 {
 	// Initialize other engine components here
 	this->is_running = true;
-	
+	Game::Start();
 }
 
 Engine::~Engine()
@@ -18,13 +19,15 @@ Engine::~Engine()
 void Engine::UpdateEditor()
 {
 
-	//Update Engine Entities
+	//Update Editor
 	tileEditor.UpdateEditor();
 }
 
 void Engine::UpdateReal(Camera3D* cam)
 {
+	//Update Real Editor and Game
 	realEditor.Update(cam);
+	Game::Update();
 }
 
 void Engine::DrawReal()
