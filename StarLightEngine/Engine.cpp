@@ -48,11 +48,11 @@ void Engine::DrawGUI()
 {
 	//Draw GUI Elements
 	DrawFPS(GetScreenWidth()/2, 0);//FPS
-	Game::DrawUi();
 
 	if (Shared::dialougeMode) {
 		DialougeSystem::DrawDialouge();//Dialouge Box Draw
 		DialougeSystem::RenderDialougeTexts(DialougeSystem::selectedDialougeNpcName, DialougeSystem::selectedDialougeName);//Dialouge Text
 	}
+
 
 }
