@@ -12,11 +12,16 @@ void Game::Start()
 	hand.CreateHand("handGun");
 }
 
-void Game::Draw()
+void Game::DrawReal()
 {
 	//Draw the game scene, render all the entities and UI elements.
 	hand.DrawHand();
 
+}
+
+void Game::DrawUi()
+{
+	//Draw the game UI elements, such as health bars, score, etc.
 }
 
 void Game::Update()

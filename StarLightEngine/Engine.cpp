@@ -35,7 +35,7 @@ void Engine::DrawReal()
 
 	//Draw Real Editor and Game
 	realEditor.Draw();
-	Game::Draw();
+	Game::DrawReal();
 }
 
 void Engine::DrawEditor()
@@ -46,7 +46,9 @@ void Engine::DrawEditor()
 
 void Engine::DrawGUI()
 {
+	//Draw GUI Elements
 	DrawFPS(GetScreenWidth()/2, 0);//FPS
+	Game::DrawUi();
 
 	if (Shared::dialougeMode) {
 		DialougeSystem::DrawDialouge();//Dialouge Box Draw
