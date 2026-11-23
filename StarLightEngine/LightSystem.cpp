@@ -61,6 +61,15 @@ void LightSystem::DrawLightEX(bool& camMode)
 	}
 }
 
+void LightSystem::DuplicateSelectedLight(Light* closestLight)
+{
+	if (closestLight) {
+		Light newLight = *closestLight;
+		newLight.position = Vector3Add(newLight.position, { 10,0,0 }); // Offset the duplicated light's position
+		Shared::lights.push_back(newLight);
+	}
+}
+
 void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 {
 	if (camMode == false) return;//PLayer cam
@@ -84,12 +93,14 @@ void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 
 	//If closest Light is found, check for selection or deletion
 	if (closestLight) {
+		//Select
 		if (IsKeyPressed(KEY_C)) {
 			selectedLight = closestLight;
 			freeCamToggle = false;
 		}
 
-		if (closestLight && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+		//Delete the closest light if right mouse button is pressed
+		if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
 
 			//Index found using pointer subtraction
 			auto index = closestLight - Shared::lights.data();
@@ -98,6 +109,11 @@ void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 			freeCamToggle = true;
 
 			Shared::lights.erase(Shared::lights.begin() + index);
+		}
+
+		//Duplicate Light
+		if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_X)) {
+			DuplicateSelectedLight(closestLight);
 		}
 	}
 
@@ -120,6 +136,7 @@ void LightSystem::Update(bool& camMode, bool& freeCamToggle)
 		selectedLight->position = Vector3Add(selectedLight->position, { 0,move.y, 0 });
 		//----Updateing XZ---
 		selectedLight->position = Vector3Add(selectedLight->position, {move.x,0,move.z});
+
 	}
 
 	//Deselect

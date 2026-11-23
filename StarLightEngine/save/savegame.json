@@ -6,9 +6,9 @@
     "decals": [],
     "defaultLight": {
         "color": [
-            255,
-            255,
-            255,
+            49,
+            74,
+            76,
             255
         ],
         "dir": [
@@ -17,19 +17,474 @@
             0.0
         ],
         "enabled": true,
-        "intensity": 10.0,
+        "intensity": 2.5,
         "position": [
             1000.0,
             1000.0,
             1000.0
         ],
-        "range": 2500.0,
+        "range": 10000.0,
         "spotAngle": 45.0,
         "type": 0
     },
+    "dialouges": [
+        {
+            "dialouges": [
+                {
+                    "dialougeName": "1",
+                    "texts": [
+                        {
+                            "fontSize": 38,
+                            "position": [
+                                0.0,
+                                0.0
+                            ],
+                            "text": "What happened?",
+                            "textColor": [
+                                255,
+                                255,
+                                255,
+                                255
+                            ]
+                        },
+                        {
+                            "fontSize": 38,
+                            "position": [
+                                0.0,
+                                0.0
+                            ],
+                            "text": "Where am I?",
+                            "textColor": [
+                                255,
+                                255,
+                                255,
+                                255
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "npcName": "ethan"
+        }
+    ],
     "doorSwitches": [],
     "isCutscenePlaying": false,
-    "lights": [],
+    "lights": [
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                961.4492797851563,
+                192.418212890625,
+                194.5147247314453
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                111,
+                74,
+                23,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                803.07080078125,
+                194.15084838867188,
+                -688.9708862304688
+            ],
+            "range": 1000.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                111,
+                29,
+                29,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 7.5,
+            "position": [
+                1070.2109375,
+                194.15084838867188,
+                1036.2955322265625
+            ],
+            "range": 1009.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                1050.8284912109375,
+                192.418212890625,
+                -1792.6185302734375
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                1938.60791015625,
+                192.418212890625,
+                -1854.3704833984375
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                111,
+                29,
+                29,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                2862.685791015625,
+                167.13137817382813,
+                -2083.664306640625
+            ],
+            "range": 1000.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                3532.688232421875,
+                192.418212890625,
+                -1478.36962890625
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                3879.80126953125,
+                192.418212890625,
+                -1108.3162841796875
+            ],
+            "range": 275.125,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                111,
+                29,
+                29,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                4469.3603515625,
+                192.418212890625,
+                -532.5291137695313
+            ],
+            "range": 1299.699951171875,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                51,
+                102,
+                145,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 10.0,
+            "position": [
+                4259.9404296875,
+                192.418212890625,
+                731.0977172851563
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                85,
+                70,
+                1,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                4268.931640625,
+                184.24349975585938,
+                1532.1104736328125
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                85,
+                70,
+                1,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                2353.079345703125,
+                184.24349975585938,
+                1983.9560546875
+            ],
+            "range": 1000.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                85,
+                70,
+                1,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 8.0,
+            "position": [
+                3436.35205078125,
+                184.24349975585938,
+                1706.777587890625
+            ],
+            "range": 400.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                6,
+                67,
+                127,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 7.0,
+            "position": [
+                3022.216552734375,
+                159.02523803710938,
+                1170.822509765625
+            ],
+            "range": 250.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                0,
+                135,
+                195,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 2.0,
+            "position": [
+                4148.32861328125,
+                132.37716674804688,
+                1139.343017578125
+            ],
+            "range": 100.1500015258789,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                0,
+                135,
+                195,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 7.0,
+            "position": [
+                3662.95654296875,
+                188.37716674804688,
+                728.998779296875
+            ],
+            "range": 250.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                111,
+                29,
+                29,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 7.0,
+            "position": [
+                2657.640380859375,
+                192.37716674804688,
+                726.7560424804688
+            ],
+            "range": 1000.0,
+            "spotAngle": 45.0,
+            "type": 0
+        },
+        {
+            "color": [
+                0,
+                135,
+                195,
+                255
+            ],
+            "dir": [
+                0.0,
+                -1.0,
+                0.0
+            ],
+            "enabled": true,
+            "intensity": 7.0,
+            "position": [
+                3830.23486328125,
+                192.37716674804688,
+                1299.307373046875
+            ],
+            "range": 250.0,
+            "spotAngle": 45.0,
+            "type": 0
+        }
+    ],
     "npcCutscenes": [],
     "npcs": [],
     "player": {
@@ -87,7 +542,7 @@
                     936.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -139,7 +594,7 @@
                     1032.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -223,7 +678,7 @@
                     1032.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -335,7 +790,7 @@
                     1080.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -386,6 +841,10 @@
                 ],
                 [
                     1640.0,
+                    1096.0
+                ],
+                [
+                    1640.0,
                     1144.0
                 ],
                 [
@@ -414,6 +873,10 @@
                 ],
                 [
                     1640.0,
+                    1096.0
+                ],
+                [
+                    1640.0,
                     1144.0
                 ],
                 [
@@ -421,12 +884,15 @@
                     1144.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
                 1,
                 0,
+                6,
+                1,
+                6,
                 5,
                 1,
                 5,
@@ -511,7 +977,7 @@
                     984.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -607,7 +1073,7 @@
                     1032.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -667,7 +1133,7 @@
                     936.0
                 ]
             ],
-            "ceilingTextureName": "tile1",
+            "ceilingTextureName": "Horror_Brick_06-128x128",
             "floor": 0,
             "floorPoints": [
                 [
@@ -703,7 +1169,7 @@
                     936.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -799,7 +1265,7 @@
                     552.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -895,7 +1361,7 @@
                     472.0
                 ]
             ],
-            "floorTextureName": "tile1",
+            "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
@@ -923,7 +1389,7 @@
     ],
     "walls": [
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 856.0,
                 1144.0
@@ -938,11 +1404,11 @@
                 856.0,
                 936.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1192.0,
                 1144.0
@@ -957,11 +1423,11 @@
                 856.0,
                 1144.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1192.0,
                 1080.0
@@ -976,11 +1442,11 @@
                 1192.0,
                 1144.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1192.0,
                 936.0
@@ -995,11 +1461,11 @@
                 1192.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1032.0,
                 936.0
@@ -1014,11 +1480,11 @@
                 1192.0,
                 936.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 856.0,
                 936.0
@@ -1033,11 +1499,11 @@
                 1000.0,
                 936.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1272.0,
                 1080.0
@@ -1052,11 +1518,11 @@
                 1192.0,
                 1080.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_02-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1448.0,
                 1080.0
@@ -1071,11 +1537,11 @@
                 1304.0,
                 1080.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1448.0,
                 1032.0
@@ -1090,11 +1556,11 @@
                 1448.0,
                 1080.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1384.0,
                 1032.0
@@ -1109,11 +1575,11 @@
                 1448.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1192.0,
                 1032.0
@@ -1128,11 +1594,11 @@
                 1352.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1352.0,
                 1016.0
@@ -1147,11 +1613,11 @@
                 1352.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1224.0,
                 1016.0
@@ -1166,11 +1632,11 @@
                 1352.0,
                 1016.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1224.0,
                 840.0
@@ -1185,11 +1651,11 @@
                 1224.0,
                 1016.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1480.0,
                 840.0
@@ -1204,11 +1670,11 @@
                 1224.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1480.0,
                 952.0
@@ -1223,11 +1689,11 @@
                 1480.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1480.0,
                 1016.0
@@ -1242,11 +1708,11 @@
                 1480.0,
                 984.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1384.0,
                 1016.0
@@ -1261,11 +1727,11 @@
                 1480.0,
                 1016.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1384.0,
                 1032.0
@@ -1280,11 +1746,11 @@
                 1384.0,
                 1016.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1272.0,
                 1096.0
@@ -1299,11 +1765,11 @@
                 1272.0,
                 1080.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1208.0,
                 1096.0
@@ -1318,11 +1784,11 @@
                 1272.0,
                 1096.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1208.0,
                 1160.0
@@ -1337,11 +1803,11 @@
                 1208.0,
                 1096.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1128.0,
                 1160.0
@@ -1356,11 +1822,11 @@
                 1208.0,
                 1160.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1128.0,
                 1272.0
@@ -1375,11 +1841,11 @@
                 1128.0,
                 1160.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1432.0,
                 1272.0
@@ -1394,11 +1860,11 @@
                 1128.0,
                 1272.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1432.0,
                 1176.0
@@ -1413,11 +1879,11 @@
                 1432.0,
                 1272.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1432.0,
                 1112.0
@@ -1432,11 +1898,11 @@
                 1432.0,
                 1144.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1304.0,
                 1112.0
@@ -1451,11 +1917,11 @@
                 1432.0,
                 1112.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1304.0,
                 1080.0
@@ -1470,11 +1936,11 @@
                 1304.0,
                 1112.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1704.0,
                 1176.0
@@ -1489,11 +1955,11 @@
                 1432.0,
                 1176.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1704.0,
                 1032.0
@@ -1508,11 +1974,11 @@
                 1704.0,
                 1176.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1688.0,
                 1032.0
@@ -1527,11 +1993,11 @@
                 1704.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1640.0,
                 1032.0
@@ -1546,30 +2012,11 @@
                 1656.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
-            "endPos": [
-                1640.0,
-                1144.0
-            ],
-            "floor": 0,
-            "id": 34,
-            "inSector": true,
-            "isDoor": false,
-            "isOpen": false,
-            "layer": 0,
-            "startPos": [
-                1640.0,
-                1032.0
-            ],
-            "textureName": "tile1",
-            "wallHeight": 200.0
-        },
-        {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1432.0,
                 1144.0
@@ -1584,11 +2031,11 @@
                 1640.0,
                 1144.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1592.0,
                 952.0
@@ -1603,11 +2050,11 @@
                 1480.0,
                 952.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1592.0,
                 1064.0
@@ -1622,11 +2069,11 @@
                 1592.0,
                 952.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1640.0,
                 1064.0
@@ -1641,11 +2088,11 @@
                 1592.0,
                 1064.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1560.0,
                 1096.0
@@ -1660,11 +2107,11 @@
                 1640.0,
                 1096.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1560.0,
                 984.0
@@ -1679,11 +2126,11 @@
                 1560.0,
                 1096.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1480.0,
                 984.0
@@ -1698,11 +2145,11 @@
                 1560.0,
                 984.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1656.0,
                 840.0
@@ -1717,11 +2164,11 @@
                 1656.0,
                 1032.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1512.0,
                 840.0
@@ -1736,11 +2183,11 @@
                 1656.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1512.0,
                 632.0
@@ -1755,11 +2202,11 @@
                 1512.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1880.0,
                 840.0
@@ -1774,11 +2221,11 @@
                 1880.0,
                 632.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1688.0,
                 840.0
@@ -1793,11 +2240,11 @@
                 1880.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1688.0,
                 1032.0
@@ -1812,11 +2259,11 @@
                 1688.0,
                 840.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1000.0,
                 792.0
@@ -1831,11 +2278,11 @@
                 1000.0,
                 936.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 888.0,
                 792.0
@@ -1850,11 +2297,11 @@
                 1000.0,
                 792.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 888.0,
                 552.0
@@ -1869,11 +2316,11 @@
                 888.0,
                 792.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1016.0,
                 552.0
@@ -1888,11 +2335,11 @@
                 888.0,
                 552.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1096.0,
                 552.0
@@ -1907,11 +2354,11 @@
                 1048.0,
                 552.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1096.0,
                 792.0
@@ -1926,11 +2373,11 @@
                 1096.0,
                 552.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1032.0,
                 792.0
@@ -1945,11 +2392,11 @@
                 1096.0,
                 792.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1032.0,
                 936.0
@@ -1964,11 +2411,11 @@
                 1032.0,
                 792.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1016.0,
                 424.0
@@ -1983,11 +2430,11 @@
                 1016.0,
                 552.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_06-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1272.0,
                 424.0
@@ -2002,11 +2449,11 @@
                 1016.0,
                 424.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_06-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1272.0,
                 296.0
@@ -2021,11 +2468,11 @@
                 1272.0,
                 424.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1512.0,
                 296.0
@@ -2040,11 +2487,11 @@
                 1272.0,
                 296.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1512.0,
                 472.0
@@ -2059,11 +2506,11 @@
                 1512.0,
                 296.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1496.0,
                 472.0
@@ -2078,11 +2525,11 @@
                 1512.0,
                 472.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1048.0,
                 472.0
@@ -2097,11 +2544,11 @@
                 1464.0,
                 472.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_06-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1048.0,
                 552.0
@@ -2116,11 +2563,11 @@
                 1048.0,
                 472.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_06-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1464.0,
                 536.0
@@ -2135,11 +2582,11 @@
                 1464.0,
                 472.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1576.0,
                 536.0
@@ -2154,11 +2601,11 @@
                 1464.0,
                 536.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1576.0,
                 632.0
@@ -2173,11 +2620,11 @@
                 1576.0,
                 536.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1608.0,
                 504.0
@@ -2192,11 +2639,11 @@
                 1608.0,
                 632.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1496.0,
                 504.0
@@ -2211,11 +2658,11 @@
                 1608.0,
                 504.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1496.0,
                 472.0
@@ -2230,11 +2677,11 @@
                 1496.0,
                 504.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1576.0,
                 632.0
@@ -2249,11 +2696,11 @@
                 1512.0,
                 632.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 92,
+            "currentWallId": 96,
             "endPos": [
                 1880.0,
                 632.0
@@ -2268,7 +2715,45 @@
                 1608.0,
                 632.0
             ],
-            "textureName": "tile1",
+            "textureName": "Horror_Brick_08-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 96,
+            "endPos": [
+                1640.0,
+                1096.0
+            ],
+            "floor": 0,
+            "id": 94,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1640.0,
+                1144.0
+            ],
+            "textureName": "Horror_Brick_08-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 96,
+            "endPos": [
+                1640.0,
+                1064.0
+            ],
+            "floor": 0,
+            "id": 95,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1640.0,
+                1032.0
+            ],
+            "textureName": "Horror_Brick_08-128x128",
             "wallHeight": 200.0
         }
     ],

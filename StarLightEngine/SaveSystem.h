@@ -48,5 +48,8 @@ private:
 	static void SaveTriggers(json& j);
 	static void LoadTriggers(const json& j);
 
+	static void SaveDialouges(json& j);
+	static void LoadDialouges(const json& j);
+
 };
 

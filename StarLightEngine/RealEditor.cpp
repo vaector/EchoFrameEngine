@@ -116,7 +116,7 @@ void RealEditor::Update(Camera3D* cam)
 	UpdateTrigger();
 
 	if (IsKeyPressed(KEY_G)) {
-		DialougeSystem::StartDialouge("ethan", "1");
+		DialougeSystem::StartDialouge("ethan", "entrance_1");
 	}
 }
 
@@ -145,7 +145,15 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 right = Vector3Normalize(Vector3CrossProduct(Shared::free.forward, { 0,1,0 }));
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::free.forward));
 
+		//Shift increasing speed
+		if (IsKeyDown(KEY_LEFT_SHIFT))
+			Shared::free.moveSpeed = 300.f;
+		else
+			Shared::free.moveSpeed = 150.f;
+
+
 		if (freeCamToggle) {
+
 			//Movement
 			if (IsKeyDown(KEY_W))
 				move = Vector3Add(move, Vector3Scale(Shared::free.forward, Shared::free.moveSpeed * dt));
@@ -190,6 +198,12 @@ void RealEditor::UpdateCam(Camera3D* cam)
 		Vector3 up = Vector3Normalize(Vector3CrossProduct(right, Shared::player.forward));
 
 		//MOVEMENT
+
+		//Shift increasing speed
+		if (IsKeyDown(KEY_LEFT_SHIFT))
+			Shared::player.moveSpeed = 220.f;
+		else
+			Shared::player.moveSpeed = 150.f;
 
 		if (IsKeyDown(KEY_W))
 			move = Vector3Add(move, Vector3Scale(Shared::player.forward, Shared::player.moveSpeed * dt));

@@ -70,7 +70,9 @@ void TileEditor::UpdateEditor()
 	bool draggingWall = UpdateWallVertices();
 	bool draggingSector = UpdateSectorVertices();
 
-	if (!draggingWall && !draggingSector && WallMode)
+	bool split = SplitWall() || SplitSector();
+
+	if (!split && !draggingWall && !draggingSector && WallMode)
 		UpdateWall();
 
 	//Update Sector
@@ -83,8 +85,6 @@ void TileEditor::UpdateEditor()
 	UpdateDoor();
 	UpdateDoorSwitch();
 	UpdatePlayerPos();
-
-	SplitWall();
 
 	//Remove
 	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
@@ -455,9 +455,9 @@ void TileEditor::UpdatePlayerPos()
 	}
 }
 
-void TileEditor::SplitWall()
+bool TileEditor::SplitWall()
 {
-	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || Shared::doorMode) return;
+	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || Shared::doorMode) return false;
 
 	//Getting the Tile that is colliding with the mouse in grid space.
 	int tileX = (int)mouse.x / tileSize;
@@ -465,7 +465,7 @@ void TileEditor::SplitWall()
 	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
 
 
-	for(int i = 0; i < Shared::walls.size(); i++) {
+	for(int i = Shared::walls.size()-1; i >= 0; i--) {
 		auto& wall = Shared::walls[i];
 		if (wall->floor != Shared::floor || wall->layer != Shared::layer) continue;
 
@@ -473,6 +473,7 @@ void TileEditor::SplitWall()
 
 		if (CheckCollisionPointLine(mouse, wall->startPos, wall->endPos, 4)) {
 			if (Vector2Distance(tile, wall->startPos) < 1.0f || Vector2Distance(tile, wall->endPos) < 1.0f) continue;
+			if (CheckCollisionPointCircle(mouse, wall->startPos, 4) || CheckCollisionPointCircle(mouse, wall->endPos, 4)) return false;
 
 			Vector2 oldEndPos = wall->endPos;
 			wall->endPos = tile;
@@ -492,16 +493,74 @@ void TileEditor::SplitWall()
 			newWall->layer = wall->layer;
 			
 			Shared::walls.insert(Shared::walls.begin() + i + 1, newWall);
+			return true;
 		}
 	}
 
+	return false;
+}
+
+bool TileEditor::SplitSector()
+{
+	if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || Shared::doorMode) return false;
+
+	//Getting the Tile that is colliding with the mouse in grid space.
+	int tileX = (int)mouse.x / tileSize;
+	int tileY = (int)mouse.y / tileSize;
+	Vector2 tile = { (float)(tileX * tileSize + tileSize / 2) , (float)(tileY * tileSize + tileSize / 2) };
+
+	bool dirty = false;
+
+	for (int j = Shared::sectors.size()-1; j >= 0; j--) {
+		if (Shared::sectors[j].floor != Shared::floor || Shared::sectors[j].layer != Shared::layer) continue;
+
+		auto& sector = Shared::sectors[j];
+
+		//Floors
+		for (int i = 0; i <= sector.floorPoints.size() - 1; i++) {
+			Vector2 p0 = sector.floorPoints[i];
+			Vector2 p1 = sector.floorPoints[(i + 1) % sector.floorPoints.size()];
+
+			if (CheckCollisionPointCircle(mouse, p0, 4) || CheckCollisionPointCircle(mouse, p1, 4)) return false;
+			if (CheckCollisionPointLine(mouse, p0, p1, 4)) {
+				// Implementation for splitting sector
+				sector.floorPoints.insert(sector.floorPoints.begin() + (i + 1), tile);
+				dirty = true;
+				break;
+			}
+		}
+		//Ceilings
+		for (int i = 0; i <= sector.ceilingPoints.size() - 1; i++) {
+			Vector2 p0 = sector.ceilingPoints[i];
+			Vector2 p1 = sector.ceilingPoints[(i + 1) % sector.ceilingPoints.size()];
+
+			if (CheckCollisionPointCircle(mouse, p0, 4) || CheckCollisionPointCircle(mouse, p1, 4)) return false;
+			if (CheckCollisionPointLine(mouse, p0, p1, 4)) {
+				// Implementation for splitting sector
+				sector.ceilingPoints.insert(sector.ceilingPoints.begin() + (i + 1), tile);
+				dirty = true;
+				break;
+			}
+		}
+
+		// If we modified the sector, we need to update its indices for rendering
+		if (dirty) {
+			std::vector<std::vector<Vector2>> polygon;
+			polygon.push_back(sector.floorPoints);
+			sector.indices = mapbox::earcut<int>(polygon);
+			dirty = false;
+			return true; // Exit after modifying one sector to avoid multiple modifications in one click
+		}
+	}
+
+	return false;
 
 }
 
 bool TileEditor::RemoveWall()
 {
 	//Removing Walls
-	for (int i = 0; i < Shared::walls.size(); i++) {
+	for (int i = Shared::walls.size()-1; i >= 0; i--) {
 		if (Shared::walls[i]->floor != Shared::floor || Shared::walls[i]->layer != Shared::layer) continue;
 
 		if (CheckCollisionPointLine(mouse, Shared::walls[i]->startPos, Shared::walls[i]->endPos, 4)) {
@@ -529,7 +588,7 @@ bool TileEditor::RemoveWall()
 bool TileEditor::RemoveSector()
 {
 	//Removing Sector
-	for (int j = 0; j < Shared::sectors.size(); j++) {
+	for (int j = Shared::sectors.size()-1; j >= 0; j--) {
 		if (Shared::sectors[j].floor != Shared::floor || Shared::sectors[j].layer != Shared::layer) continue;
 
 		for (int i = 1; i < Shared::sectors[j].floorPoints.size() - 1; i++) {

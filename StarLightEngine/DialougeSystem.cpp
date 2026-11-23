@@ -14,6 +14,7 @@ std::string DialougeSystem::selectedDialougeName = "";
 void DialougeSystem::DrawDialouge()
 {
 	DrawRectangle(GetScreenWidth() / 6, GetScreenHeight()/1.5, GetScreenWidth()/1.5, GetScreenHeight()/4, {50, 50, 50, 200});
+	DrawRectangleLines(GetScreenWidth() / 6, GetScreenHeight() / 1.5, GetScreenWidth() / 1.5, GetScreenHeight() / 4, WHITE);
 }
 
 void DialougeSystem::AddDialouge(std::string& npcName, std::string& dialougeName,DialougeText& dialougeText)

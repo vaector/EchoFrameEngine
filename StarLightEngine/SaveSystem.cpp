@@ -4,6 +4,7 @@
 #include <fstream>
 #include <filesystem>
 #include "Shared.h"
+#include "DialougeSystem.h"
 
 namespace fs = std::filesystem;
 
@@ -36,6 +37,7 @@ void SaveSystem::SaveGame(const std::string& filename)
 	SaveDecals(data);
 	SaveTriggers(data);
 	SaveWorldData(data);
+	SaveDialouges(data);
 
 	file << data.dump(4); // Dump the JSON object to the file with indentation of 4 spaces
 	file.close();
@@ -78,6 +80,7 @@ void SaveSystem::LoadGame(const std::string& filename)
 	LoadDecals(data);
 	LoadTriggers(data);
 	LoadWorldData(data);
+	LoadDialouges(data);
 }
 
 void SaveSystem::SaveWorldData(json& j)
@@ -855,5 +858,86 @@ void SaveSystem::LoadTriggers(const json& j)
 		trigger.box = { {t["box"][0][0].get<float>(), t["box"][0][1].get<float>(), t["box"][0][2].get<float>()}, {t["box"][1][0].get<float>(), t["box"][1][1].get<float>(), t["box"][1][2].get<float>()} };
 
 		Shared::boxTriggers[trigger.name] = trigger;
+	}
+}
+
+void SaveSystem::SaveDialouges(json& j)
+{
+	json dialouges = json::array();
+
+	for (const auto& [npcName, npcDialouges] : DialougeSystem::dialouges)
+	{
+		json npcJson;
+		npcJson["npcName"] = npcName;
+
+		json npcDialougesJson = json::array();
+
+		for (const auto& [dialougeName, texts] : npcDialouges)
+		{
+			json dialougeJson;
+			dialougeJson["dialougeName"] = dialougeName;
+
+			json textsJson = json::array();
+
+			for (const auto& text : texts)
+			{
+				json textJson;
+				textJson["text"] = text.text;
+				textJson["textColor"] = { text.textColor.r, text.textColor.g, text.textColor.b, text.textColor.a };
+				textJson["fontSize"] = text.fontSize;
+				textJson["position"] = { text.position.x, text.position.y };
+
+				textsJson.push_back(textJson);
+			}
+
+			dialougeJson["texts"] = textsJson;
+			npcDialougesJson.push_back(dialougeJson);
+		}
+
+		npcJson["dialouges"] = npcDialougesJson;
+		dialouges.push_back(npcJson);
+	}
+
+	j["dialouges"] = dialouges;
+}
+
+void SaveSystem::LoadDialouges(const json& j)
+{
+	if (!j.contains("dialouges"))
+		return;
+
+	DialougeSystem::dialouges.clear();
+
+	for (auto& npc : j["dialouges"])
+	{
+		std::string npcName = npc["npcName"].get<std::string>();
+
+		for (auto& d : npc["dialouges"])
+		{
+			std::string dialougeName = d["dialougeName"].get<std::string>();
+
+			std::vector<DialougeText> texts;
+
+			for (auto& t : d["texts"])
+			{
+				DialougeText text;
+				text.text = t["text"].get<std::string>();
+				text.textColor = {
+					t["textColor"][0].get<unsigned char>(),
+					t["textColor"][1].get<unsigned char>(),
+					t["textColor"][2].get<unsigned char>(),
+					t["textColor"][3].get<unsigned char>()
+				};
+				text.fontSize = t["fontSize"].get<int>();
+				text.position = {
+					t["position"][0].get<float>(),
+					t["position"][1].get<float>()
+				};
+
+				texts.push_back(text);
+			}
+
+			DialougeSystem::dialouges[npcName][dialougeName] = texts;
+		}
 	}
 }

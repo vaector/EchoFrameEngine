@@ -1,0 +1,372 @@
+{
+    "GlobalWallHeight": {
+        "value": 200
+    },
+    "boxTriggers": [],
+    "decals": [],
+    "defaultLight": {
+        "color": [
+            255,
+            255,
+            255,
+            255
+        ],
+        "dir": [
+            0.0,
+            -1.0,
+            0.0
+        ],
+        "enabled": true,
+        "intensity": 5.0,
+        "position": [
+            0.0,
+            1000.0,
+            0.0
+        ],
+        "range": 10000.0,
+        "spotAngle": 45.0,
+        "type": 0
+    },
+    "dialouges": [],
+    "doorSwitches": [],
+    "isCutscenePlaying": false,
+    "lights": [],
+    "npcCutscenes": [],
+    "npcs": [],
+    "player": {
+        "gravity": 512.0,
+        "height": 150.0,
+        "jump": 250.0,
+        "moveSpeed": 150,
+        "playerPos": [
+            1025.4305419921875,
+            0.0,
+            1038.040283203125
+        ],
+        "radius": 8.0,
+        "setPlayerPos": true
+    },
+    "playingTrack": "",
+    "ramps": [],
+    "sectors": [
+        {
+            "ceilingPoints": [
+                [
+                    712.0,
+                    360.0
+                ],
+                [
+                    712.0,
+                    1096.0
+                ],
+                [
+                    1480.0,
+                    1096.0
+                ],
+                [
+                    1480.0,
+                    344.0
+                ],
+                [
+                    1480.0,
+                    344.0
+                ]
+            ],
+            "ceilingTextureName": "blue_brick",
+            "floor": 0,
+            "floorPoints": [
+                [
+                    712.0,
+                    360.0
+                ],
+                [
+                    712.0,
+                    1096.0
+                ],
+                [
+                    1480.0,
+                    1096.0
+                ],
+                [
+                    1480.0,
+                    344.0
+                ],
+                [
+                    1480.0,
+                    344.0
+                ]
+            ],
+            "floorTextureName": "blue_brick",
+            "hasCeiling": false,
+            "hasFloor": true,
+            "indices": [
+                3,
+                2,
+                1,
+                3,
+                1,
+                0
+            ],
+            "layer": 0
+        },
+        {
+            "ceilingPoints": [
+                [
+                    968.0,
+                    1016.0
+                ],
+                [
+                    968.0,
+                    1080.0
+                ],
+                [
+                    1144.0,
+                    1080.0
+                ],
+                [
+                    1144.0,
+                    1016.0
+                ],
+                [
+                    1048.0,
+                    1016.0
+                ],
+                [
+                    1048.0,
+                    984.0
+                ],
+                [
+                    1016.0,
+                    984.0
+                ],
+                [
+                    1016.0,
+                    1016.0
+                ]
+            ],
+            "ceilingTextureName": "blue_brick",
+            "floor": 0,
+            "floorPoints": [
+                [
+                    968.0,
+                    1016.0
+                ],
+                [
+                    968.0,
+                    1080.0
+                ],
+                [
+                    1144.0,
+                    1080.0
+                ],
+                [
+                    1144.0,
+                    1016.0
+                ],
+                [
+                    1048.0,
+                    1016.0
+                ],
+                [
+                    1048.0,
+                    984.0
+                ],
+                [
+                    1016.0,
+                    984.0
+                ],
+                [
+                    1016.0,
+                    1016.0
+                ]
+            ],
+            "floorTextureName": "blue_brick",
+            "hasCeiling": true,
+            "hasFloor": true,
+            "indices": [
+                1,
+                0,
+                7,
+                7,
+                6,
+                5,
+                7,
+                5,
+                4,
+                4,
+                3,
+                2,
+                4,
+                2,
+                1,
+                4,
+                1,
+                7
+            ],
+            "layer": 0
+        }
+    ],
+    "walls": [
+        {
+            "currentWallId": 43,
+            "endPos": [
+                968.0,
+                1080.0
+            ],
+            "floor": 0,
+            "id": 32,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                968.0,
+                1016.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                984.0,
+                1080.0
+            ],
+            "floor": 0,
+            "id": 33,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                968.0,
+                1080.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1144.0,
+                1080.0
+            ],
+            "floor": 0,
+            "id": 41,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1000.0,
+                1080.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1144.0,
+                1016.0
+            ],
+            "floor": 0,
+            "id": 34,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1144.0,
+                1080.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1048.0,
+                1016.0
+            ],
+            "floor": 0,
+            "id": 35,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1144.0,
+                1016.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1048.0,
+                984.0
+            ],
+            "floor": 0,
+            "id": 36,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1048.0,
+                1016.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                1016.0,
+                1016.0
+            ],
+            "floor": 0,
+            "id": 38,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                984.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 43,
+            "endPos": [
+                968.0,
+                1016.0
+            ],
+            "floor": 0,
+            "id": 39,
+            "inSector": true,
+            "isDoor": false,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1016.0,
+                1016.0
+            ],
+            "textureName": "blue_brick",
+            "wallHeight": 200.0
+        }
+    ],
+    "worldData": {
+        "worldPivot": [
+            1024.0,
+            1024.0
+        ],
+        "worldScale": 10.0
+    },
+    "worldObjectCutscenes": [],
+    "worldObjects": []
+}

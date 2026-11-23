@@ -50,7 +50,8 @@ public:
 	void UpdateDoorSwitch();
 	void UpdateSelectedWall();
 	void UpdatePlayerPos();
-	void SplitWall();
+	bool SplitWall();
+	bool SplitSector();
 
 	bool RemoveWall();
 	bool RemoveSector();

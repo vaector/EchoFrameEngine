@@ -4,9 +4,12 @@
 
 class ImguiWindow
 {
+private:
+	bool dialougeWindowOpen = false;
 
 public:
 	void UpdateImguiEditor();
+	void UpdateDialougeWindow();
 	void UpdateImguiExitPopup(bool& running);
 	void LoadPopup(std::string& fileName);
 	void SavePopup(std::string& fileName);

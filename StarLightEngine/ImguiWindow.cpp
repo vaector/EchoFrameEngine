@@ -10,6 +10,9 @@
 #include "LightSystem.h"
 #include "DialougeSystem.h"
 #include "BoxTrigger.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 void ImguiWindow::UpdateImguiEditor()
 {
@@ -35,6 +38,24 @@ void ImguiWindow::UpdateImguiEditor()
 	ImGui::NewLine();
 
 	if (ImGui::CollapsingHeader("SAVE_LOAD")) {
+
+		if (ImGui::CollapsingHeader("SAVED_FILES")) {
+			//List all files in the save folder
+			if (fs::exists("save")) {
+				for (const auto& entry : fs::directory_iterator("save")) {
+					if (entry.is_regular_file()) {
+						std::string filePath = entry.path().string();
+						std::string fileName = entry.path().filename().string();
+						ImGui::Text("%s", fileName.c_str());
+					}
+				}
+			}
+			else {
+				ImGui::Text("No save folder found.");
+			}
+		}
+
+		ImGui::NewLine();
 		// Save
 		if (ImGui::Button("Save"))
 			ImGui::OpenPopup("Save?");
@@ -112,6 +133,13 @@ void ImguiWindow::UpdateImguiEditor()
 				ImGui::SameLine();
 		}
 	}
+
+	ImGui::SeparatorText("Dialouges");
+	if (ImGui::Button("DIALOUGES"))
+		dialougeWindowOpen = !dialougeWindowOpen;
+	if (dialougeWindowOpen)
+		UpdateDialougeWindow();
+	ImGui::NewLine();
 
 	//---3D Editor----
 	if (ImGui::CollapsingHeader("3D PROPERTIES") && !Shared::editorMode) {
@@ -575,24 +603,6 @@ void ImguiWindow::UpdateImguiEditor()
 			}
 		}
 
-
-		if (ImGui::CollapsingHeader("DIALOUGES")) {
-			static DialougeText selectedDialougeText;
-			static std::string selectedDialougeName = "";
-			static std::string selectedDialougeNpc = "";
-			ImGui::InputTextMultiline("Dialouge Text", &selectedDialougeText.text);
-			ImGui::InputText("Dialouge Name", &selectedDialougeName);
-			ImGui::InputText("Dialouge NPC", &selectedDialougeNpc);
-
-			if (ImGui::Button("Add Dialouge"))
-			{
-				DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, selectedDialougeText);
-				std::cout << "Dialouge Text: " << selectedDialougeText.text << std::endl;
-				selectedDialougeText.text.clear();
-			}
-		}
-
-
 		if (ImGui::CollapsingHeader("TRIGGERS")) {
 			static std::string triggerName = "";
 			ImGui::InputText("Trigger Name", &triggerName);
@@ -653,6 +663,33 @@ void ImguiWindow::UpdateImguiEditor()
 
 	ImGui::End();
 	first = false;
+}
+
+void ImguiWindow::UpdateDialougeWindow()
+{
+	ImGui::Begin("Dialouge Editor");
+
+	ImGui::SetNextWindowPos(
+		ImVec2(GetScreenWidth() / 1.5f, 200),
+		ImGuiCond_Appearing,
+		ImVec2(0.5f, 0.5f)
+	);
+
+	static DialougeText selectedDialougeText;
+	static std::string selectedDialougeName = "";
+	static std::string selectedDialougeNpc = "";
+	ImGui::InputTextMultiline("Dialouge Text", &selectedDialougeText.text);
+	ImGui::InputText("Dialouge Name", &selectedDialougeName);
+	ImGui::InputText("Dialouge NPC", &selectedDialougeNpc);
+
+	if (ImGui::Button("Add Dialouge"))
+	{
+		DialougeSystem::AddDialouge(selectedDialougeNpc, selectedDialougeName, selectedDialougeText);
+		std::cout << "Dialouge Text: " << selectedDialougeText.text << std::endl;
+		selectedDialougeText.text.clear();
+	}
+
+	ImGui::End();
 }
 
 void ImguiWindow::UpdateImguiExitPopup(bool& running)
