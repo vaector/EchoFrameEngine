@@ -35,6 +35,7 @@ void Engine::DrawReal()
 
 	//Draw Real Editor and Game
 	realEditor.Draw();
+	Game::Draw();
 }
 
 void Engine::DrawEditor()
