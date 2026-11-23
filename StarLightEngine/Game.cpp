@@ -27,8 +27,12 @@ void Game::DrawUi()
 
 void Game::Update()
 {
+<<<<<<< HEAD
 	//Update the game state, handle input, update entities, and render the scene.
 
 	hand.UpdateHand();
 
+=======
+	//Update the game state, handle input, update entities.
+>>>>>>> origin/master
 }

@@ -1490,22 +1490,26 @@ void RealEditor::CreateDecal()
 		if(!closestWall)
 			return;
 
-		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
+		Vector3 wallStart = Shared::ToWorld({closestWall->startPos.x, 0, closestWall->startPos.y});
+		Vector3 wallEnd = Shared::ToWorld({closestWall->endPos.x, 0, closestWall->endPos.y});
+		Vector3 wallDirection = Vector3Normalize(Vector3Subtract(wallEnd, wallStart));
+
+		Vector2 dir = { wallDirection.x, wallDirection.z };
 		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
 		if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
 			normal = Vector3Scale(normal, -1.0f);
 
-		Vector3 bottomLeft = { closestWall->startPos.x, (closestWall->floor * Shared::globalWallHeight), closestWall->startPos.y };
-		Vector3 bottomRight = { closestWall->endPos.x, (closestWall->floor * Shared::globalWallHeight), closestWall->endPos.y };
-		Vector3 topLeft = { closestWall->startPos.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, closestWall->startPos.y };
-		Vector3 topRight = { closestWall->endPos.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, closestWall->endPos.y };
+		Vector3 bottomLeft = { wallStart.x, (closestWall->floor * Shared::globalWallHeight), wallStart.z };
+		Vector3 bottomRight = { wallEnd.x, (closestWall->floor * Shared::globalWallHeight), wallEnd.z };
+		Vector3 topLeft = { wallStart.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, wallStart.z };
+		Vector3 topRight = { wallEnd.x, (closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight, wallEnd.z };
 
 		RayCollision dCol = GetRayCollisionQuad(Shared::freeRay, bottomLeft, topLeft, topRight, bottomRight);
 
 		if (dCol.hit) {
 			Decal decal;
 
-			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 2.f));
+			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 1.5f));
 			decal.textureName = *Shared::selectedTextureName;
 			decal.floor = closestWall->floor;
 			decal.wallDir = dir;
