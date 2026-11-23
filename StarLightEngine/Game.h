@@ -4,7 +4,8 @@
 namespace Game
 {
 	void Start();
-	void Draw();
+	void DrawReal();
+	void DrawUi();
 	void Update();
 };
 
