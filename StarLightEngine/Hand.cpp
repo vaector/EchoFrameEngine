@@ -17,5 +17,7 @@ void Hand::UpdateHand()
 void Hand::DrawHand()
 {
 	//Render Hand
-	DrawTexture(Shared::textures[textureName], 200, 200, WHITE);
+	float width = GetScreenWidth()-(Shared::textures[textureName].width)*1.75;
+	float height = GetScreenHeight()-(Shared::textures[textureName].height)*1.75;
+	DrawTextureEx(Shared::textures[textureName], {width, height}, 0, 1.75, WHITE);
 }
