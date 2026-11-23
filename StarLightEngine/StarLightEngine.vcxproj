@@ -136,6 +136,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Hand.cpp" />
     <ClCompile Include="ImguiWindow.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="Entity.h" />
     <ClInclude Include="external\earcut.hpp" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Hand.h" />
     <ClInclude Include="ImguiWindow.h" />
     <ClInclude Include="imgui\extras\FA6FreeSolidFontData.h" />
     <ClInclude Include="imgui\extras\IconsFontAwesome6.h" />

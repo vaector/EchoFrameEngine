@@ -28,6 +28,12 @@
     <Filter Include="Source Files\EngineSourceFiles">
       <UniqueIdentifier>{1098fb0f-c78e-4984-a88b-da3828cfb337}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GameHeaderFiles">
+      <UniqueIdentifier>{f620fac7-fb9a-4280-aefe-210ed9eaaaca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameSourceFiles">
+      <UniqueIdentifier>{3b8e50b5-aa14-436b-83dc-6e49e7d1debb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui\imgui.cpp">
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="WorldObject.cpp">
       <Filter>Source Files\EngineSourceFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\GameSourceFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Hand.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +232,12 @@
     </ClInclude>
     <ClInclude Include="WorldObject.h">
       <Filter>Header Files\EngineHeaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files\GameHeaderFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Hand.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

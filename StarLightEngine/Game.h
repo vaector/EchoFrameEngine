@@ -1,5 +1,7 @@
 #pragma once
+#include "Hand.h"
 
+Hand hand;
 
 namespace Game
 {
