@@ -15,13 +15,14 @@ void Game::Start()
 void Game::DrawReal()
 {
 	//Draw the game scene, render all the entities and UI elements.
-	hand.DrawHand();
+	
 
 }
 
 void Game::DrawUi()
 {
 	//Draw the game UI elements, such as health bars, score, etc.
+	hand.DrawHand();
 }
 
 void Game::Update()
