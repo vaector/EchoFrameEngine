@@ -135,8 +135,38 @@ void Hand::UpdateNailShooting()
 
 void Hand::DrawHand()
 {
-	//Render Hand
-	float width = GetScreenWidth()-(Shared::textures[textureName].width)*1.5;
-	float height = GetScreenHeight()-(Shared::textures[textureName].height)*1.5;
-	DrawTextureEx(Shared::textures[textureName], {width, height}, -15.f, 1.5, WHITE);
+    // Render Hand
+    float width = GetScreenWidth() - (Shared::textures[textureName].width) * 1.25f;
+    float height = GetScreenHeight() - (Shared::textures[textureName].height) * 1.25f;
+
+    static float rotation = -15.f;
+	static float posY = height;
+    static float animationTime = 1.0f;
+
+    // Start shooting animation
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+        animationTime = 0.0f;
+
+    // Update animation
+    if (animationTime < 1.0f)
+    {
+        animationTime += GetFrameTime() / 0.2f;
+        animationTime = std::min(animationTime, 1.0f);
+
+        // Move forward, then return
+        float t = (animationTime < 0.5f) ? animationTime * 2.0f : (1.0f - animationTime) * 2.0f;
+
+        // Smooth animation
+        t = t * t * (3.0f - 2.0f * t);
+
+        rotation = Lerp(-15.f, 30.f, t);
+        posY = Lerp(height, height + 50.0f, t);
+    }
+    else
+    {
+        rotation = -15.f;
+		posY = height;
+    }
+
+    DrawTextureEx(Shared::textures[textureName], { width, posY }, rotation, 1.5, WHITE);
 }
