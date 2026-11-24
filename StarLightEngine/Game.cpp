@@ -1,15 +1,14 @@
 #include "Game.h"
 #include <iostream>
 #include "Shared.h"
-#include "Hand.h"
+#include "GameShared.h"
 
-Hand hand;
 
 void Game::Start()
 {
 	//Start the game, initialize all the necessary components and resources.
 
-	hand.CreateHand("handGun");
+	GameShared::hand.CreateHand("handGun");
 }
 
 void Game::DrawReal()
@@ -22,17 +21,13 @@ void Game::DrawReal()
 void Game::DrawUi()
 {
 	//Draw the game UI elements, such as health bars, score, etc.
-	hand.DrawHand();
+	GameShared::hand.DrawHand();
 }
 
 void Game::Update()
 {
-<<<<<<< HEAD
-	//Update the game state, handle input, update entities, and render the scene.
-
-	hand.UpdateHand();
-
-=======
 	//Update the game state, handle input, update entities.
->>>>>>> origin/master
+
+	GameShared::hand.UpdateHand();
+
 }

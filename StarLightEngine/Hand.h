@@ -9,6 +9,7 @@ public:
 
 	void CreateHand(std::string name);
 	void UpdateHand();
+	void UpdateNailShooting();
 	void DrawHand();
 };
 
