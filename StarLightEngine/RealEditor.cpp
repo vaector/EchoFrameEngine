@@ -374,7 +374,7 @@ void RealEditor::UpdateSector()
 		selectedFloor = nullptr;
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !decalMode) {
 		if (selectedFloor)
 			selectedFloor->floorTextureName = *Shared::selectedTextureName;
 		if (selectedCeiling)
@@ -1483,21 +1483,24 @@ void RealEditor::UpdateNpc()
 
 void RealEditor::CreateDecal()
 {
-	if (camMode == false || !IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return;//Player Cam Mode.
+	if (camMode == false || !IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return; // Player Cam Mode.
+	if (!decalMode) return;
 
-	if (decalMode) {
-		Wall* closestWall = GetRayWall(Shared::freeRay);
-		if(!closestWall)
-			return;
+	float closestDistance = FLT_MAX;
+	Vector3 hitPos{};
+	Vector3 hitAxisH{};
+	Vector3 hitAxisV{};
+	int hitFloor = 0;
+	bool foundHit = false;
 
-		Vector3 wallStart = Shared::ToWorld({closestWall->startPos.x, 0, closestWall->startPos.y});
-		Vector3 wallEnd = Shared::ToWorld({closestWall->endPos.x, 0, closestWall->endPos.y});
+	// Loop through walls
+	Wall* closestWall = GetRayWall(Shared::freeRay);
+
+	if (closestWall)
+	{
+		Vector3 wallStart = Shared::ToWorld({ closestWall->startPos.x, 0, closestWall->startPos.y });
+		Vector3 wallEnd = Shared::ToWorld({ closestWall->endPos.x, 0, closestWall->endPos.y });
 		Vector3 wallDirection = Vector3Normalize(Vector3Subtract(wallEnd, wallStart));
-
-		Vector2 dir = { wallDirection.x, wallDirection.z };
-		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
-			normal = Vector3Scale(normal, -1.0f);
 
 		Vector3 bottomLeft = { wallStart.x, (closestWall->floor * Shared::globalWallHeight), wallStart.z };
 		Vector3 bottomRight = { wallEnd.x, (closestWall->floor * Shared::globalWallHeight), wallEnd.z };
@@ -1506,116 +1509,250 @@ void RealEditor::CreateDecal()
 
 		RayCollision dCol = GetRayCollisionQuad(Shared::freeRay, bottomLeft, topLeft, topRight, bottomRight);
 
-		if (dCol.hit) {
-			Decal decal;
+		if (dCol.hit && dCol.distance < closestDistance)
+		{
+			Vector3 axisH = wallDirection;
+			Vector3 axisV = { 0, 1, 0 };
 
-			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 1.0f));
-			decal.textureName = *Shared::selectedTextureName;
-			decal.floor = closestWall->floor;
-			decal.wallDir = dir;
-			Shared::decals.push_back(decal);
+			Vector3 normal = Vector3Normalize(Vector3CrossProduct(axisV, axisH));
+
+			if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
+				normal = Vector3Scale(normal, -1.0f);
+
+			hitPos = dCol.point;
+			hitAxisH = axisH;
+			hitAxisV = axisV;
+			hitFloor = closestWall->floor;
+			closestDistance = dCol.distance;
+			foundHit = true;
 		}
 	}
 
+	// Loop through sectors (Floors/Ceilings)
+	for (auto& sector : Shared::sectors)
+	{
+		float floorY = (float)(sector.floor * Shared::globalWallHeight);
+		float ceilingY = floorY + Shared::globalWallHeight - 1.0f;
+
+		// Floor
+		for (size_t j = 0; j + 2 < sector.indices.size(); j += 3)
+		{
+			int i0 = sector.indices[j];
+			int i1 = sector.indices[j + 1];
+			int i2 = sector.indices[j + 2];
+
+			Vector3 p0 = Shared::ToWorld({ sector.floorPoints[i0].x, floorY, sector.floorPoints[i0].y });
+			Vector3 p1 = Shared::ToWorld({ sector.floorPoints[i1].x, floorY, sector.floorPoints[i1].y });
+			Vector3 p2 = Shared::ToWorld({ sector.floorPoints[i2].x, floorY, sector.floorPoints[i2].y });
+
+			RayCollision dCol = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
+
+			if (dCol.hit && dCol.distance < closestDistance)
+			{
+				Vector3 axisH = { 1, 0, 0 };
+				Vector3 axisV = { 0, 0, 1 };
+
+				Vector3 normal = Vector3Normalize(Vector3CrossProduct(axisV, axisH));
+
+				if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
+					normal = Vector3Scale(normal, -1.0f);
+
+				hitPos = dCol.point;
+				hitAxisH = axisH;
+				hitAxisV = axisV;
+				hitFloor = sector.floor;
+				closestDistance = dCol.distance;
+				foundHit = true;
+			}
+		}
+
+		// Ceiling
+		for (size_t j = 0; j + 2 < sector.indices.size(); j += 3)
+		{
+			int i0 = sector.indices[j];
+			int i1 = sector.indices[j + 1];
+			int i2 = sector.indices[j + 2];
+
+			Vector3 p0 = Shared::ToWorld({ sector.ceilingPoints[i0].x, ceilingY, sector.ceilingPoints[i0].y });
+			Vector3 p1 = Shared::ToWorld({ sector.ceilingPoints[i1].x, ceilingY, sector.ceilingPoints[i1].y });
+			Vector3 p2 = Shared::ToWorld({ sector.ceilingPoints[i2].x, ceilingY, sector.ceilingPoints[i2].y });
+
+			RayCollision dCol = GetRayCollisionTriangle(Shared::freeRay, p0, p1, p2);
+
+			if (dCol.hit && dCol.distance < closestDistance)
+			{
+				Vector3 axisH = { 1, 0, 0 };
+				Vector3 axisV = { 0, 0, -1 };
+
+				Vector3 normal = Vector3Normalize(Vector3CrossProduct(axisV, axisH));
+
+				if (Vector3DotProduct(Shared::freeRay.direction, normal) > 0.0f)
+					normal = Vector3Scale(normal, -1.0f);
+
+				hitPos = dCol.point;
+				hitAxisH = axisH;
+				hitAxisV = axisV;
+				hitFloor = sector.floor;
+				closestDistance = dCol.distance;
+				foundHit = true;
+			}
+		}
+	}
+
+	// Create Decal
+	if (foundHit)
+	{
+		Decal decal;
+
+		Vector3 normal = Vector3Normalize(Vector3CrossProduct(hitAxisV, hitAxisH));
+
+		decal.pos = Vector3Add(hitPos, Vector3Scale(normal, 1.0f));
+		decal.axisH = hitAxisH;
+		decal.axisV = hitAxisV;
+		decal.textureName = *Shared::selectedTextureName;
+		decal.floor = hitFloor;
+
+		Shared::decals.push_back(decal);
+	}
 }
 
 void RealEditor::UpdateDecal()
 {
-	if (camMode == false) return;//Player Cam Mode.
+	if (camMode == false) return; // Player Cam Mode.
 
 	float closestDist = INFINITY;
 	Decal* closestDecal = nullptr;
-	for (int i = 0; i < Shared::decals.size(); i++) {
+
+	for (int i = 0; i < Shared::decals.size(); i++)
+	{
 		auto& d = Shared::decals[i];
 
+		Vector3 h = Vector3Scale(d.axisH, 16 * d.scale);
+		Vector3 v = Vector3Scale(d.axisV, 16 * d.scale);
 
-		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16 * d.scale));
-		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16 * d.scale));
-		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16 * d.scale));
-		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16 * d.scale));
+		Vector3 bottomLeft = Vector3Subtract(Vector3Subtract(d.pos, h), v);
+		Vector3 bottomRight = Vector3Add(Vector3Subtract(d.pos, v), h);
+		Vector3 topLeft = Vector3Add(Vector3Subtract(d.pos, h), v);
+		Vector3 topRight = Vector3Add(Vector3Add(d.pos, h), v);
 
 		RayCollision dCol = GetRayCollisionQuad(Shared::freeRay, bottomLeft, topLeft, topRight, bottomRight);
-		
-		//Select
+
+		// Select
 		if (dCol.hit && (closestDist > dCol.distance))
 		{
 			closestDecal = &d;
 			closestDist = dCol.distance;
 		}
-
 	}
 
-	//Select decal
-	if(closestDecal && IsKeyPressed(KEY_C))
+	// Select decal
+	if (closestDecal && IsKeyPressed(KEY_C))
 		Shared::selectedDecal = closestDecal;
 
-
-	//If Selected
-	if (Shared::selectedDecal) {
-
-		//Move the decal
+	// If Selected
+	if (Shared::selectedDecal)
+	{
+		// Move the decal
 		Vector2 mouseDelta = GetMouseDelta();
 
-		Vector3 normal = Vector3CrossProduct({ Shared::selectedDecal->wallDir.x, 0, Shared::selectedDecal->wallDir.y }, { 0, 1, 0 });
-		float sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? 1.0f : -1.0f;
+		Vector3 normal = Vector3Normalize(Vector3CrossProduct(
+			Shared::selectedDecal->axisV,
+			Shared::selectedDecal->axisH
+		));
 
+		// Check if decal is on a floor/ceiling
+		if (fabsf(normal.y) > 0.9f)
+		{
+			// Get camera forward projected onto the XZ plane
+			Vector3 forward = { Shared::free.forward.x, 0, Shared::free.forward.z };
 
-		Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ Shared::selectedDecal->wallDir.x, 0, Shared::selectedDecal->wallDir.y }, mouseDelta.x * 1.25f * sign));
-		Shared::selectedDecal->pos = Vector3Add(Shared::selectedDecal->pos, Vector3Scale({ 0, 1, 0 }, mouseDelta.y * -1.25f));
+			if (Vector3Length(forward) > 0.001f)
+			{
+				forward = Vector3Normalize(forward);
 
+				// Calculate camera right
+				Vector3 right = Vector3Normalize(Vector3CrossProduct(forward, { 0, 1, 0 }));
 
-		//Scale the decal with arrow Keys
-		if(IsKeyPressed(KEY_RIGHT))
+				// Move relative to camera direction
+				Shared::selectedDecal->pos = Vector3Add(
+					Shared::selectedDecal->pos,
+					Vector3Scale(right, mouseDelta.x * 1.25f)
+				);
+
+				Shared::selectedDecal->pos = Vector3Add(
+					Shared::selectedDecal->pos,
+					Vector3Scale(forward, mouseDelta.y * -1.25f)
+				);
+			}
+		}
+		else // Wall
+		{
+			float sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? 1.0f : -1.0f;
+
+			Shared::selectedDecal->pos = Vector3Add(
+				Shared::selectedDecal->pos,
+				Vector3Scale(Shared::selectedDecal->axisH, mouseDelta.x * 1.25f * sign)
+			);
+
+			Shared::selectedDecal->pos = Vector3Add(
+				Shared::selectedDecal->pos,
+				Vector3Scale(Shared::selectedDecal->axisV, mouseDelta.y * -1.25f)
+			);
+		}
+
+		// Scale the decal with arrow Keys
+		if (IsKeyPressed(KEY_RIGHT))
 		{
 			Shared::selectedDecal->scale += 0.1f;
 		}
-		else if(IsKeyPressed(KEY_LEFT))
+		else if (IsKeyPressed(KEY_LEFT))
 		{
 			Shared::selectedDecal->scale -= 0.1f;
-		}	
-		Shared::selectedDecal->scale = std::max(0.1f, Shared::selectedDecal->scale);
+		}
 
+		Shared::selectedDecal->scale = std::max(0.1f, Shared::selectedDecal->scale);
 	}
 
-	//Delete Decal
+	// Delete Decal
 	if (closestDecal && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 	{
 		auto index = closestDecal - Shared::decals.data();
+
 		Shared::selectedDecal = nullptr;
 		closestDecal = nullptr;
+
 		Shared::decals.erase(Shared::decals.begin() + index);
 	}
 
-	//Deselect Decal
-	if(IsKeyReleased(KEY_C))
+	// Deselect Decal
+	if (IsKeyReleased(KEY_C))
 		Shared::selectedDecal = nullptr;
-
 }
 
 void RealEditor::DrawDecals()
 {
-	for (auto& d : Shared::decals) {
+	for (auto& d : Shared::decals)
+	{
+		Vector3 normal = Vector3Normalize(Vector3CrossProduct(d.axisV, d.axisH));
 
-		Vector3 normal = Vector3CrossProduct({ d.wallDir.x, 0, d.wallDir.y }, { 0, 1, 0 });
+		Vector3 h = Vector3Scale(d.axisH, 16 * d.scale);
+		Vector3 v = Vector3Scale(d.axisV, 16 * d.scale);
 
-		Vector3 bottomLeft = Vector3Add({ d.pos.x, d.pos.y - 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16 * d.scale));
-		Vector3 bottomRight = Vector3Add({ d.pos.x, d.pos.y - 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16 * d.scale));
-		Vector3 topLeft = Vector3Add({ d.pos.x, d.pos.y + 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, -16 * d.scale));
-		Vector3 topRight = Vector3Add({ d.pos.x, d.pos.y + 16 * d.scale, d.pos.z }, Vector3Scale({ d.wallDir.x, 0, d.wallDir.y }, 16 * d.scale));
-
-		float tileX = 1.f;
-		float tileY = 1.f;
+		Vector3 bottomLeft = Vector3Subtract(Vector3Subtract(d.pos, h), v);
+		Vector3 bottomRight = Vector3Add(Vector3Subtract(d.pos, v), h);
+		Vector3 topLeft = Vector3Add(Vector3Subtract(d.pos, h), v);
+		Vector3 topRight = Vector3Add(Vector3Add(d.pos, h), v);
 
 		rlBegin(RL_QUADS);
-		rlNormal3f(-normal.x, -normal.y, -normal.z);
+		rlNormal3f(normal.x, normal.y, normal.z);
 		rlSetTexture(Shared::textures[d.textureName].id);
 
 		rlColor4ub(255, 255, 255, 255);
 
-		rlTexCoord2f(0.0f, 0.0f);  rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
-		rlTexCoord2f(0.0f, tileY); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
-		rlTexCoord2f(tileX, tileY); rlVertex3f(topRight.x, topRight.y, topRight.z);
-		rlTexCoord2f(tileX, 0.0f);  rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
+		rlTexCoord2f(0.0f, 0.0f); rlVertex3f(bottomLeft.x, bottomLeft.y, bottomLeft.z);
+		rlTexCoord2f(0.0f, 1.0f); rlVertex3f(topLeft.x, topLeft.y, topLeft.z);
+		rlTexCoord2f(1.0f, 1.0f); rlVertex3f(topRight.x, topRight.y, topRight.z);
+		rlTexCoord2f(1.0f, 0.0f); rlVertex3f(bottomRight.x, bottomRight.y, bottomRight.z);
 
 		rlEnd();
 		rlSetTexture(0);
