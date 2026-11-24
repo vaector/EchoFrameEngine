@@ -1509,7 +1509,7 @@ void RealEditor::CreateDecal()
 		if (dCol.hit) {
 			Decal decal;
 
-			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 1.5f));
+			decal.pos = Vector3Add(dCol.point, Vector3Scale(normal, 1.0f));
 			decal.textureName = *Shared::selectedTextureName;
 			decal.floor = closestWall->floor;
 			decal.wallDir = dir;
