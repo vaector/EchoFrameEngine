@@ -27,7 +27,8 @@ void Engine::UpdateReal(Camera3D* cam)
 {
 	//Update Real Editor and Game
 	realEditor.Update(cam);
-	Game::Update();
+	if(cam == &Shared::player.cam)
+		Game::Update();
 }
 
 void Engine::DrawReal()
