@@ -315,6 +315,7 @@ void RealEditor::UpdatePlayerHeight(Camera3D* cam, Vector3* nextPos)
 void RealEditor::UpdateSector()
 {
 
+
 	float closestFloorDist = FLT_MAX;
 	float closestCeilingDist = FLT_MAX;
 
@@ -369,12 +370,12 @@ void RealEditor::UpdateSector()
 	}
 
 	//Deselect
-	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) && camMode) {
 		selectedCeiling = nullptr;
 		selectedFloor = nullptr;
 	}
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !decalMode) {
+	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !decalMode && camMode) {
 		if (selectedFloor)
 			selectedFloor->floorTextureName = *Shared::selectedTextureName;
 		if (selectedCeiling)
