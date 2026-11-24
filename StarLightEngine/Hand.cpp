@@ -119,7 +119,7 @@ void Hand::UpdateNailShooting()
 
         Vector3 normal = hitCeiling ? Vector3{ 0, -1, 0 } : Vector3{ 0, 1, 0 };
 
-        hitDecal.pos = Vector3Add(hitSectorPos, Vector3Scale(normal, 0.02f));
+        hitDecal.pos = Vector3Add(hitSectorPos, Vector3Scale(normal, 0.75f));
         hitDecal.axisH = { 1, 0, 0 };
         hitDecal.axisV = hitCeiling ? Vector3{ 0, 0, -1 } : Vector3{ 0, 0, 1 };
         hitDecal.textureName = "nailHole";
