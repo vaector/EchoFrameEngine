@@ -17,8 +17,10 @@ void Hand::UpdateNailShooting()
 {
     if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) return;
 
-    float closestDistance = INFINITY;
-    Vector3 hitPos{};
+
+    //Loop through walls and if hit then add a Decal on the hit position
+    float closestWallDistance = INFINITY;
+    Vector3 hitWallPos{};
     Wall* hitWall = nullptr;
 
     for (auto& wall : Shared::walls)
@@ -30,7 +32,7 @@ void Hand::UpdateNailShooting()
 
         RayCollision col = GetRayCollisionQuad(Shared::playerRay, bottomLeft, topLeft, topRight, bottomRight);
 
-        if (col.hit && col.distance < closestDistance) { closestDistance = col.distance; hitPos = col.point; hitWall = wall; }
+        if (col.hit && col.distance < closestWallDistance) { closestWallDistance = col.distance; hitWallPos = col.point; hitWall = wall; }
     }
 
     if (hitWall)
@@ -44,10 +46,82 @@ void Hand::UpdateNailShooting()
         if (Vector3DotProduct(Shared::playerRay.direction, normal) > 0.0f) normal = Vector3Scale(normal, -1.0f);
 
         Decal hitDecal{};
-        hitDecal.pos = Vector3Add(hitPos, Vector3Scale(normal, 0.75f));
+        hitDecal.pos = Vector3Add(hitWallPos, Vector3Scale(normal, 0.75f));
         hitDecal.wallDir = wallDir;
         hitDecal.textureName = "nailHole";
         hitDecal.floor = hitWall->floor;
+        hitDecal.scale = 0.1f;
+
+        Shared::decals.push_back(hitDecal);
+    }
+
+    //Loop through Sectors(Floors/Ceilings) and if hit then add a Decal on the hit position
+
+    float closestSectorDistance = FLT_MAX;
+    Vector3 hitSectorPos{};
+    Sector* hitSector = nullptr;
+    bool hitCeiling = false;
+
+    for (auto& sector : Shared::sectors)
+    {
+        float floorY = (float)(sector.floor * Shared::globalWallHeight);
+        float ceilingY = floorY + Shared::globalWallHeight - 1.0f;
+
+        // floor
+        for (auto j = 0; j + 2 < sector.indices.size(); j += 3)
+        {
+            int i0 = sector.indices[j];
+            int i1 = sector.indices[j + 1];
+            int i2 = sector.indices[j + 2];
+
+            Vector3 p0 = Shared::ToWorld({ sector.floorPoints[i0].x, floorY, sector.floorPoints[i0].y });
+            Vector3 p1 = Shared::ToWorld({ sector.floorPoints[i1].x, floorY, sector.floorPoints[i1].y });
+            Vector3 p2 = Shared::ToWorld({ sector.floorPoints[i2].x, floorY, sector.floorPoints[i2].y });
+
+            RayCollision col = GetRayCollisionTriangle(Shared::playerRay, p0, p1, p2);
+
+            if (col.hit && col.distance < closestSectorDistance)
+            {
+                closestSectorDistance = col.distance;
+                hitSectorPos = col.point;
+                hitSector = &sector;
+                hitCeiling = false;
+            }
+        }
+
+        // ceiling
+        for (auto j = 0; j + 2 < sector.indices.size(); j += 3)
+        {
+            int i0 = sector.indices[j];
+            int i1 = sector.indices[j + 1];
+            int i2 = sector.indices[j + 2];
+
+            Vector3 p0 = Shared::ToWorld({ sector.ceilingPoints[i0].x, ceilingY, sector.ceilingPoints[i0].y });
+            Vector3 p1 = Shared::ToWorld({ sector.ceilingPoints[i1].x, ceilingY, sector.ceilingPoints[i1].y });
+            Vector3 p2 = Shared::ToWorld({ sector.ceilingPoints[i2].x, ceilingY, sector.ceilingPoints[i2].y });
+
+            RayCollision col = GetRayCollisionTriangle(Shared::playerRay, p0, p1, p2);
+
+            if (col.hit && col.distance < closestSectorDistance)
+            {
+                closestSectorDistance = col.distance;
+                hitSectorPos = col.point;
+                hitSector = &sector;
+                hitCeiling = true;
+            }
+        }
+    }
+
+    // Create sector decal
+    if (hitSector)
+    {
+        Decal hitDecal;
+
+        Vector3 normal = hitCeiling ? Vector3{ 0, 1, 0 } : Vector3{ 0, -1, 0 };
+
+        hitDecal.pos = Vector3Add(hitSectorPos, Vector3Scale(normal, 0.02f));
+        hitDecal.textureName = "nailHole";
+        hitDecal.floor = hitSector->floor;
         hitDecal.scale = 0.1f;
 
         Shared::decals.push_back(hitDecal);
