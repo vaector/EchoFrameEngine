@@ -17,7 +17,6 @@ void Hand::UpdateNailShooting()
 {
     if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) return;
 
-
     //Loop through walls and if hit then add a Decal on the hit position
     float closestWallDistance = INFINITY;
     Vector3 hitWallPos{};
@@ -47,7 +46,8 @@ void Hand::UpdateNailShooting()
 
         Decal hitDecal{};
         hitDecal.pos = Vector3Add(hitWallPos, Vector3Scale(normal, 0.75f));
-        hitDecal.wallDir = wallDir;
+        hitDecal.axisH = { wallDir.x, 0, wallDir.y };
+        hitDecal.axisV = { 0, 1, 0 };
         hitDecal.textureName = "nailHole";
         hitDecal.floor = hitWall->floor;
         hitDecal.scale = 0.1f;
@@ -115,11 +115,13 @@ void Hand::UpdateNailShooting()
     // Create sector decal
     if (hitSector)
     {
-        Decal hitDecal;
+        Decal hitDecal{};
 
-        Vector3 normal = hitCeiling ? Vector3{ 0, 1, 0 } : Vector3{ 0, -1, 0 };
+        Vector3 normal = hitCeiling ? Vector3{ 0, -1, 0 } : Vector3{ 0, 1, 0 };
 
         hitDecal.pos = Vector3Add(hitSectorPos, Vector3Scale(normal, 0.02f));
+        hitDecal.axisH = { 1, 0, 0 };
+        hitDecal.axisV = hitCeiling ? Vector3{ 0, 0, -1 } : Vector3{ 0, 0, 1 };
         hitDecal.textureName = "nailHole";
         hitDecal.floor = hitSector->floor;
         hitDecal.scale = 0.1f;
@@ -127,8 +129,8 @@ void Hand::UpdateNailShooting()
         Shared::decals.push_back(hitDecal);
     }
 
-    //PLay shooting sfx
-	Audio::Play(Shared::sounds["nailGunShoot"]);
+    // Play shooting sfx
+    Audio::Play(Shared::sounds["nailGunShoot"]);
 }
 
 void Hand::DrawHand()
