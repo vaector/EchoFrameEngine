@@ -1,5 +1,18 @@
 #include "Hand.h"
 #include "Audio.h"
+#include  "GameShared.h"
+#include <iostream>
+
+std::string Hand::GetHitSocketName()
+{
+    for (auto& [name, trigger] : Shared::boxTriggers)
+    {
+        if (name.find("socket") != std::string::npos && trigger.IsRayHit(Shared::playerRay))
+            return name;
+    }
+
+    return "";
+}
 
 void Hand::CreateHand(std::string name)
 {
@@ -9,13 +22,20 @@ void Hand::CreateHand(std::string name)
 
 void Hand::UpdateHand()
 {
+    UpdateFinger();
+
+    //Nail Gun(Index Finger)
     UpdateNailShooting();
+
+	//Cable Gun(Ring Finger)
+    UpdateCableShooting();
+
 
 }
 
 void Hand::UpdateNailShooting()
 {
-    if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) return;
+    if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || GameShared::hand.currentFinger != IndexFinger) return;
 
     //Loop through walls and if hit then add a Decal on the hit position
     float closestWallDistance = INFINITY;
@@ -133,6 +153,53 @@ void Hand::UpdateNailShooting()
     Audio::Play(Shared::sounds["nailGunShoot"]);
 }
 
+void Hand::UpdateCableShooting()
+{
+    if (GameShared::hand.currentFinger != RingFinger) return;
+
+
+	//Begin cable shooting process
+    
+    //Attach the First Endpoint
+    if (pendingCableIndex == -1) {
+        if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return;
+        Cable cable;
+        cable.endSocket = GetHitSocketName();
+        if (cable.endSocket.empty()) return;
+        cable.state = CableState::FirstEndpointAttached;
+
+        GameShared::cables.push_back(cable);
+        pendingCableIndex = GameShared::cables.size() - 1; //Last cable added(Current cable)
+    }
+    //Attach the Second Endpoint
+    else {
+        if (!IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) return;
+        Cable* cable = &GameShared::cables.at(pendingCableIndex);
+
+        //The Second edpoint can't be the First endpoint.
+        std::string socket = GetHitSocketName();
+        if (socket.empty() || socket == cable->endSocket) return;
+
+        cable->startSocket = socket;
+
+        cable->state = CableState::Connected;
+        pendingCableIndex = -1;
+    }
+
+}
+
+void Hand::UpdateFinger()
+{
+    if(IsKeyPressed(KEY_ONE))
+        currentFinger = IndexFinger;
+    else if(IsKeyPressed(KEY_TWO))
+        currentFinger = MiddleFinger;
+    else if(IsKeyPressed(KEY_THREE))
+        currentFinger = RingFinger;
+    else if(IsKeyPressed(KEY_FOUR))
+        currentFinger = PinkyFinger;
+}
+
 void Hand::DrawHand()
 {
     // Render Hand
@@ -169,4 +236,19 @@ void Hand::DrawHand()
     }
 
     DrawTextureEx(Shared::textures[textureName], { width, posY }, rotation, 1.5, WHITE);
+}
+
+void Hand::DrawCable()
+{
+    for (const auto& cable : GameShared::cables)
+    {
+        auto start = Shared::boxTriggers[cable.startSocket].pos;
+        auto end = Shared::boxTriggers[cable.endSocket].pos;
+
+        if (cable.state == CableState::Connected)
+            DrawCylinderEx(start, end, 0.05f, 0.05f, 8, RED);
+        else if(cable.state == CableState::FirstEndpointAttached)
+            DrawCylinderEx(Vector3Subtract(Shared::playerRay.position, {0,2,0}), end, 0.05f, 0.05f, 2, RED);
+        
+    }
 }

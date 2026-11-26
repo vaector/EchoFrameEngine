@@ -3,6 +3,6 @@
 namespace GameShared
 {
 	extern Hand hand;
-
+	extern std::vector<Cable> cables;
 };
 

@@ -1,5 +1,4 @@
 #include "Game.h"
-#include <iostream>
 #include "Shared.h"
 #include "GameShared.h"
 
@@ -14,7 +13,7 @@ void Game::Start()
 void Game::DrawReal()
 {
 	//Draw the game scene, render all the entities and UI elements.
-	
+	GameShared::hand.DrawCable();
 
 }
 
