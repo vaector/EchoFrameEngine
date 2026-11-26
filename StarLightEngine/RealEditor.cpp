@@ -1818,6 +1818,14 @@ void RealEditor::UpdateTrigger()
 		Shared::selectedBoxTrigger->pos = Vector3Add(Shared::selectedBoxTrigger->pos, { move.x, 0, move.z });
 	}
 
+	//Scale the selected Trigger
+	if (Shared::selectedBoxTrigger != nullptr) {
+		if (IsKeyPressed(KEY_RIGHT))
+			Shared::selectedBoxTrigger->size = Vector3Add(Shared::selectedBoxTrigger->size, { 10,10,10 });
+		if (IsKeyPressed(KEY_LEFT))
+			Shared::selectedBoxTrigger->size = Vector3Subtract(Shared::selectedBoxTrigger->size, { 10,10,10 });
+	}
+
 }
 
 void RealEditor::DrawTrigger()
