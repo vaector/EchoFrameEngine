@@ -7,11 +7,24 @@ std::string Hand::GetHitSocketName()
 {
     for (auto& [name, trigger] : Shared::boxTriggers)
     {
-        if (name.find("socket") != std::string::npos && trigger.IsRayHit(Shared::playerRay))
+        if (name.find("socket") != std::string::npos &&
+            !IsSocketUsed(name) &&
+            trigger.IsRayHit(Shared::playerRay))
             return name;
     }
 
     return "";
+}
+
+bool Hand::IsSocketUsed(const std::string& socketName)
+{
+    for (const auto& cable : GameShared::cables)
+    {
+        if (cable.startSocket == socketName || cable.endSocket == socketName)
+            return true;
+    }
+
+    return false;
 }
 
 void Hand::CreateHand(std::string name)

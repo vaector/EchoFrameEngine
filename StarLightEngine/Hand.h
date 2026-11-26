@@ -31,7 +31,10 @@ private:
 	Fingers currentFinger = IndexFinger;
 
 	int pendingCableIndex = -1;
+
+	//Helpers
 	std::string GetHitSocketName();
+	bool IsSocketUsed(const std::string& socketName);
 
 public:
 
@@ -45,5 +48,6 @@ public:
 
 	void DrawHand();
 	void DrawCable();
+
 };
 
