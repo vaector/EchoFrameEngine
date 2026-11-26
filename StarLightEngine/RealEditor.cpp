@@ -1052,7 +1052,12 @@ void RealEditor::UpdateWorldObject()
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta =Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 4.0f);
+		static float moveAmount = 4.0f;
+
+		moveAmount += GetMouseWheelMove() * 0.5f;
+		moveAmount = Clamp(moveAmount, 0.5f, 10.0f);
+
+		Vector3 move = Vector3Scale(delta, moveAmount);
 		
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
@@ -1077,7 +1082,9 @@ void RealEditor::UpdateWorldObject()
 			rect.height = box.max.z - box.min.z;
 
 			for (auto& wall : Shared::walls) {
-				if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+				Vector3 start = { Shared::ToWorld({wall->startPos.x, 0, wall->startPos.y}) };
+				Vector3 end = { Shared::ToWorld({wall->endPos.x, 0, wall->endPos.y}) };
+				if (CheckLineRectCollision({ start.x, start.z }, { end.x, end.z }, rect))
 				{
 					collided = true;
 					break;
@@ -1419,7 +1426,12 @@ void RealEditor::UpdateNpc()
 		//Move the entity and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta = Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 8.0f);
+		static float moveAmount = 4.0f;
+
+		moveAmount += GetMouseWheelMove() * 0.5f;
+		moveAmount = Clamp(moveAmount, 0.5f, 10.0f);
+
+		Vector3 move = Vector3Scale(delta, moveAmount);
 
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
@@ -1444,7 +1456,9 @@ void RealEditor::UpdateNpc()
 		rect.height = Shared::selectedNpc->collisionBoxes[0].max.z - Shared::selectedNpc->collisionBoxes[0].min.z;
 
 		for (auto& wall : Shared::walls) {
-			if (CheckLineRectCollision(wall->startPos, wall->endPos, rect))
+			Vector3 start = { Shared::ToWorld({wall->startPos.x, 0, wall->startPos.y}) };
+			Vector3 end = { Shared::ToWorld({wall->endPos.x, 0, wall->endPos.y}) };
+			if (CheckLineRectCollision({start.x, start.z}, {end.x, end.z}, rect))
 			{
 				Shared::selectedNpc->position = Vector3Subtract(Shared::selectedNpc->position, { move.x, 0, move.z });
 				
@@ -1801,7 +1815,12 @@ void RealEditor::UpdateTrigger()
 		//Move the Trigger and its collider
 		Vector3 perp = Vector3CrossProduct(Shared::free.forward, { 0,1,0 });
 		Vector3 delta = Vector3Normalize(Vector3Add(Vector3Scale(perp, GetMouseDelta().x), Vector3Scale(Shared::free.forward, -GetMouseDelta().y)));
-		Vector3 move = Vector3Scale(delta, 8.0f);
+		static float moveAmount = 4.0f;
+
+		moveAmount += GetMouseWheelMove() * 0.5f;
+		moveAmount = Clamp(moveAmount, 0.5f, 10.0f);
+
+		Vector3 move = Vector3Scale(delta, moveAmount);
 
 		if (IsKeyPressed(KEY_UP))
 			move.y = 4.0f;
