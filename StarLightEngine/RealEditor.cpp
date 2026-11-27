@@ -463,7 +463,7 @@ void RealEditor::UpdateWallFeatures()
 	Vector2 wheel = GetMouseWheelMoveV();
 
 	//Select Wall(closestWall)
-	if (closestWall && wheel.y != 0) {
+	if (closestWall && wheel.y != 0 && !IsKeyDown(KEY_C)) {
 		
 		if (wheel.y < 0)
 			closestWall->wallHeight += Vector2Scale(wheel, -5).y;
@@ -500,15 +500,20 @@ void RealEditor::EditDoor()
 			}
 		}
 
+		// Direction and normal are unaffected by the uniform scale
 		Vector2 dir = Vector2Normalize(Vector2Subtract(closestWall->endPos, closestWall->startPos));
 		Vector3 normal = Vector3CrossProduct({ dir.x, 0, dir.y }, { 0, 1, 0 });
-		if (Vector3DotProduct(ray.direction, normal) > 0.0f)
-			normal = Vector3Scale(normal, -1.0f);
 
-		Vector3 bottomLeft = Shared::ToWorld({ closestWall->startPos.x, (float)(closestWall->floor * Shared::globalWallHeight), closestWall->startPos.y });
-		Vector3 bottomRight = Shared::ToWorld({ closestWall->endPos.x, (float)(closestWall->floor * Shared::globalWallHeight), closestWall->endPos.y });
-		Vector3 topLeft = Shared::ToWorld({ closestWall->startPos.x, (float)((closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight), closestWall->startPos.y });
-		Vector3 topRight = Shared::ToWorld({ closestWall->endPos.x, (float)((closestWall->floor * Shared::globalWallHeight) + Shared::globalWallHeight), closestWall->endPos.y });
+		// Convert only the center point
+		Vector3 pos = Shared::ToWorld(d.pos);
+
+		const float half = 16.0f;   // world units; use 16.0f * Shared::worldScale if the switch should grow with the map
+		Vector3 along = { dir.x * half, 0, dir.y * half };
+
+		Vector3 bottomLeft = Vector3Subtract({ pos.x, pos.y - half, pos.z }, along);
+		Vector3 bottomRight = Vector3Add({ pos.x, pos.y - half, pos.z }, along);
+		Vector3 topLeft = Vector3Subtract({ pos.x, pos.y + half, pos.z }, along);
+		Vector3 topRight = Vector3Add({ pos.x, pos.y + half, pos.z }, along);
 
 		RayCollision dCol = GetRayCollisionQuad(ray, bottomLeft, topLeft, topRight, bottomRight);
 
@@ -517,7 +522,7 @@ void RealEditor::EditDoor()
 		{
 			selectedDoorSwitch = &d;
 			savedDir = dir;
-			sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? -1.0f : 1.0f;
+			sign = (Vector3DotProduct(Shared::free.forward, normal) < 0.0f) ? 1.0f : -1.0f;
 			savedNormal = normal;
 
 			break;
@@ -526,7 +531,7 @@ void RealEditor::EditDoor()
 	}
 
 	//Deselect
-	if(IsKeyReleased(KEY_C))
+	if(IsKeyReleased(KEY_C) || IsKeyReleased(KEY_R))
 		selectedDoorSwitch = nullptr;
 
 	if (selectedDoorSwitch != nullptr)
