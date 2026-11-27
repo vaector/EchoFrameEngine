@@ -695,17 +695,15 @@ void TileEditor::DrawWall()
 			if (wall->isDoor) {
 
 				DrawLineEx(wall->startPos, wall->endPos,2 ,{ 255,161,0,255 });
-				int index = -1;
+				int index = wall->id;
 				for (int i = 0; i < Shared::doorSwitches.size(); i++)
 				{
 					if(Shared::doorSwitches[i].linkedWall == wall)
 						index = i;
 				}
-				if (index != -1) {
-					std::string indexStr = std::to_string(index);
-					DrawText(indexStr.c_str(), (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2, 2, { 255,255,255,255 });
+				std::string indexStr = std::to_string(index);
+				DrawText(indexStr.c_str(), (wall->startPos.x + wall->endPos.x) / 2, (wall->startPos.y + wall->endPos.y) / 2, 2, { 255,255,255,255 });
 					
-				}
 			}
 			else
 				DrawLineEx(wall->startPos, wall->endPos, 2, {200,122,255,255});
@@ -723,9 +721,6 @@ void TileEditor::DrawWall()
 			else
 				DrawLineEx(wall->startPos, wall->endPos, 2, {200,122,255,100});
 			
-			//Draw Verices
-			//DrawCircle(wall->startPos.x, wall->startPos.y, 2, {0,0,255,100});
-			//DrawCircle(wall->endPos.x, wall->endPos.y, 2, { 0,0,255,100 });
 		}
 		
 	}
