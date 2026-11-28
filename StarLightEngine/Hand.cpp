@@ -2,6 +2,7 @@
 #include "Audio.h"
 #include  "GameShared.h"
 #include <iostream>
+#include "Cable.h"
 
 std::string Hand::GetHitSocketName()
 {

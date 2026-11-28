@@ -10,20 +10,6 @@ enum Fingers
 	PinkyFinger
 };
 
-//Cable Gun
-enum CableState
-{
-	FirstEndpointAttached,
-	Connected
-};
-
-struct Cable
-{
-	std::string startSocket = "";
-	std::string endSocket = "";
-	CableState state = FirstEndpointAttached;
-};
-
 class Hand
 {
 private:

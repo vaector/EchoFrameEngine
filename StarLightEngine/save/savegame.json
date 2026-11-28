@@ -1182,6 +1182,22 @@
                 [
                     1032.0,
                     936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
                 ]
             ],
             "ceilingTextureName": "Horror_Brick_06-128x128",
@@ -1218,18 +1234,28 @@
                 [
                     1032.0,
                     936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
+                ],
+                [
+                    1000.0,
+                    936.0
                 ]
             ],
             "floorTextureName": "Horror_Floor_12-128x128",
             "hasCeiling": true,
             "hasFloor": true,
             "indices": [
-                6,
-                7,
-                0,
-                6,
-                0,
-                1,
                 1,
                 2,
                 3,
@@ -1239,9 +1265,15 @@
                 4,
                 5,
                 6,
+                1,
                 4,
                 6,
-                1
+                1,
+                6,
+                7,
+                0,
+                1,
+                7
             ],
             "layer": 0
         },
@@ -1440,7 +1472,7 @@
     ],
     "walls": [
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 856.0,
                 1144.0
@@ -1459,7 +1491,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1192.0,
                 1144.0
@@ -1478,7 +1510,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1192.0,
                 1080.0
@@ -1497,7 +1529,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1192.0,
                 936.0
@@ -1516,7 +1548,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1032.0,
                 936.0
@@ -1535,7 +1567,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 856.0,
                 936.0
@@ -1554,7 +1586,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1272.0,
                 1080.0
@@ -1573,7 +1605,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1448.0,
                 1080.0
@@ -1592,7 +1624,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1448.0,
                 1032.0
@@ -1611,7 +1643,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1384.0,
                 1032.0
@@ -1630,7 +1662,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1192.0,
                 1032.0
@@ -1649,7 +1681,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1352.0,
                 1016.0
@@ -1668,7 +1700,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1224.0,
                 1016.0
@@ -1687,7 +1719,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1224.0,
                 840.0
@@ -1706,7 +1738,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1480.0,
                 840.0
@@ -1725,7 +1757,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1480.0,
                 952.0
@@ -1744,7 +1776,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1480.0,
                 1016.0
@@ -1763,7 +1795,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1384.0,
                 1016.0
@@ -1782,7 +1814,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1384.0,
                 1032.0
@@ -1801,7 +1833,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1272.0,
                 1096.0
@@ -1820,7 +1852,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1208.0,
                 1096.0
@@ -1839,7 +1871,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1208.0,
                 1160.0
@@ -1858,7 +1890,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1128.0,
                 1160.0
@@ -1877,7 +1909,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1128.0,
                 1272.0
@@ -1896,7 +1928,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1432.0,
                 1272.0
@@ -1915,7 +1947,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1432.0,
                 1176.0
@@ -1934,7 +1966,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1432.0,
                 1112.0
@@ -1953,7 +1985,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1304.0,
                 1112.0
@@ -1972,7 +2004,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1304.0,
                 1080.0
@@ -1991,7 +2023,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1704.0,
                 1176.0
@@ -2010,7 +2042,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1704.0,
                 1032.0
@@ -2029,7 +2061,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1688.0,
                 1032.0
@@ -2048,7 +2080,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1640.0,
                 1032.0
@@ -2067,7 +2099,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1432.0,
                 1144.0
@@ -2086,7 +2118,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1592.0,
                 952.0
@@ -2105,7 +2137,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1592.0,
                 1064.0
@@ -2124,7 +2156,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1640.0,
                 1064.0
@@ -2143,7 +2175,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1560.0,
                 1096.0
@@ -2162,7 +2194,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1560.0,
                 984.0
@@ -2181,7 +2213,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1480.0,
                 984.0
@@ -2200,7 +2232,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1656.0,
                 840.0
@@ -2219,7 +2251,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1512.0,
                 840.0
@@ -2238,7 +2270,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1512.0,
                 632.0
@@ -2257,7 +2289,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1880.0,
                 840.0
@@ -2276,7 +2308,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1688.0,
                 840.0
@@ -2295,7 +2327,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1688.0,
                 1032.0
@@ -2314,7 +2346,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1000.0,
                 792.0
@@ -2333,7 +2365,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 888.0,
                 792.0
@@ -2352,7 +2384,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 888.0,
                 552.0
@@ -2371,7 +2403,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1016.0,
                 552.0
@@ -2390,7 +2422,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1096.0,
                 552.0
@@ -2409,7 +2441,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1096.0,
                 792.0
@@ -2428,7 +2460,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1032.0,
                 792.0
@@ -2447,7 +2479,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1032.0,
                 936.0
@@ -2466,7 +2498,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1016.0,
                 424.0
@@ -2485,7 +2517,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1272.0,
                 424.0
@@ -2504,7 +2536,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1272.0,
                 296.0
@@ -2523,7 +2555,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1512.0,
                 296.0
@@ -2542,7 +2574,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1512.0,
                 472.0
@@ -2561,7 +2593,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1496.0,
                 472.0
@@ -2580,7 +2612,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1048.0,
                 472.0
@@ -2599,7 +2631,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1048.0,
                 552.0
@@ -2618,7 +2650,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1464.0,
                 536.0
@@ -2637,7 +2669,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1576.0,
                 536.0
@@ -2656,7 +2688,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1576.0,
                 632.0
@@ -2675,7 +2707,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1608.0,
                 504.0
@@ -2694,7 +2726,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1496.0,
                 504.0
@@ -2713,7 +2745,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1496.0,
                 472.0
@@ -2732,7 +2764,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1576.0,
                 632.0
@@ -2751,7 +2783,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1880.0,
                 632.0
@@ -2770,7 +2802,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1640.0,
                 1096.0
@@ -2789,7 +2821,7 @@
             "wallHeight": 200.0
         },
         {
-            "currentWallId": 96,
+            "currentWallId": 104,
             "endPos": [
                 1640.0,
                 1064.0
@@ -2805,6 +2837,25 @@
                 1032.0
             ],
             "textureName": "Horror_Brick_08-128x128",
+            "wallHeight": 200.0
+        },
+        {
+            "currentWallId": 104,
+            "endPos": [
+                1032.0,
+                936.0
+            ],
+            "floor": 0,
+            "id": 103,
+            "inSector": true,
+            "isDoor": true,
+            "isOpen": false,
+            "layer": 0,
+            "startPos": [
+                1000.0,
+                936.0
+            ],
+            "textureName": "tile1",
             "wallHeight": 200.0
         }
     ],

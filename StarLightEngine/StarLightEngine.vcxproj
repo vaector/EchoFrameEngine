@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="Audio.cpp" />
     <ClCompile Include="BoxTrigger.cpp" />
+    <ClCompile Include="Cable.cpp" />
     <ClCompile Include="Cutscene.cpp" />
     <ClCompile Include="Decal.cpp" />
     <ClCompile Include="DialougeSystem.cpp" />
@@ -161,6 +162,7 @@
   <ItemGroup>
     <ClInclude Include="Audio.h" />
     <ClInclude Include="BoxTrigger.h" />
+    <ClInclude Include="Cable.h" />
     <ClInclude Include="Cutscene.h" />
     <ClInclude Include="Decal.h" />
     <ClInclude Include="DialougeSystem.h" />
