@@ -87,7 +87,7 @@ void RealEditor::Update(Camera3D* cam)
 	//Update Ramp
 	UpdateRamp();
 
-	EditDoor();
+	UpdateDoor();
 
 	//World Objects
 	CreateWorldObject();
@@ -473,7 +473,7 @@ void RealEditor::UpdateWallFeatures()
 		closestWall->wallHeight = Clamp(closestWall->wallHeight, 1.0f, Shared::globalWallHeight);
 	}
 }
-void RealEditor::EditDoor()
+void RealEditor::UpdateDoor()
 {
 	Ray ray;
 	if(camMode)
@@ -560,18 +560,16 @@ void RealEditor::EditDoor()
 	}
 
 	float speed = 100.0f * GetFrameTime();
-	for (auto& d : Shared::doorSwitches)
+	for (auto& wall : Shared::walls)
 	{
-		if(d.linkedWall == nullptr) continue;
+		if(!wall->isDoor) continue;
 
-		if (d.linkedWall->isOpen) {
-			d.linkedWall->wallHeight -= speed;
-		}
-		else if(!d.linkedWall->isOpen){
-			d.linkedWall->wallHeight += speed;
-		}
+		if (wall->isOpen)
+			wall->wallHeight -= speed;
+		else
+			wall->wallHeight += speed;
 
-		d.linkedWall->wallHeight = Clamp(d.linkedWall->wallHeight, 0.0f, Shared::globalWallHeight);
+		wall->wallHeight = Clamp(wall->wallHeight, 0.0f, Shared::globalWallHeight);
 	}
 
 }

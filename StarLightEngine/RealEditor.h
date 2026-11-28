@@ -34,7 +34,7 @@ public:
 	void UpdateWall();
 	void UpdateRamp();
 	void UpdateWallFeatures();
-	void EditDoor();
+	void UpdateDoor();
 	
 
 	void DrawDoorSwitch();
